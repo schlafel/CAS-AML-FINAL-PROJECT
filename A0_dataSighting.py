@@ -6,29 +6,56 @@ import os
 import json
 import torch
 from torch.utils.data import Dataset,DataLoader
+import torch.nn.functional as F
 
-import lightning.pytorch as pl
+import pytorch_lightning as pl
+
+from tqdm import tqdm
+
+import mediapipe as mp
+mp_pose = mp.solutions.pose
 
 
+def data_checks(ASL_DATASET):
+    for _i, (df,lab) in tqdm(enumerate(ASL_DATASET),total = len(ASL_DATASET)):
+        ASL_DATASET.df_train.loc[_i,"n_frames"] = len(df.frame.value_counts())
+        ASL_DATASET.df_train.loc[_i,"average_landmarks"] = (df.frame.value_counts()).mean()
+        ASL_DATASET.df_train.loc[_i,"std_landmarks"] = (df.frame.value_counts()).std()
+
+    ASL_DATASET.df_train.to_csv(r"Statisics_dataset.csv")
+
+
+def convert_df_to_result(df):
+    #iterate through each frame
+    for frame_no, df_frame in df.groupby(by="frame"):
+        print("done")
+
+    pass
 class ASL_DATSET(Dataset):
-    def __init__(self,_path,label_dict, transform = None):
+    def __init__(self,_path, transform = None):
         super().__init__()
         self.transform = transform
-        self._path = _path
-        self.label_dict = label_dict
-        self.label_dict_inv = {y:x for x,y in self.label_dict.items() }
+        self.path = _path
 
         #Function to load csv
         self.load_datas()
 
     @property
-    def _path(self):
+    def path(self):
         return self._path
 
-    @_path.setter
-    def _path(self,new_path):
+    @path.setter
+    def path(self,new_path):
         self._path = new_path
+        self._load_label_map()
         self.load_datas()
+
+
+    def _load_label_map(self):
+        with open(config.PATH_LABELMAP, "r") as infile:
+            ln = infile.readline()
+        self.label_dict = json.loads(ln)
+        self.label_dict_inv = {y:x for x,y in self.label_dict.items() }
 
 
 
@@ -42,23 +69,25 @@ class ASL_DATSET(Dataset):
         self.sequence_id = self.df_train["sequence_id"].values
         self.sign = self.df_train["sign"].values
 
+        self.sign_int = self.df_train["sign"].map(self.label_dict).values
+        self.sign_oneHot = F.one_hot(torch.from_numpy(self.sign_int))
+
+
+
 
     def __getitem__(self, idx):
-
         x = self.open_parquet(self.file_paths[idx])
-        label = self.img_labels[idx]
-
-
+        label = self.sign_oneHot[idx]
         return x, label
 
     def __len__(self):
-        return len(self.img_labels)
+        return len(self.sign_int)
 
 
+    @staticmethod
+    def open_parquet(file_path):
+        return pd.read_parquet(file_path)
 
-    def open_parquet(self):
-        pd.read_parquet
-        pass
 
 
 
@@ -113,10 +142,6 @@ class ASL_DATAModule(pl.LightningDataModule):
                           num_workers=self.num_workers,shuffle=True)
 
 
-    def _load_label_map(self):
-        with open(self.config.PATH_LABELMAP, "r") as infile:
-            ln = infile.readline()
-        self.label_dict = json.loads(ln)
 
 
 
@@ -126,14 +151,22 @@ class ASL_DATAModule(pl.LightningDataModule):
 if __name__ == '__main__':
     print("done")
 
-    # label_dict = load_label_map(config.PATH_LABELMAP)
-    # df_train = pd.read_csv(os.path.join(config.PATH_DATA,"train.csv"))
+    asl_train_ds = ASL_DATSET(config.PATH_TRAIN_DATA)
+
+    data_checks(asl_train_ds)
+
+    df, label = next(iter(asl_train_ds))
+    convert_df_to_result(df)
+    print("done")
+
+    # # label_dict = load_label_map(config.PATH_LABELMAP)
+    # # df_train = pd.read_csv(os.path.join(config.PATH_DATA,"train.csv"))
+    # #
+    # dM = ASL_DATAModule(config = config)
     #
-    dM = ASL_DATAModule(config = config)
-
-
-    fig,ax = plt.subplots(1)
-    ax.scatter(1,1)
-    plt.show()
-
-
+    #
+    # fig,ax = plt.subplots(1)
+    # ax.scatter(1,1)
+    # plt.show()
+    #
+    #
