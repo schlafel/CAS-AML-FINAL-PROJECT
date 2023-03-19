@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# my ignored files #
+data/train_landmark_files/*
+*.parquet

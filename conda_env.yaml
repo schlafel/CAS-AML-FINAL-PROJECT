@@ -1,0 +1,30 @@
+name: CASAML
+channels:
+  - pytorch
+  - conda-forge
+dependencies:
+  - python=3.9
+  - pip
+  - pytorch
+  - torchvision
+  - pytorch-lightning
+  - scikit-learn
+  - scikit-image 
+  - numpy
+  - matplotlib
+  - napari
+  - pandas
+  - seaborn
+  - pip
+  - jupyterlab=3.*
+  - ipywidgets
+  - pip:
+    - albumentations
+    - captum
+    - tqdm
+    - opencv-python
+    - psutil
+    - tensorboard
+    - tensorboard-plugin-wit
+    - kaggle
+    - mediapipe
