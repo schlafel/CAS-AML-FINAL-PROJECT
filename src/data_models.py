@@ -32,6 +32,8 @@ class ASL_DATSET(Dataset):
 
         # Store individual metadata lists
         # [TODO] Cleanup unnecessary files, do we need these?
+        # Felix: For modelling: Definetely no. I was just thinking, that it might get useful, if some participants have crappy data?
+
         self.participant_ids = self.df_train["participant_id"].values
         self.sequence_ids = self.df_train["sequence_id"].values
 
