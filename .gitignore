@@ -129,5 +129,7 @@ dmypy.json
 .pyre/
 
 # my ignored files #
-data/train_landmark_files/*
+data/raw/train_landmark_files/*
+data/processed/train_landmark_files/*
 *.parquet
+*.pt
