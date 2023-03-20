@@ -33,6 +33,7 @@ EPOCHS = 10
 TRAIN_CSV_FILE = 'train.csv'
 MAP_JSON_FILE = 'sign_to_prediction_index_map.json'
 LANDMARK_FILES = 'train_landmark_files'
+MARKER_FILE = 'preprocessed_data.marker'
 
 # Data features
 FACE_FEATURES=468
