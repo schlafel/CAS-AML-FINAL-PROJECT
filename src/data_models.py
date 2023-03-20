@@ -71,6 +71,8 @@ class ASL_DATSET(Dataset):
         pad_len = max(0, self.max_seq_length - len(landmarks))
         landmarks = landmarks + [[0] * len(new_columns)] * pad_len
 
+        #todo: implement transforms?
+        #transforms is currently not used...
         if self.transform:
             sample = self.transform(landmarks)
 

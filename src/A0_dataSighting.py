@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import config as config
+from config import *
 import os
 import json
 import torch
@@ -52,7 +52,7 @@ class ASL_DATSET(Dataset):
 
 
     def _load_label_map(self):
-        with open(config.PATH_LABELMAP, "r") as infile:
+        with open(MAP_JSON_FILE, "r") as infile:
             ln = infile.readline()
         self.label_dict = json.loads(ln)
         self.label_dict_inv = {y:x for x,y in self.label_dict.items() }
@@ -63,7 +63,7 @@ class ASL_DATSET(Dataset):
     def load_datas(self):
         self.df_train = pd.read_csv(self._path)
         #generate Absolute path
-        self.file_paths = np.array([os.path.join(config.PATH_DATA,x) for x in self.df_train["path"].values])
+        self.file_paths = np.array([os.path.join(D,x) for x in self.df_train["path"].values])
 
         self.participant_id = self.df_train["participant_id"].values
         self.sequence_id = self.df_train["sequence_id"].values
