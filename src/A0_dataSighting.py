@@ -1,146 +1,77 @@
+import time
+
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from config import *
 import os
-import json
-import torch
-from torch.utils.data import Dataset,DataLoader
-import torch.nn.functional as F
-
-import pytorch_lightning as pl
-
+from config import *
+from multiprocessing import Process, Queue
 from tqdm import tqdm
+import numpy as np
+import datetime
+def analyze_file(q,q_out,i):
 
-import mediapipe as mp
-mp_pose = mp.solutions.pose
+    while True:
+        item = q.get()
+        if item is None:
+            print("Process {:d}: Queue is empty".format(i))
+            break
+        idx,path = item
+        df_in = pd.read_parquet(path)
 
+        max_length = df_in.shape[0]/543
+        q_out.put((idx,path,max_length))
 
-def data_checks(ASL_DATASET):
-    for _i, (df,lab) in tqdm(enumerate(ASL_DATASET),total = len(ASL_DATASET)):
-        ASL_DATASET.df_train.loc[_i,"n_frames"] = len(df.frame.value_counts())
-        ASL_DATASET.df_train.loc[_i,"average_landmarks"] = (df.frame.value_counts()).mean()
-        ASL_DATASET.df_train.loc[_i,"std_landmarks"] = (df.frame.value_counts()).std()
+        # finished = q_out.qsize()/q.qsize() *100
+        # if finished%10 == 0:
+        #     print()
 
-    ASL_DATASET.df_train.to_csv(r"Statisics_dataset.csv")
-
-
-def convert_df_to_result(df):
-    #iterate through each frame
-    for frame_no, df_frame in df.groupby(by="frame"):
-        print("done")
-
-    pass
-class ASL_DATSET(Dataset):
-    def __init__(self,_path, transform = None):
-        super().__init__()
-        self.transform = transform
-        self.path = _path
-
-        #Function to load csv
-        self.load_datas()
-
-    @property
-    def path(self):
-        return self._path
-
-    @path.setter
-    def path(self,new_path):
-        self._path = new_path
-        self._load_label_map()
-        self.load_datas()
+    # print("Process:",i)
+    return
 
 
-    def _load_label_map(self):
-        with open(MAP_JSON_FILE, "r") as infile:
-            ln = infile.readline()
-        self.label_dict = json.loads(ln)
-        self.label_dict_inv = {y:x for x,y in self.label_dict.items() }
+def start_mp( df_train,   n_processes = 10):
+    q = Queue()
+    q_out = Queue(maxsize=df_train.shape[0])
+    #Fill Queue
+
+    print("Filling Queue...")
+    for _,row in tqdm(df_train.iterrows(),total = df_train.shape[0]):
+        q.put((_,os.path.join(ROOT_PATH,RAW_DATA_DIR,row.path)))
 
 
+    procs = []
+    for i in range(0,n_processes):
+        p = Process(target=analyze_file, args=(q,q_out,i,))
+        procs.append(p)
+    t0 = datetime.datetime.now()
+    print("Start Processes",t0)
+    for p in procs:
+        q.put(None)
+        p.start()
+    print("all Prcesses started")
 
 
-    def load_datas(self):
-        self.df_train = pd.read_csv(self._path)
-        #generate Absolute path
-        self.file_paths = np.array([os.path.join(D,x) for x in self.df_train["path"].values])
+    #retrieve elements
+    _liout = []
+    while not (q_out.empty() & q.empty()):
+        _liout.append(q_out.get())
 
-        self.participant_id = self.df_train["participant_id"].values
-        self.sequence_id = self.df_train["sequence_id"].values
-        self.sign = self.df_train["sign"].values
+    print("Emptied Queue....")
+    # print("Maximum Sequence Length:", np.array(_liout).max(axis=0)[1])
 
-        self.sign_int = self.df_train["sign"].map(self.label_dict).values
-        self.sign_oneHot = F.one_hot(torch.from_numpy(self.sign_int))
+
+    #now join all the processes
+    for p in procs:
+        p.join()
+    t1 = datetime.datetime.now()
 
 
 
-
-    def __getitem__(self, idx):
-        x = self.open_parquet(self.file_paths[idx])
-        label = self.sign_oneHot[idx]
-        return x, label
-
-    def __len__(self):
-        return len(self.sign_int)
-
-
-    @staticmethod
-    def open_parquet(file_path):
-        return pd.read_parquet(file_path)
-
-
-
-
-
-
-class ASL_DATAModule(pl.LightningDataModule):
-    def __init__(self,config,
-                 batch_size = 8,
-                 ):
-        super().__init__()
-        self.config = config
-        self.batch_size = batch_size
-
-        self.num_workers = 1
-
-    # @config.setter
-    # def config(self,x):
-    #     self.config = x
-
-    @property
-    def config(self,):
-        return self._config
-
-    @config.setter
-    def config(self,_config):
-        self._config = _config
-        #reload also the label_dict
-        self._load_label_map()
-        self._getTrainCSV()
-
-    def setup(self, stage: str):
-        if stage == "fit" or stage is None:
-            self.train = ASL_DATSET(self.train_dir,
-                                    transform = None,)
-            # self.validate = StoneDataset(self.val_dir,transform = self.transform)
-        if stage == "test":
-            # self.test = StoneDataset(self.test_dir,transform = self.transform)
-            pass
-
-    def train_dataloader(self):
-        return DataLoader(self.train,
-                          batch_size=self.batch_size,
-                          num_workers=self.num_workers,
-                          shuffle=True)
-
-    def val_dataloader(self):
-        return DataLoader(self.validate, batch_size=self.batch_size,
-                          num_workers=self.num_workers,shuffle=True)
-
-    def test_dataloader(self):
-        return DataLoader(self.test, batch_size=self.batch_size,
-                          num_workers=self.num_workers,shuffle=True)
-
+    #now retrieve Queue
+    print("Empty Queue....")
+    df_out = pd.DataFrame(np.array(_liout), columns=["idx", "path", "n_frames"])
+    df_out["idx"] = df_out["idx"].map(int)
+    df_out["n_frames"] = df_out["n_frames"].map(float).map(int)
+    return df_out.sort_values(by="idx")
 
 
 
@@ -149,24 +80,19 @@ class ASL_DATAModule(pl.LightningDataModule):
 
 
 if __name__ == '__main__':
-    print("done")
 
-    asl_train_ds = ASL_DATSET(config.PATH_TRAIN_DATA)
+    df_train = pd.read_csv(os.path.join(ROOT_PATH,RAW_DATA_DIR,"train.csv"))
+    print("done", df_train.shape)
 
-    data_checks(asl_train_ds)
+    df_out = start_mp(df_train, n_processes=10)
+    print(df_out["n_frames"].max())
 
-    df, label = next(iter(asl_train_ds))
-    convert_df_to_result(df)
-    print("done")
+    df_out.to_csv("sequence_length_dataset.csv",index = False)
 
-    # # label_dict = load_label_map(config.PATH_LABELMAP)
-    # # df_train = pd.read_csv(os.path.join(config.PATH_DATA,"train.csv"))
-    # #
-    # dM = ASL_DATAModule(config = config)
-    #
-    #
-    # fig,ax = plt.subplots(1)
-    # ax.scatter(1,1)
-    # plt.show()
-    #
-    #
+
+
+
+
+
+
+
