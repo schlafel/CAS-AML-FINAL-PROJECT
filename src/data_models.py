@@ -46,6 +46,10 @@ class ASL_DATSET(Dataset):
         # Get the processed data for the single index
         landmark_file = self.file_paths[idx]
 
+        # f_name = os.path.splitext(os.path.basename(self.file_paths[idx]))[0].split("-")
+        # df_init = pd.read_parquet(
+        #     os.path.join(ROOT_PATH, RAW_DATA_DIR, "train_landmark_files", f_name[0], f_name[1] + ".parquet"))
+
         # Read in the processed file
         landmark_file = torch.load(landmark_file)
 
@@ -54,10 +58,17 @@ class ASL_DATSET(Dataset):
         target = landmark_file['target']
         size = landmark_file['size']
 
+        left_hands = np.array(landmarks)[:, (FACE_FEATURES * 2):(FACE_FEATURES * 2 + HAND_FEATURES * 2)]
+        right_hands = np.array(landmarks)[:, (FACE_FEATURES * 2 + HAND_FEATURES * 2 + POSE_FEATURES * 2):]
+        #interesting pose landmarks: 11-22 (upper extremity)
+        pose_landmarks = np.array(landmarks)[:, (FACE_FEATURES * 2 + HAND_FEATURES * 2 + 11 * 2):(FACE_FEATURES * 2 + HAND_FEATURES * 2 + 23 * 2)]
+        idx_lips = list(range(157,162)) + list(range(144,156))
+        lip_landmarks = np.array(landmarks)[:, (FACE_FEATURES * 2 + HAND_FEATURES * 2 + 11 * 2):(FACE_FEATURES * 2 + HAND_FEATURES * 2 + 23 * 2)]
+
 
         ## now select only relevant features
         #structure of landmarks
-
+        #structure is x,y for each landmark....
         # Pad the landmark data
         pad_len = max(0, self.max_seq_length - len(landmarks))
         landmarks = landmarks + [[0] * len(landmarks[0])] * pad_len
