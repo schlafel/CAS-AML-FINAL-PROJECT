@@ -41,12 +41,6 @@ if __name__ == '__main__':
     dM = ASLDataModule(batch_size=BATCH_SIZE,
                        max_seq_length=MAX_SEQUENCES,
                        num_workers= num_workers)
-    dM.setup()
-    t_dl = dM.train_dataloader()
-
-    # for sample in t_dl:
-    #     pass
-
 
     # ------------ 2. Create Model PL------------
     model = LSTM_Predictor(n_features=188,
