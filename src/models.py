@@ -3,6 +3,7 @@ import torch
 
 import pytorch_lightning as pl
 from torchmetrics.classification import accuracy
+from config import *
 
 class LSTM_BASELINE_Model(nn.Module):
     def __init__(self, n_features, n_classes=250, n_hidden=256, num_layers=3):
@@ -68,5 +69,5 @@ class LSTM_Predictor(pl.LightningModule):
         pass
 
     def configure_optimizers(self, ):
-        return torch.optim.Adam(self.parameters(), lr=0.0001)
+        return torch.optim.Adam(self.parameters(), lr=LEARNING_RATE)
 

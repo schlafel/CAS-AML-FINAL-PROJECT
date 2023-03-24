@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
     MAX_SEQUENCES = 150
     BATCH_SIZE = 512
-    num_workers = os.cpu_count()#or 0
+    num_workers = os.cpu_count()//2#or 0
 
 
     # ------------ 1. Load data ------------
@@ -63,10 +63,12 @@ if __name__ == '__main__':
                                   )
 
     trainer = pl.Trainer(accelerator="gpu",
-                         logger=tb_logger,
-                         callbacks=[checkpoint_callback],
-                         max_epochs=250,
-                         )
+                             logger=tb_logger,
+                             callbacks=[checkpoint_callback],
+                             max_epochs=250,
+                             limit_val_batches=0,
+                             num_sanity_val_steps=0
+                             )
 
 
     # ------------ 3. Create Model Callbacks------------
