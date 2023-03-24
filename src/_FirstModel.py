@@ -32,7 +32,7 @@ if __name__ == '__main__':
     """
 
     MAX_SEQUENCES = 150
-    BATCH_SIZE = 512  #
+    BATCH_SIZE = 1024  #Not optimal as not a perfect power of 2, but maximum that fits in my GPU
     num_workers = os.cpu_count() // 2  # or 0
     mod_name = "FIRST_POC_MODEL"
 
@@ -60,9 +60,9 @@ if __name__ == '__main__':
     )
     # Tensorboard logger
     tb_logger = TensorBoardLogger(
-        save_dir=os.path.join(ROOT_PATH, "checkpoints"),
-        name="lightning_logs",
-        version=mod_name
+        save_dir=os.path.join(ROOT_PATH, "checkpoints","lightning_logs"),
+        name=mod_name,
+        # version=mod_name
     )
 
     trainer = pl.Trainer(

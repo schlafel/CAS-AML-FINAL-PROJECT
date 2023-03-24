@@ -61,7 +61,6 @@ class ASL_DATSET(Dataset):
         # select the landmarks
         landmarks = df_in.loc[(
                                       ((df_in.type == "pose") & (df_in.landmark_index.isin(list(range(11, 23))))) |
-
                                       ((df_in.type == "face") & (df_in.landmark_index.isin(FACE_INDICES))) |
                                       ((df_in.type == "right_hand")) |
                                       ((df_in.type == "left_hand"))
