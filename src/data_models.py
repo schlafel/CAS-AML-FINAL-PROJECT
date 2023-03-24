@@ -104,7 +104,7 @@ class ASL_DATSET(Dataset):
 
 class ASL_DATSET_PROCESSED(ASL_DATSET):
     def __init__(self, transform=None, max_seq_length=MAX_SEQUENCES):
-        super(ASL_DATSET_PROCESSED, self).__init__(transform=None, max_seq_length=MAX_SEQUENCES)
+        super(ASL_DATSET_PROCESSED, self).__init__(transform=None, max_seq_length=max_seq_length)
 
     def __getitem__(self, idx):
         # get the paths
@@ -152,7 +152,7 @@ class ASLDataModule(pl.LightningDataModule):
 
 class ASLDataModule_Preprocessed(ASLDataModule):
     def __init__(self, max_seq_length=MAX_SEQUENCES,
-                 batch_size=16,
+                 batch_size=BATCH_SIZE,
                  num_workers=0):
         super().__init__(
             max_seq_length=MAX_SEQUENCES,
