@@ -41,9 +41,6 @@ if __name__ == '__main__':
                                     max_seq_length=MAX_SEQUENCES,
                                     num_workers=num_workers)
 
-    dM.setup()
-    dl = dM.train_dataloader()
-    sample = next(iter(dl))
 
     # ------------ 2. Create Model PL------------
     model = LSTM_Predictor(n_features=188,
