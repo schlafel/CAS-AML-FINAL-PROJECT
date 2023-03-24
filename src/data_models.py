@@ -101,6 +101,18 @@ class ASL_DATSET(Dataset):
     def __repr__(self):
         return f'ASL_DATSET(Participants: {len(set(self.participant_ids))}, Length: {len(self.df_train)}, Number of Features: {self.n_features}, " Number of Frames: {self.max_seq_length}"'
 
+class ASL_DATSET_PROCESSED(ASL_DATSET):
+    def __init__(self,transform=None, max_seq_length=MAX_SEQUENCES):
+        super(ASL_DATSET_PROCESSED, self).__init__(transform=None, max_seq_length=MAX_SEQUENCES)
+    def __getitem__(self, idx):
+        #get the paths
+        sample = None
+
+        #get correct paths
+        path_file = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR[:-1] + "_v2",
+                                 self.file_paths[idx].replace(".parquet", ".pt").split("files/")[1])
+        sample = torch.load(path_file)
+        return sample
 
 class ASLDataModule(pl.LightningDataModule):
     def __init__(self,
@@ -136,9 +148,31 @@ class ASLDataModule(pl.LightningDataModule):
         return train_loader
 
 
+class ASLDataModule_Preprocessed(ASLDataModule):
+    def __init__(self,max_seq_length = MAX_SEQUENCES,
+                 batch_size=16,
+                 num_workers=0):
+        super().__init__(
+            max_seq_length = MAX_SEQUENCES,
+                 batch_size=16,
+                 num_workers=0)
+
+        self.max_seq_length = max_seq_length
+        self.batch_size = batch_size
+        self.num_workers = num_workers
+
+
+    def setup(self, stage=None):
+
+        if stage == "fit" or stage is None:
+            self.train_dataset = ASL_DATSET_PROCESSED(max_seq_length=self.max_seq_length)
+
+
+
+
 if __name__ == '__main__':
 
-    ds = ASL_DATSET()
+    ds = ASL_DATSET_PROCESSED()
 
     data_loader = DataLoader(ds, batch_size=1,
                              shuffle=True)
