@@ -6,7 +6,9 @@ from tqdm import tqdm
 import os
 
 if __name__ == '__main__':
-    datset = ASL_DATSET()
+    MAX_SEQUENCES = 150 #Fix to 150!!
+
+    datset = ASL_DATSET(max_seq_length=MAX_SEQUENCES)
     PROCESSED_DATA_DIR2 = r"data/processed_v2"
     #.0-
     for idx,files in tqdm(enumerate(datset.file_paths),total = len(datset.file_paths)):

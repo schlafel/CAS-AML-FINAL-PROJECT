@@ -5,8 +5,9 @@ import pytorch_lightning as pl
 from torchmetrics.classification import accuracy
 from config import *
 
+
 class LSTM_BASELINE_Model(nn.Module):
-    def __init__(self, n_features, n_classes=250, n_hidden=256, num_layers=3, dropout = 0.3):
+    def __init__(self, n_features, n_classes=250, n_hidden=256, num_layers=3, dropout=0.3):
         super().__init__()
 
         self.lstm = nn.LSTM(
@@ -35,23 +36,25 @@ class LSTM_Predictor(pl.LightningModule):
                  dropout: float = 0.3):
         super().__init__()
 
-        self.model = LSTM_BASELINE_Model(n_features=n_features,
-                                         n_classes=n_classes,
-                                         num_layers=num_layers,
-                                         dropout=dropout)
+        self.model = LSTM_BASELINE_Model(
+            n_features=n_features,
+            n_classes=n_classes,
+            num_layers=num_layers,
+            dropout=dropout
+        )
         # Define criterion
         self.criterion = nn.CrossEntropyLoss()
 
-        self.accuracy = accuracy.Accuracy(task="multiclass",
-                                          num_classes=n_classes
-                                          )
-
+        self.accuracy = accuracy.Accuracy(
+            task="multiclass",
+            num_classes=n_classes
+        )
 
     def forward(self, x, labels):
         y_hat = self.model(x)
         loss = 0
         if labels is not None:
-            loss = self.criterion(y_hat, labels.view(-1)) #need to "flatten" the labels
+            loss = self.criterion(y_hat, labels.view(-1))  # need to "flatten" the labels
         return loss, y_hat
 
     def training_step(self, batch, batch_idx):
@@ -72,4 +75,3 @@ class LSTM_Predictor(pl.LightningModule):
 
     def configure_optimizers(self, ):
         return torch.optim.Adam(self.parameters(), lr=LEARNING_RATE)
-

@@ -32,7 +32,7 @@ if __name__ == '__main__':
     """
 
     MAX_SEQUENCES = 150
-    BATCH_SIZE = 400  # suboptimal as not a power of 2
+    BATCH_SIZE = 512  #
     num_workers = os.cpu_count() // 2  # or 0
     mod_name = "FIRST_POC_MODEL"
 
@@ -40,6 +40,10 @@ if __name__ == '__main__':
     dM = ASLDataModule_Preprocessed(batch_size=BATCH_SIZE,
                                     max_seq_length=MAX_SEQUENCES,
                                     num_workers=num_workers)
+
+    dM.setup()
+    dl = dM.train_dataloader()
+    sample = next(iter(dl))
 
     # ------------ 2. Create Model PL------------
     model = LSTM_Predictor(n_features=188,

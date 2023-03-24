@@ -155,7 +155,7 @@ class ASLDataModule_Preprocessed(ASLDataModule):
                  batch_size=BATCH_SIZE,
                  num_workers=0):
         super().__init__(
-            max_seq_length=MAX_SEQUENCES,
+            max_seq_length=max_seq_length,
             batch_size=16,
             num_workers=0)
 
