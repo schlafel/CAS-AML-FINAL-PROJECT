@@ -17,7 +17,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 
 from config import *
 
-from data_models import ASL_DATSET, ASLDataModule
+from data_models import ASL_DATSET, ASLDataModule,ASLDataModule_Preprocessed
 from models import LSTM_BASELINE_Model, LSTM_Predictor
 
 if __name__ == '__main__':
@@ -38,7 +38,7 @@ if __name__ == '__main__':
 
 
     # ------------ 1. Load data ------------
-    dM = ASLDataModule(batch_size=BATCH_SIZE,
+    dM = ASLDataModule_Preprocessed(batch_size=BATCH_SIZE,
                        max_seq_length=MAX_SEQUENCES,
                        num_workers= num_workers)
 
