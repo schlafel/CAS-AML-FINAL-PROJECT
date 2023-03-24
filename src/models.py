@@ -6,7 +6,7 @@ from torchmetrics.classification import accuracy
 from config import *
 
 class LSTM_BASELINE_Model(nn.Module):
-    def __init__(self, n_features, n_classes=250, n_hidden=256, num_layers=3):
+    def __init__(self, n_features, n_classes=250, n_hidden=256, num_layers=3, dropout = 0.3):
         super().__init__()
 
         self.lstm = nn.LSTM(
@@ -14,7 +14,7 @@ class LSTM_BASELINE_Model(nn.Module):
             hidden_size=n_hidden,
             num_layers=num_layers,
             batch_first=True,
-            dropout=.3)
+            dropout=dropout)
 
         self.fc = nn.Linear(n_hidden, n_classes)
 
@@ -31,12 +31,14 @@ class LSTM_Predictor(pl.LightningModule):
     def __init__(self,
                  n_features: int,
                  n_classes: int = 250,
-                 num_layers: int = 3):
+                 num_layers: int = 3,
+                 dropout: float = 0.3):
         super().__init__()
 
         self.model = LSTM_BASELINE_Model(n_features=n_features,
                                          n_classes=n_classes,
-                                         num_layers=num_layers)
+                                         num_layers=num_layers,
+                                         dropout=dropout)
         # Define criterion
         self.criterion = nn.CrossEntropyLoss()
 

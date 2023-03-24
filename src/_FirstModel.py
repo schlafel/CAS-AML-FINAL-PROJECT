@@ -43,7 +43,9 @@ if __name__ == '__main__':
 
     # ------------ 2. Create Model PL------------
     model = LSTM_Predictor(n_features=188,
-                           num_layers=3)
+                           num_layers=3,
+                           n_classes=N_CLASSES,
+                           dropout = 0.3)
 
     # ------------ 3. Create Model Callbacks------------
     # Model checkpoints
