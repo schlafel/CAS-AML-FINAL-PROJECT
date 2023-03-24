@@ -35,7 +35,7 @@ if __name__ == '__main__':
     MAX_SEQUENCES = 150
     BATCH_SIZE = 512
     num_workers = os.cpu_count()//2#or 0
-
+    mod_name = "FIRST_POC_MODEL"
 
     # ------------ 1. Load data ------------
     dM = ASLDataModule_Preprocessed(batch_size=BATCH_SIZE,
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     #Model checkpoints
     checkpoint_callback = ModelCheckpoint(
         dirpath=os.path.join(ROOT_PATH, "checkpoints"),
-        filename="best_checkpoint",
+        filename=mod_name + "-{epoch:02d}-{train_acc:.2f}",
         save_top_k=1,
         monitor="train_loss",
         verbose=True,
@@ -59,7 +59,7 @@ if __name__ == '__main__':
     #Tensorboard logger
     tb_logger = TensorBoardLogger(save_dir=os.path.join(ROOT_PATH, "checkpoints"),
                                   name="lightning_logs",
-                                  version="FIRST_POC_MODEL"
+                                  version=mod_name
                                   )
 
     trainer = pl.Trainer(accelerator="gpu",
