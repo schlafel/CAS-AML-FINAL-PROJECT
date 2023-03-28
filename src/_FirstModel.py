@@ -12,9 +12,9 @@ import pytorch_lightning as pl
 from sklearn import *
 from torchmetrics.classification import accuracy
 
-from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.callbacks import ModelCheckpoint,DeviceStatsMonitor
 from pytorch_lightning.loggers import TensorBoardLogger
-
+from pytorch_lightning.tuner import Tuner
 from config import *
 
 from data_models import ASL_DATSET, ASLDataModule, ASLDataModule_Preprocessed
@@ -66,15 +66,27 @@ if __name__ == '__main__':
     )
 
     trainer = pl.Trainer(
+        enable_progress_bar=True,
         accelerator="gpu",
         logger=tb_logger,
-        callbacks=[checkpoint_callback],
-        max_epochs=250,
+        callbacks=[DeviceStatsMonitor(),checkpoint_callback],
+        max_epochs=1,
         limit_val_batches=0,
-        num_sanity_val_steps=0
+        num_sanity_val_steps=0,
+        profiler="simple",#select from None
     )
 
-    # ------------ 3. Create Model Callbacks------------
+    # ------------ 4. Tune Model ------------
+    # tuner = Tuner(trainer)
+    # tuner.scale_batch_size(
+    #     model=model,
+    #     datamodule=dM,
+    #     init_val = 256
+    # )
+    #1024 is optimal...
+
+
+    # ------------ 5. Train Model ------------
     trainer.fit(
         model=model,
         datamodule=dM,
