@@ -7,7 +7,7 @@ from config import *
 
 
 class LSTM_BASELINE_Model(nn.Module):
-    def __init__(self, n_features, n_classes=250, n_hidden=256, num_layers=3, dropout=0.3):
+    def __init__(self, n_features=188, n_classes=250, n_hidden=256, num_layers=3, dropout=0.3):
         super().__init__()
 
         self.lstm = nn.LSTM(
