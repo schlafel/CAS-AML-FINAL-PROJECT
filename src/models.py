@@ -30,7 +30,7 @@ class LSTM_BASELINE_Model(nn.Module):
 
 class LSTM_Predictor(pl.LightningModule):
     def __init__(self,
-                 n_features: int,
+                 n_features: int = 188,
                  n_classes: int = 250,
                  num_layers: int = 3,
                  dropout: float = 0.3):
@@ -50,7 +50,7 @@ class LSTM_Predictor(pl.LightningModule):
             num_classes=n_classes
         )
 
-    def forward(self, x, labels):
+    def forward(self, x, labels = None):
         y_hat = self.model(x)
         loss = 0
         if labels is not None:
