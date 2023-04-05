@@ -9,7 +9,7 @@ import numpy as np
 import torch.nn.functional as F
 from tqdm import tqdm
 import pytorch_lightning as pl
-from sklearn import *
+# from sklearn import *
 from torchmetrics.classification import accuracy
 
 from pytorch_lightning.callbacks import ModelCheckpoint,DeviceStatsMonitor
@@ -40,7 +40,9 @@ if __name__ == '__main__':
     dM = ASLDataModule_Preprocessed(batch_size=BATCH_SIZE,
                                     max_seq_length=MAX_SEQUENCES,
                                     num_workers=num_workers)
-
+    dM.setup()
+    dL = dM.train_dataloader()
+    print(next(iter(dL))["landmarks"].shape)
 
     # ------------ 2. Create Model PL------------
     model = LSTM_Predictor(n_features=188,
@@ -52,7 +54,7 @@ if __name__ == '__main__':
     # Model checkpoints
     checkpoint_callback = ModelCheckpoint(
         dirpath=os.path.join(ROOT_PATH, "checkpoints"),
-        filename=mod_name + "-{epoch:02d}-{train_acc:.2f}",
+        filename=mod_name + "-{epoch:02d}-{train_accuracy:.2f}",
         save_top_k=1,
         monitor="train_loss",
         verbose=True,
@@ -66,7 +68,7 @@ if __name__ == '__main__':
     )
 
     trainer = pl.Trainer(
-        enable_progress_bar=True,
+        enable_progress_bar=False,
         accelerator="gpu",
         logger=tb_logger,
         callbacks=[DeviceStatsMonitor(),checkpoint_callback],

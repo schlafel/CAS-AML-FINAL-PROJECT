@@ -82,7 +82,7 @@ class LSTM_Predictor(pl.LightningModule):
 
 
 class TransformerPredictor(LSTM_Predictor):
-    def __init__(self,seq_length:int =150, hidden_size:int=188,num_classes:int = 250):
+    def __init__(self,seq_length:int =150, hidden_size:int=256,num_classes:int = 250):
         super().__init__()
         self.model = TransformerSequenceClassifier(input_dim =seq_length,  hidden_size = hidden_size, num_classes = num_classes)
         # Define criterion
