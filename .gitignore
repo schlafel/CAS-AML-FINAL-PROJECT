@@ -133,3 +133,4 @@ data/raw/train_landmark_files/*
 data/processed/train_landmark_files/*
 *.parquet
 *.pt
+*.marker
