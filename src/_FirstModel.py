@@ -9,12 +9,12 @@ import numpy as np
 import torch.nn.functional as F
 from tqdm import tqdm
 import pytorch_lightning as pl
-from sklearn import *
+# from sklearn import *
 from torchmetrics.classification import accuracy
 
-from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.callbacks import ModelCheckpoint,DeviceStatsMonitor
 from pytorch_lightning.loggers import TensorBoardLogger
-
+from pytorch_lightning.tuner import Tuner
 from config import *
 
 from data_models import ASL_DATSET, ASLDataModule, ASLDataModule_Preprocessed
@@ -40,7 +40,9 @@ if __name__ == '__main__':
     dM = ASLDataModule_Preprocessed(batch_size=BATCH_SIZE,
                                     max_seq_length=MAX_SEQUENCES,
                                     num_workers=num_workers)
-
+    dM.setup()
+    dL = dM.train_dataloader()
+    print(next(iter(dL))["landmarks"].shape)
 
     # ------------ 2. Create Model PL------------
     model = LSTM_Predictor(n_features=188,
@@ -52,7 +54,7 @@ if __name__ == '__main__':
     # Model checkpoints
     checkpoint_callback = ModelCheckpoint(
         dirpath=os.path.join(ROOT_PATH, "checkpoints"),
-        filename=mod_name + "-{epoch:02d}-{train_acc:.2f}",
+        filename=mod_name + "-{epoch:02d}-{train_accuracy:.2f}",
         save_top_k=1,
         monitor="train_loss",
         verbose=True,
@@ -66,15 +68,27 @@ if __name__ == '__main__':
     )
 
     trainer = pl.Trainer(
+        enable_progress_bar=False,
         accelerator="gpu",
         logger=tb_logger,
-        callbacks=[checkpoint_callback],
-        max_epochs=250,
+        callbacks=[DeviceStatsMonitor(),checkpoint_callback],
+        max_epochs=1,
         limit_val_batches=0,
-        num_sanity_val_steps=0
+        num_sanity_val_steps=0,
+        profiler="simple",#select from None
     )
 
-    # ------------ 3. Create Model Callbacks------------
+    # ------------ 4. Tune Model ------------
+    # tuner = Tuner(trainer)
+    # tuner.scale_batch_size(
+    #     model=model,
+    #     datamodule=dM,
+    #     init_val = 256
+    # )
+    #1024 is optimal...
+
+
+    # ------------ 5. Train Model ------------
     trainer.fit(
         model=model,
         datamodule=dM,
