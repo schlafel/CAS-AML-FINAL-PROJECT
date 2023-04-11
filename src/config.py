@@ -1,7 +1,9 @@
+"""
+Configuration
+"""
 # This file keeps the project configurations
 
 import torch
-import random
 
 # Set the device for training
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
