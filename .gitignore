@@ -134,3 +134,4 @@ data/processed/train_landmark_files/*
 *.parquet
 *.pt
 *.marker
+*.bak
