@@ -158,11 +158,11 @@ def calculate_landmark_length_stats():
 
     Returns:
     dict: A dictionary of landmark lengths for each sign type containing:
-        - minimum 
-        - maximum
-        - mean
-        - median 
-        - standard deviation        
+    - minimum
+    - maximum
+    - mean
+    - median
+    - standard deviation
     """
         
     # Read the CSV file 
@@ -208,9 +208,9 @@ def calculate_avg_landmark_positions():
     
     Returns:
     List : Containing a dictionary with average x/y positions with keys
-        'left_hand'
-        'right_hand'
-        'face'
+    -    'left_hand'
+    -    'right_hand'
+    -    'face'
     """
     df_train = pd.read_csv(os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, TRAIN_CSV_FILE))
     avg_landmarks_pos = {}
@@ -268,6 +268,12 @@ def remove_outlier_or_missing_data(landmark_len_dict):
     Returns:
     None
     """
+    
+    marker_file_path = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, CLEANED_FILE)
+    
+    if os.path.exists(os.path.join(marker_file_path)):
+        print('Cleansed data found. Skipping...')
+        return
     
     # The function checks if there are more than SKIP_CONSECUTIVE_ZEROS consecutive frames in which both the X and Y coordinates 
     # are 0 (i.e., [0, 0]). If such consecutive frames are found, the function returns True, otherwise it returns False.
@@ -361,12 +367,16 @@ def remove_outlier_or_missing_data(landmark_len_dict):
 
     # Save the updated DataFrame to the CSV file
     df_train.to_csv(os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, TRAIN_CSV_FILE), index=False)
+    
+    # Create the marker file
+    with open(marker_file_path, 'w') as f:
+        f.write('')
 
 
 if __name__ == '__main__':
 
     preprocess_raw_data(sample=100000)
-    
+
     landmark_len_dict = calculate_landmark_length_stats()
     max_seq_len = 0
     for label, stats in landmark_len_dict.items():
@@ -374,9 +384,9 @@ if __name__ == '__main__':
         if seq_len > max_seq_len:
             max_seq_len = seq_len
     print(max_seq_len)
-    
+
     remove_outlier_or_missing_data(landmark_len_dict)
-    
+
     cleansed_landmark_len_dict = calculate_landmark_length_stats()
     max_seq_len = 0
     for label, stats in cleansed_landmark_len_dict.items():

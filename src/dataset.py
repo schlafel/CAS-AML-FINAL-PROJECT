@@ -2,101 +2,18 @@ import sys
 
 sys.path.insert(0, '../src')
 from config import *
+from augmentations import *
 
 import os
 import pandas as pd
 import numpy as np
-import torch
-from torch.utils.data import Dataset
+import random
+import json
 
-"""
-Data Augmentation Methods
-"""
-def shift_landmarks(frames, max_shift=0.01):
-    """
-    Shift landmark coordinates randomly by a small amount.
-
-    Args:
-        frames (numpy.ndarray): An array of landmarks data.
-        max_shift (float): Maximum shift for the random shift (default: 0.01).
-
-    Returns:
-        numpy.ndarray: An array of augmented landmarks.
-    """
-    h = np.random.uniform(-max_shift, max_shift)
-    v = np.random.uniform(-max_shift, max_shift)
-    augmented_landmarks = np.array([[[x + h, y + v] for x, y in landmarks] for landmarks in frames])
-    return augmented_landmarks
-
-
-def mirror_landmarks(frames):
-    """
-    Invert/mirror landmark coordinates along the x-axis.
-
-    Args:
-        frames (numpy.ndarray): An array of landmarks data.
-
-    Returns:
-        numpy.ndarray: An array of inverted landmarks.
-    """
-    inverted_frames = frames.copy()
-    inverted_frames[..., 0] = np.array(
-        [[[((x - 0.5) * (-1)) + 0.5, y] for x, y in landmarks] for landmarks in inverted_frames])
-    return inverted_frames
-
-
-def frame_dropout(frames, dropout_rate=0.05):
-    """
-    Randomly drop frames from the input landmark data.
-
-    Args:
-        frames (numpy.ndarray): An array of landmarks data.
-        dropout_rate (float): The proportion of frames to drop (default: 0.05).
-
-    Returns:
-        numpy.ndarray: An array of landmarks with dropped frames.
-    """
-    keep_rate = 1 - dropout_rate
-    keep_indices = np.random.choice(len(frames), int(len(frames) * keep_rate), replace=False)
-    keep_indices.sort()
-    dropped_landmarks = np.array([frames[i] for i in keep_indices])
-    return dropped_landmarks
-
-
-def random_scaling(frames, scale_range=(0.9, 1.1)):
-    """
-    Apply random scaling to landmark coordinates.
-
-    Args:
-        frames (numpy.ndarray): An array of landmarks data.
-        scale_range (tuple): A tuple containing the minimum and maximum scaling factors (default: (0.9, 1.1)).
-
-    Returns:
-        numpy.ndarray: An array of landmarks with randomly scaled coordinates.
-    """
-    scale_factor = np.random.uniform(scale_range[0], scale_range[1])
-    return frames * scale_factor
-
-
-def random_rotation(frames, max_angle=10):
-    """
-    Apply random rotation to landmark coordinates.
-
-    Args:
-        frames (numpy.ndarray): An array of landmarks data.
-        max_angle (int): The maximum rotation angle in degrees (default: 10).
-
-    Returns:
-        numpy.ndarray: An array of landmarks with randomly rotated coordinates.
-    """
-    angle = np.radians(np.random.uniform(-max_angle, max_angle))
-    cos_a, sin_a = np.cos(angle), np.sin(angle)
-    rotation_matrix = np.array([[cos_a, -sin_a], [sin_a, cos_a]])
-
-    return np.einsum('ijk,kl->ijl', frames, rotation_matrix)
-
-
-class ASL_DATSET(Dataset):
+# Label dictionaries
+label_dict = json.load(open(os.path.join(ROOT_PATH,RAW_DATA_DIR,MAP_JSON_FILE)))
+label_dict_inference = dict(zip(label_dict.values(),label_dict.keys()))
+class ASL_DATASET:
     """
     A dataset class for the ASL dataset.
     """
@@ -127,7 +44,6 @@ class ASL_DATSET(Dataset):
         """
         Load the data for the dataset.
         """
-
         # Load Processed data
         self.df_train = pd.read_csv(os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, TRAIN_CSV_FILE))
 
@@ -159,9 +75,8 @@ class ASL_DATSET(Dataset):
         Returns:
             dict: A dictionary containing the landmarks, target, and size for the item.
         """
-
-        if torch.is_tensor(idx):
-            idx = idx.item()
+        #if torch.is_tensor(idx):
+        #    idx = idx.item()
 
         # Get the processed data for the single index
         landmark_file = self.file_paths[idx]
@@ -205,5 +120,29 @@ class ASL_DATSET(Dataset):
         Return a string representation of the dataset.
         """
 
-        return f'ASL_DATSET(Participants: {len(set(self.participant_ids))}, Length: {len(self.df_train)}'
+        return f'ASL_DATASET(Participants: {len(set(self.participant_ids))}, Length: {len(self.df_train)}'
 
+
+if __name__ == '__main__':
+
+    dataset = ASL_DATASET(augment=True)
+
+    from torch.utils.data import DataLoader
+    ## ASL Data loader
+    dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
+
+    print(f'Length data loader: {len(dataloader)}')
+
+    sample = next(iter(dataloader))
+    frames = sample['landmarks']
+    target = sample['target']
+    size = sample['size']
+
+    print(f'Sample size: {size}')
+    print(f'Sample target: {target}')
+
+    index = 0
+    print(f'Total frames: {frames[index].shape}')
+
+    landmark_lists = frames[index][:size[index]]
+    print(f'Actual frames: {landmark_lists.shape}')

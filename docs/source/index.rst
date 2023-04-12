@@ -10,6 +10,11 @@ Welcome to American Sign Language Recognition's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   config
+   augmentations
+   data_utils
+   dataset
+
 
 
 Indices and tables
