@@ -14,7 +14,7 @@ Welcome to American Sign Language Recognition's documentation!
    augmentations
    data_utils
    dataset
-
+   visualizations
 
 
 Indices and tables

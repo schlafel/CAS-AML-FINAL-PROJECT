@@ -13,13 +13,21 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 ROOT_PATH='../'
 
 #: Directory paths
+#: Source files Directory path
 SRC_DIR='src/'
+#: Data files Directory path
 DATA_DIR='data/'
+#: Raw Data files Directory path
 RAW_DATA_DIR='data/raw/'
+#: Processed Data files Directory path
 PROCESSED_DATA_DIR='data/processed/'
+#: Model files Directory path
 MODEL_DIR='models/'
+#: Checkpoint files Directory path
 CHECKPOINT_DIR = 'checkpoints/'
+#: Run files Directory path
 RUNS_DIR='runs/'
+#: Output files Directory path
 OUT_DIR='out/'
 
 #: Set Random Seed
@@ -29,9 +37,18 @@ SEED=0
 torch.manual_seed(SEED)
 
 #: Training hyperparameters
+#: Training Batch Size
 BATCH_SIZE = 32
+#: Training Learning rate
 LEARNING_RATE = 0.001
+#: Training Number of epochs
 EPOCHS = 10
+#: Training Train set split size
+TRAIN_SIZE=0.85
+#: Training Validation set size
+VALID_SIZE=0.05
+#: Testing Test set size
+TEST_SIZE=0.1
 
 #: Data files
 TRAIN_CSV_FILE = 'train.csv'

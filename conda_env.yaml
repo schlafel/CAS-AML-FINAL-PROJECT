@@ -28,3 +28,4 @@ dependencies:
     - tensorboard-plugin-wit
     - kaggle
     - mediapipe
+    - Sphinx
