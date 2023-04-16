@@ -2,7 +2,7 @@
 Configuration
 """
 #: This file keeps the project configurations
-
+import os
 import torch
 
 #: Set the device for training
@@ -10,7 +10,7 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # Paths
 #: Root directory
-ROOT_PATH='../'
+ROOT_PATH=os.path.join(os.path.dirname(__file__),'../')
 
 #: Directory paths
 #: Source files Directory path
@@ -63,6 +63,8 @@ HAND_FEATURES=21
 POSE_FEATURES=33
 MAX_SEQUENCES=150
 MIN_SEQUENCES=15
+TOTAL_LANDMARKS = 543
+
 
 # Landmarks to select
 #: Landmarks for face
