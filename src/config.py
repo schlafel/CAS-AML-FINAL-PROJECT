@@ -13,13 +13,21 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 ROOT_PATH=os.path.join(os.path.dirname(__file__),'../')
 
 #: Directory paths
+#: Source files Directory path
 SRC_DIR='src/'
+#: Data files Directory path
 DATA_DIR='data/'
+#: Raw Data files Directory path
 RAW_DATA_DIR='data/raw/'
+#: Processed Data files Directory path
 PROCESSED_DATA_DIR='data/processed/'
+#: Model files Directory path
 MODEL_DIR='models/'
+#: Checkpoint files Directory path
 CHECKPOINT_DIR = 'checkpoints/'
+#: Run files Directory path
 RUNS_DIR='runs/'
+#: Output files Directory path
 OUT_DIR='out/'
 
 #: Set Random Seed
@@ -29,9 +37,18 @@ SEED=0
 torch.manual_seed(SEED)
 
 #: Training hyperparameters
+#: Training Batch Size
 BATCH_SIZE = 32
+#: Training Learning rate
 LEARNING_RATE = 0.001
+#: Training Number of epochs
 EPOCHS = 10
+#: Training Train set split size
+TRAIN_SIZE=0.85
+#: Training Validation set size
+VALID_SIZE=0.05
+#: Testing Test set size
+TEST_SIZE=0.1
 
 #: Data files
 TRAIN_CSV_FILE = 'train.csv'
@@ -71,8 +88,3 @@ SKIP_CONSECUTIVE_ZEROS=4
 
 #: Columns to use
 COLUMNS_TO_USE = ["x","y"]
-
-#LIPS_INDICES = lip_landmarks = [61, 185, 40, 39, 37, 0, 267, 269, 270, 409, 291, 146, 91, 181, 84, 17, 314, 405, 321, 375, 78, 191, 80, 81, 82, 13, 312, 311, 310, 415, 95, 88, 178, 87, 14, 317, 402, 318, 324, 308]
-#FACE_INDICES = [] + LIPS_INDICES
-#POSE_INDICES = list(range(FACE_FEATURES  + HAND_FEATURES  + 11 ,FACE_FEATURES + HAND_FEATURES + 23))
-#LANDMARK_INDICES = LEFT_HAND_INDICES + RIGHT_HAND_INDICES + FACE_INDICES + POSE_INDICES

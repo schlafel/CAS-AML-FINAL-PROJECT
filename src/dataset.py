@@ -19,14 +19,27 @@ class ASL_DATASET:
     """
 
     # Constructor method
-    def __init__(self, transform=None, max_seq_length=MAX_SEQUENCES, augment=False):
+    def __init__(self, metadata_df=None, transform=None, max_seq_length=MAX_SEQUENCES, augment=False):
         """
         Initialize the dataset.
 
         Args:
+            metadata_df (pd.DataFrame, optional): A dataframe containing the metadata for the dataset.
             transform (callable, optional): A function/transform to apply to the data.
             max_seq_length (int): The maximum sequence length for the data.
             augment (bool): Whether to apply data augmentation.
+
+        Functionality:
+            Constructor method
+
+        :rtype: object
+        :param metadata_df: A dataframe containing the metadata for the dataset.
+        :param transform: A function/transform to apply to the data.
+        :type transform: callable, optional
+        :param max_seq_length: The maximum sequence length for the data.
+        :type max_seq_length: int
+        :param augment: Whether to apply data augmentation.
+        :type augment: bool
         """
 
         super().__init__()
@@ -37,15 +50,24 @@ class ASL_DATASET:
         # [TODO] get this from data
         self.max_seq_length = max_seq_length
 
+        self.df_train = metadata_df
+
         self.load_data()
 
     # Load the data method
     def load_data(self):
         """
         Load the data for the dataset.
+
+        Functionality:
+            Load the data method
+
+        :rtype: None
         """
-        # Load Processed data
-        self.df_train = pd.read_csv(os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, TRAIN_CSV_FILE))
+
+        if self.df_train is None:
+            # Load Processed data
+            self.df_train = pd.read_csv(os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, TRAIN_CSV_FILE))
 
         # Generate Absolute path to locate landmark files
         self.file_paths = np.array(
@@ -61,6 +83,15 @@ class ASL_DATASET:
     def __len__(self):
         """
         Return the length of the dataset.
+
+        Functionality:
+            Get the length of the dataset
+
+        Returns:
+            int: The length of the dataset.
+
+        :return: The length of the dataset.
+        :rtype: int
         """
         return len(self.df_train)
 
@@ -74,6 +105,14 @@ class ASL_DATASET:
 
         Returns:
             dict: A dictionary containing the landmarks, target, and size for the item.
+
+        Functionality:
+            Get a single item from the dataset
+
+        :param idx: The index of the item to retrieve.
+        :type idx: int
+        :return: A dictionary containing the landmarks, target, and size for the item.
+        :rtype: dict
         """
         #if torch.is_tensor(idx):
         #    idx = idx.item()
@@ -118,10 +157,18 @@ class ASL_DATASET:
     def __repr__(self):
         """
         Return a string representation of the dataset.
+
+        Returns:
+            str: A string representation of the dataset.
+
+        Functionality:
+            Return a string representation of the dataset
+
+        :return: A string representation of the dataset.
+        :rtype: str
         """
 
         return f'ASL_DATASET(Participants: {len(set(self.participant_ids))}, Length: {len(self.df_train)}'
-
 
 if __name__ == '__main__':
 
