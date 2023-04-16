@@ -38,7 +38,7 @@ torch.manual_seed(SEED)
 
 #: Training hyperparameters
 #: Training Batch Size
-BATCH_SIZE = 32
+BATCH_SIZE = 128
 #: Training Learning rate
 LEARNING_RATE = 0.001
 #: Training Number of epochs

@@ -27,7 +27,7 @@ class LSTM_BASELINE_Model(nn.Module):
         batch_size, seq_len, landmarks, coords = x.size()
         x = x.view(batch_size, seq_len, -1).float()
 
-        x = nn.utils.rnn.pack_padded_sequence(x, seq_lengths, batch_first=True, enforce_sorted=False)
+        x = nn.utils.rnn.pack_padded_sequence(x, seq_lengths.cpu(), batch_first=True, enforce_sorted=False)
 
         # Set the initial hidden and cell states
         h0 = torch.zeros(self.num_layers, x.batch_sizes[0], self.hidden_size).to(DEVICE).float()

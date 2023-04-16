@@ -31,6 +31,7 @@ def train_model(model, train_loader, valid_loader, criterion, optimizer, schedul
     best_epoch = 0
 
     model.zero_grad()
+    model.to(DEVICE)
 
     cudnn.benchmark = True
     writer = SummaryWriter(log_dir=RUNS_DIR)
