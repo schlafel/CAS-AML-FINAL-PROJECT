@@ -22,6 +22,23 @@ def shift_landmarks(frames, max_shift=0.01):
     v = np.random.uniform(-max_shift, max_shift)
     augmented_landmarks = np.array([[[x + h, y + v] for x, y in landmarks] for landmarks in frames])
     return augmented_landmarks
+def shift_landmarks2(frames, max_shift=0.01):
+    """
+    Shift landmark coordinates randomly by a small amount.
+
+    Args:
+        frames (numpy.ndarray): An array of landmarks data.
+        max_shift (float): Maximum shift for the random shift (default: 0.01).
+
+    Returns:
+        numpy.ndarray: An array of augmented landmarks.
+    """
+    h = np.random.uniform(-max_shift, max_shift) * np.ones((frames.shape[0], frames.shape[1], 1))
+    v = np.random.uniform(-max_shift, max_shift) * np.ones((frames.shape[0], frames.shape[1], 1))
+    augmented_landmarks = frames + np.concatenate((h, v), axis=2)
+    return augmented_landmarks
+
+
 def mirror_landmarks(frames):
     """
     Invert/mirror landmark coordinates along the x-axis.
@@ -35,6 +52,22 @@ def mirror_landmarks(frames):
     inverted_frames = frames.copy()
     inverted_frames = np.array(
         [[[((x - 0.5) * (-1)) + 0.5, y] for x, y in landmarks] for landmarks in inverted_frames])
+    return inverted_frames
+
+
+def mirror_landmarks2(frames):
+    """
+    Invert/mirror landmark coordinates along the x-axis.
+
+    Args:
+        frames (numpy.ndarray): An array of landmarks data.
+
+    Returns:
+        numpy.ndarray: An array of inverted landmarks.
+    """
+
+    inverted_frames = np.copy(frames)
+    inverted_frames[:, :, 0] = -inverted_frames[:, :, 0] + 1
     return inverted_frames
 def frame_dropout(frames, dropout_rate=0.05):
     """
