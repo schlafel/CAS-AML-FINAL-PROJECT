@@ -1,12 +1,13 @@
 import tensorflow as tf
 from src.models.tf_models import TransformerClassifierModel
-from src.data.tf_data import create_dataset
+from src.data.tf_data import get_TF_ASL_DATASET
 import os
 from config import *
 
 
 def train():
-    dm = create_dataset(max_seq_length=MAX_SEQUENCES,
+    dm = get_TF_ASL_DATASET(
+        max_seq_length=MAX_SEQUENCES,
                         batch_size=512)
     input_shape = (MAX_SEQUENCES,368)
     print(MAX_SEQUENCES)

@@ -114,3 +114,15 @@ def random_rotation(frames, max_angle=10):
     rotation_matrix = np.array([[cos_a, -sin_a], [sin_a, cos_a]])
 
     return np.einsum('ijk,kl->ijl', frames, rotation_matrix)
+
+
+def normalize(frames, mn,std):
+
+
+    pass
+
+
+def standardize():
+
+    pass
+

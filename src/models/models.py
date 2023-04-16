@@ -2,7 +2,7 @@ import torch.nn as nn
 
 import pytorch_lightning as pl
 from torchmetrics.classification import accuracy
-from config import *
+from src.config import *
 
 
 class LSTM_BASELINE_Model(nn.Module):

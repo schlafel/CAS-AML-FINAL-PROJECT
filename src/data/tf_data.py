@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 
 class ASL_TF_DATASET():
-    def __init__(self, df, batch_size=32,
+    def __init__(self, df,
                  max_seq_length=MAX_SEQUENCES,
                  N_LANDMARKS=N_LANDMARKS,
                  N_DIMS = len(COLUMNS_TO_USE),
@@ -24,7 +24,6 @@ class ASL_TF_DATASET():
 
 
         self.df = df
-        self.batch_size = batch_size
 
         self.augment = augment
         self.augmentation_threshold = augmentation_threshold
@@ -121,14 +120,26 @@ def map_full_path(path,data_path = os.path.join(ROOT_PATH,PROCESSED_DATA_DIR)):
 
 def get_TF_ASL_DATASET(csv_path = os.path.join(ROOT_PATH,PROCESSED_DATA_DIR,TRAIN_CSV_FILE),
                       data_path = os.path.join(ROOT_PATH,PROCESSED_DATA_DIR),
-                       sample = None,
-                       batch_size=BATCH_SIZE,
-                       max_seq_length=MAX_SEQUENCES,
-                       N_LANDMARKS=N_LANDMARKS,
-                       N_DIMS=len(COLUMNS_TO_USE),
-                       augment=True,
-                       augmentation_threshold=.5,
+                       sample:int = None,
+                       batch_size:int=BATCH_SIZE,
+                       max_seq_length:int=MAX_SEQUENCES,
+                       N_LANDMARKS:int=N_LANDMARKS,
+                       N_DIMS:int=len(COLUMNS_TO_USE),
+                       augment:bool=True,
+                       augmentation_threshold:float=.5,
                        ):
+    """
+    Training-Pipeline
+    :param csv_path: Path to the Training CSV-File (Can be Processed or not)
+    :param data_path: Path to the base data
+    :param sample: Optional --> For testing (ilmits the number of items to read)
+    :param max_seq_length: Maximum sequence length
+    :param N_LANDMARKS: Number of landmarks used
+    :param N_DIMS: Number of Dimensions used
+    :param augment: Wheter to augment or not
+    :param augmentation_threshold: Threshold for augmentation for each sequence 1 --> Every item gets augmented
+    :return: tf.data.Dataset for ASL-DATA based on input csv-File
+    """
     df = pd.read_csv(csv_path)
     df["full_path"] = df.path.apply(map_full_path,args=(data_path,))
     
@@ -137,7 +148,6 @@ def get_TF_ASL_DATASET(csv_path = os.path.join(ROOT_PATH,PROCESSED_DATA_DIR,TRAI
     
     #Get the dataset
     cDM = ASL_TF_DATASET(df,
-                         batch_size=batch_size,
                          max_seq_length=max_seq_length,
                          N_LANDMARKS=N_LANDMARKS,
                          N_DIMS=N_DIMS,
@@ -146,7 +156,7 @@ def get_TF_ASL_DATASET(csv_path = os.path.join(ROOT_PATH,PROCESSED_DATA_DIR,TRAI
                          )
 
 
-    dataset = cDM.get_dataset(batch_size=240,
+    dataset = cDM.get_dataset(batch_size=batch_size,
                               shuffle_buffer_size=250,
                               )
 
@@ -159,7 +169,7 @@ def get_TF_ASL_DATASET(csv_path = os.path.join(ROOT_PATH,PROCESSED_DATA_DIR,TRAI
 if __name__ == '__main__':
 
 
-    dataset = get_TF_ASL_DATASET()
+    dataset = get_TF_ASL_DATASET(batch_size=32)
     # df = pd.read_csv(os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, TRAIN_CSV_FILE))
     # df["full_path"] = df.path.apply(map_full_path)
     # cDM = ASL_TF_DATASET(df.sample(1000), )

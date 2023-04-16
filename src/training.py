@@ -133,7 +133,7 @@ def train():
 
     train_loader, valid_loader, test_loader = create_data_loaders(asl_dataset)
 
-    from models import LSTM_BASELINE_Model
+    from src.models.models import LSTM_BASELINE_Model
 
     model = LSTM_BASELINE_Model()
 
