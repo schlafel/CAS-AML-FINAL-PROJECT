@@ -1,5 +1,4 @@
 import torch.nn as nn
-import torch
 
 import pytorch_lightning as pl
 from torchmetrics.classification import accuracy
@@ -7,11 +6,16 @@ from config import *
 
 
 class LSTM_BASELINE_Model(nn.Module):
-    def __init__(self, n_features=188, n_classes=250, n_hidden=256, num_layers=3, dropout=0.3):
+    def __init__(self, n_features=N_LANDMARKS, n_classes=N_CLASSES, n_hidden=256, num_layers=3, dropout=0.3):
         super().__init__()
 
+        self.hidden_size = n_hidden
+        self.num_layers = num_layers
+
+        input_size = n_features * 2  # 2 is for x and y coordinates
+
         self.lstm = nn.LSTM(
-            input_size=n_features,
+            input_size=input_size,
             hidden_size=n_hidden,
             num_layers=num_layers,
             batch_first=True,
@@ -19,19 +23,29 @@ class LSTM_BASELINE_Model(nn.Module):
 
         self.fc = nn.Linear(n_hidden, n_classes)
 
-    def forward(self, x):
-        self.lstm.flatten_parameters()
-        _, (hidden, _) = self.lstm(x)
+    def forward(self, x, seq_lengths):
+        batch_size, seq_len, landmarks, coords = x.size()
+        x = x.view(batch_size, seq_len, -1).float()
 
-        out = hidden[-1]
+        x = nn.utils.rnn.pack_padded_sequence(x, seq_lengths, batch_first=True, enforce_sorted=False)
 
-        return self.fc(out)
+        # Set the initial hidden and cell states
+        h0 = torch.zeros(self.num_layers, x.batch_sizes[0], self.hidden_size).to(DEVICE).float()
+        c0 = torch.zeros(self.num_layers, x.batch_sizes[0], self.hidden_size).to(DEVICE).float()
+
+        out, _ = self.lstm(x, (h0, c0))
+
+        out, _ = nn.utils.rnn.pad_packed_sequence(out, batch_first=True)
+
+        out = self.fc(out[:, -1, :])
+
+        return out
 
 
 class LSTM_Predictor(pl.LightningModule):
     def __init__(self,
                  n_features: int = 188,
-                 n_classes: int = 250,
+                 n_classes: int = N_CLASSES,
                  num_layers: int = 3,
                  dropout: float = 0.3):
         super().__init__()

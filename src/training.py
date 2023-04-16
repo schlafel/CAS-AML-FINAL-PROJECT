@@ -10,6 +10,8 @@ import time
 import gc
 import torch.backends.cudnn as cudnn
 from torch.utils.tensorboard import SummaryWriter
+import torch.nn as nn
+import torch.optim as optim
 
 import torch
 def train_model(model, train_loader, valid_loader, criterion, optimizer, scheduler=None, num_epochs=EPOCHS,
@@ -42,16 +44,16 @@ def train_model(model, train_loader, valid_loader, criterion, optimizer, schedul
 
         for i, data in enumerate(train_loader):
             # Get the inputs; data is a dictionary like {'landmarks': landmarks, 'target': target, 'size': size}
-            inputs, labels = data['landmarks'], data['target']
+            inputs, labels, seq_lengths = data['landmarks'], data['target'], data['size']
 
             # Move data to the device
-            inputs, labels = inputs.to(DEVICE), labels.to(DEVICE)
+            inputs, labels, seq_lengths = inputs.to(DEVICE), labels.to(DEVICE), seq_lengths.to(DEVICE)
 
             # zero the parameter gradients
             optimizer.zero_grad()
 
             # forward + backward + optimize
-            outputs = model(inputs)
+            outputs = model(inputs, seq_lengths)
 
             if type(outputs) == tuple and len(outputs) == 2:
                 outputs = outputs[0]
@@ -96,10 +98,10 @@ def train_model(model, train_loader, valid_loader, criterion, optimizer, schedul
 
         with torch.no_grad():
             for data in valid_loader:
-                inputs, labels = data['landmarks'], data['target']
-                inputs, labels = inputs.to(DEVICE), labels.to(DEVICE)
+                inputs, labels, seq_lengths = data['landmarks'], data['target'], data['size']
+                inputs, labels, seq_lengths = inputs.to(DEVICE), labels.to(DEVICE), seq_lengths.to(DEVICE)
 
-                outputs = model(inputs)
+                outputs = model(inputs, seq_lengths)
                 loss = criterion(outputs, labels)
                 val_loss += loss.item()
 
@@ -130,6 +132,16 @@ def train():
     asl_dataset = ASL_DATASET(augment=True)
 
     train_loader, valid_loader, test_loader = create_data_loaders(asl_dataset)
+
+    from models import LSTM_BASELINE_Model
+
+    model = LSTM_BASELINE_Model()
+
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+    train_model(model, train_loader, valid_loader, criterion, optimizer, scheduler=None, num_epochs=EPOCHS,
+                save_freq=5, verbose=True)
 
 if __name__ == '__main__':
     train()
