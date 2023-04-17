@@ -191,14 +191,74 @@ def augment(x,y, augmentation_threshold = .5):
         scale_factor = np.random.uniform(scale_range[0], scale_range[1])
         return frames.numpy() * scale_factor
 
+    def random_rotation(frames, max_angle=10):
+        """
+        Apply random rotation to landmark coordinates.
+
+        Args:
+            frames (numpy.ndarray): An array of landmarks data.
+            max_angle (int): The maximum rotation angle in degrees (default: 10).
+
+        Returns:
+            numpy.ndarray: An array of landmarks with randomly rotated coordinates.
+        """
+        #Define Rotation Matrix
+        angle = np.radians(np.random.uniform(-max_angle, max_angle))
+        cos_a, sin_a = np.cos(angle), np.sin(angle)
+        rotation_matrix = np.array([[cos_a, -sin_a], [sin_a, cos_a]])
+
+        if frames.shape[-1] == 3:
+            arr_rot_2d = np.einsum('ijk,kl->ijl', frames.numpy()[:,:,0:2], rotation_matrix)
+            c = frames.numpy()[:,:,2][...,np.newaxis]
+            arr_rot = np.concatenate([arr_rot_2d,c ],axis = 2)
+
+        else:
+            arr_rot = np.einsum('ijk,kl->ijl', frames.numpy(), rotation_matrix)
+
+
+
+
+        return arr_rot
+
+    def mirror_landmarks(frames):
+        """
+        Invert/mirror landmark coordinates along the x-axis.
+
+        Args:
+            frames (numpy.ndarray): An array of landmarks data.
+
+        Returns:
+            numpy.ndarray: An array of inverted landmarks.
+        """
+        inverted_frames = np.copy(frames.numpy())
+        inverted_frames[:, :, 0] = -inverted_frames[:, :, 0] + 1
+        return inverted_frames
+
+    def frame_dropout(frames, dropout_rate=0.05):
+        """
+        Randomly drop frames from the input landmark data.
+
+        Args:
+            frames (numpy.ndarray): An array of landmarks data.
+            dropout_rate (float): The proportion of frames to drop (default: 0.05).
+
+        Returns:
+            numpy.ndarray: An array of landmarks with dropped frames.
+        """
+        keep_rate = 1 - dropout_rate
+        keep_indices = np.random.choice(len(frames), int(len(frames) * keep_rate), replace=False)
+        keep_indices = np.sort(keep_indices)
+        dropped_landmarks = frames.numpy()[keep_indices]
+        return dropped_landmarks
+
     if tf.random.uniform([]) > augmentation_threshold:
         [x, ] = tf.py_function(random_scaling, [x], [tf.float32])
-    # # if tf.random.uniform([]) > augmentation_threshold:
-    # #     [x, ] = tf.py_function(random_rotation, [x], [tf.float64])
-    # if tf.random.uniform([]) > augmentation_threshold:
-    #     [x, ] = tf.py_function(mirror_landmarks2, [x], [tf.float64])
-    # if tf.random.uniform([]) > augmentation_threshold:
-    #     [x, ] = tf.py_function(shift_landmarks2, [x], [tf.float64])
+    if tf.random.uniform([]) > augmentation_threshold:
+        [x, ] = tf.py_function(random_rotation, [x], [tf.float32])
+    if tf.random.uniform([]) > augmentation_threshold:
+        [x, ] = tf.py_function(mirror_landmarks, [x], [tf.float32])
+    if tf.random.uniform([]) > augmentation_threshold:
+        [x, ] = tf.py_function(frame_dropout, [x], [tf.float32])
 
     return x,y
 
@@ -216,6 +276,7 @@ def load_data(x,y):
     # x = tf.squeeze(x,axis = 0)
 
     return x,y
+
 
 def get_tf_dataset(csv_path,
                    data_path,
