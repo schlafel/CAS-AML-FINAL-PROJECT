@@ -8,6 +8,7 @@ from data_utils import create_data_loaders
 
 import time
 import gc
+import math
 import torch.backends.cudnn as cudnn
 from torch.utils.tensorboard import SummaryWriter
 import torch.nn as nn
@@ -34,13 +35,15 @@ def train_model(model, train_loader, valid_loader, criterion, optimizer, schedul
     model.to(DEVICE)
 
     cudnn.benchmark = True
-    writer = SummaryWriter(log_dir=RUNS_DIR)
+    writer = SummaryWriter(log_dir=os.path.join(ROOT_PATH, RUNS_DIR))
 
-    for epoch in range(1, num_epochs + 1):  # loop over the dataset multiple times
+    for epoch in range(1, num_epochs + 1):
         model.train()
         print(f"Epoch {epoch}")
 
         running_loss = 0.0
+        running_accuracy = 0.0
+        
         epoch_start_time = time.time()
 
         for i, data in enumerate(train_loader):
@@ -62,11 +65,13 @@ def train_model(model, train_loader, valid_loader, criterion, optimizer, schedul
             outputs.to(DEVICE)
 
             loss = criterion(outputs, labels)
+            acc = accuracy(outputs, labels)
             loss.backward()
             optimizer.step()
 
             # Accumulate running loss
             running_loss += loss.item()
+            running_accuracy += acc
 
             # Clean up GPU memory if needed
             if DEVICE == 'cuda':
@@ -80,22 +85,24 @@ def train_model(model, train_loader, valid_loader, criterion, optimizer, schedul
                     print(f' Epoch: {epoch:>2} '
                           f' Batch: {i + 1:>3} / {len(train_loader)} '
                           f' loss: {running_loss / (i + 1):>6.4f} '
+                          f' accuracy: {running_accuracy / (i + 1):>6.4f} '
                           f' Average batch time: {(time.time() - epoch_start_time) / (i + 1):>4.3f} secs')
 
         print(f"\nTraining loss: {running_loss / len(train_loader):>4f}")
+        print(f"Training accuracy: {running_accuracy / len(train_loader):>4f}") 
+    
         train_losses.append(running_loss / len(train_loader))  # keep trace of train loss in each epoch
         writer.add_scalar("Loss/train", running_loss / len(train_loader), epoch)  # write loss to TensorBoard
         print(f'Time elapsed: {(time.time()-start_time)/60.0:.1f} minutes.')
 
-        #if epoch % save_freq == 0:  # save model and checkpoint for inference or training
-        #    save_model(model, epoch)
-        #    save_checkpoint(model, epoch, optimizer, running_loss)
-
+        if epoch % 5 == 0:  # save model and checkpoint for inference or training
+            save_model(model, epoch)
+        
         # validation
         print("Validating...")
         model.eval()
-
-        val_loss, val_roc = 0.0, 0.0
+        
+        val_loss, val_accuracy = 0.0, 0.0
 
         with torch.no_grad():
             for data in valid_loader:
@@ -105,12 +112,16 @@ def train_model(model, train_loader, valid_loader, criterion, optimizer, schedul
                 outputs = model(inputs, seq_lengths)
                 loss = criterion(outputs, labels)
                 val_loss += loss.item()
+                val_accuracy += acc
 
         val_loss /= len(valid_loader)
+        val_accuracy /= len(valid_loader)
+        
         val_losses.append(val_loss)
         writer.add_scalar("Loss/val", val_loss, epoch)
 
         print(f"Validation loss: {val_loss:.4f}")
+        print(f"Validation accuracy: {val_accuracy:.4f}")
 
         if val_loss < best_val_loss:
             best_val_loss = val_loss
@@ -128,15 +139,31 @@ def train_model(model, train_loader, valid_loader, criterion, optimizer, schedul
     writer.close()
 
     return best_model_path, train_losses, val_losses, val_rocs
+                           
+                           
+def save_model(model, num_epochs):
+    model_subdir = 'model_' + str(model)
+    folder_path = os.path.join(ROOT_PATH, MODEL_DIR, model_subdir)
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+    path = os.path.join(folder_path, f'{str(model)}_{num_epochs}.pth')
+    torch.save(model.state_dict(), path)
+    return path                        
+
+def accuracy(outputs, labels):
+    _, predicted = torch.max(outputs.data, 1)
+    correct = (predicted == labels).sum().item()
+    total = labels.size(0)
+    return correct / total
 
 def train():
     asl_dataset = ASL_DATASET(augment=True)
 
     train_loader, valid_loader, test_loader = create_data_loaders(asl_dataset)
 
-    from src.models.models import LSTM_BASELINE_Model
+    from models.models import LSTM_BASELINE_Model, ImprovedLSTMModel
 
-    model = LSTM_BASELINE_Model()
+    model = ImprovedLSTMModel()
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)

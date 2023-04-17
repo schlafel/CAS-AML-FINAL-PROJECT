@@ -15,6 +15,49 @@ from dataset import ASL_DATASET
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 
+def load_relevant_data_subset(pq_path):
+    data_columns = COLUMNS_TO_USE
+    data = pd.read_parquet(pq_path, columns=data_columns)
+    n_frames = int(len(data) / ROWS_PER_FRAME)
+    data = data.values.reshape(n_frames, ROWS_PER_FRAME, len(data_columns))
+    return data.astype(np.float32)
+
+def interpolate_missing_values(arr, max_gap=INTEREMOLATE_MISSING):
+    nan_mask = np.isnan(arr)
+
+    for coord_idx in range(arr.shape[2]):
+        for lm_idx in range(arr.shape[1]):
+            good_indices = np.where(~nan_mask[:, lm_idx, coord_idx])[0]
+            if len(good_indices) == 0:
+                continue
+
+            curr_idx  = good_indices[0]
+            
+            for idx in good_indices[1:]:
+                
+                last_idx = curr_idx
+                curr_idx = idx
+                
+                if curr_idx == last_idx + 1 :
+                    continue
+                                
+                left_boundary  = last_idx
+                right_boundary = curr_idx
+                
+                if right_boundary - left_boundary <= max_gap:
+                    
+                    if left_boundary >= 0 and right_boundary < arr.shape[0]:
+                        arr[left_boundary + 1:right_boundary, lm_idx, coord_idx] = np.interp(
+                            np.arange(left_boundary + 1, right_boundary),
+                            [left_boundary, right_boundary],
+                            [arr[left_boundary, lm_idx, coord_idx], arr[right_boundary, lm_idx, coord_idx]]
+                        )
+                    elif left_boundary < 0 and right_boundary < arr.shape[0]:
+                        arr[:idx, lm_idx, coord_idx] = arr[right_boundary, lm_idx, coord_idx]
+                    elif left_boundary >= 0 and right_boundary >= arr.shape[0]:
+                        arr[start_idx:, lm_idx, coord_idx] = arr[left_boundary, lm_idx, coord_idx]
+                
+    return arr
 
 def preprocess_raw_data(sample=100000):
     """
@@ -109,6 +152,7 @@ def preprocess_raw_data(sample=100000):
 
 def preprocess_data_item(raw_landmark_path, targets_sign):
     """
+    OUTDATED DOCSTRING
     Preprocesses the landmark data for a single file. This method is used in pre processing of all data.
     At inference, this method may be called to preprocess the data items in the same manner
     This function is a handy function to process all landmark aequences on a particular location. This will come in handy while testing where individual sequences may be provided
@@ -139,47 +183,56 @@ def preprocess_data_item(raw_landmark_path, targets_sign):
     """
 
     # Read in the parquet file and process the data
-    landmarks = pq.read_table(raw_landmark_path).to_pandas()
-
-    # Read individual landmark data
-    # As per dataset description the MediaPipe model is not fully trained to predict depth so you may wish to ignore the z values'
-    # Filter columns to include only frame, type, landmark_index, x, and y
-    landmarks = landmarks[['frame', 'type', 'landmark_index', 'x', 'y']]
-
-    # We do not need all face mesh landmarks, just the ones for face countours
-    # We do not need all pose landmarks, not the ones for face
-    # boolean indexing to filter face landmarks
-    mask = (((landmarks['type'] != 'face') & (landmarks['type'] != 'pose'))
-            | ((landmarks['type'] == 'face') & landmarks['landmark_index'].isin(USEFUL_FACE_LANDMARKS))
-            | ((landmarks['type'] == 'pose') & landmarks['landmark_index'].isin(USEFUL_POSE_LANDMARKS)))
-
-    landmarks = landmarks[mask]
-
-    # Pivot the dataframe to have a multi-level column structure on landmark type and frame sequence ids
-    landmarks = landmarks.pivot(index='frame', columns=['type', 'landmark_index'], values=['x', 'y'])
-    landmarks.columns = [f"{col[1]}-{col[2]}_{col[0]}" for col in landmarks.columns]
-
-    # Interpolate missing values using linear interpolation
-    landmarks.interpolate(method='linear', inplace=True, limit=3)
-
-    # Fill any remaining missing values with 0
-    landmarks.fillna(0, inplace=True)
-    landmarks.reset_index(inplace=True)
-
-    # Rearrange columns
-    columns = list(landmarks.columns)
-    new_columns = [columns[(i + 1) // 2 + (len(columns)) // 2 * ((i + 1) % 2)] for i in range(1, len(columns))]
-    landmarks = landmarks[new_columns].values.tolist()
-
-    # Calculate the number of frames in the data
-    data_size = len(landmarks)
-
-    # Bring X and Y coordinates together
-    landmarks = np.array([[[frame[i], frame[i + 1]] for i in range(0, len(frame), 2)] for frame in landmarks])
+    landmarks = load_relevant_data_subset(raw_landmark_path)
+    
+    landmarks, size = preprocess_data(landmarks)
 
     # Create a dictionary with the processed data
-    return {'landmarks': landmarks, 'target': targets_sign, 'size': data_size}
+    return {'landmarks': landmarks, 'target': targets_sign, 'size': size}
 
+def preprocess_data(landmarks):
+    frames_hands_nansum = np.nanmean(landmarks[:, USEFUL_HAND_LANDMARKS], axis=(1, 2))
+    non_empty_frames_idxs = np.where(frames_hands_nansum > 0)[0]
+    landmark_data = landmarks[non_empty_frames_idxs]
+
+    landmark_data = landmark_data[:, USEFUL_ALL_LANDMARKS]
+
+    num_frames = landmark_data.shape[0]
+
+    if num_frames < INPUT_SIZE:
+        non_empty_frames_idxs = np.pad(non_empty_frames_idxs, (0, INPUT_SIZE - num_frames), constant_values=-1)
+        landmark_data = np.pad(landmark_data, ((0, INPUT_SIZE - num_frames), (0, 0), (0, 0)), constant_values=0)
+        size = num_frames
+    else:
+        if N_FRAMES < INPUT_SIZE**2:
+            repeats = INPUT_SIZE * INPUT_SIZE // num_frames
+            landmark_data = np.repeat(landmark_data, repeats=repeats, axis=0)
+            
+        pool_size = len(landmark_data) // INPUT_SIZE
+        if len(landmark_data) % INPUT_SIZE > 0:
+            pool_size += 1
+
+        if pool_size == 1:
+            pad_size = (pool_size * INPUT_SIZE) - len(landmark_data)
+        else:
+            pad_size = (pool_size * INPUT_SIZE) % len(landmark_data)
+
+        pad_left = pad_size // 2 + INPUT_SIZE // 2
+        pad_right = pad_size // 2 + INPUT_SIZE // 2
+        if pad_size % 2 > 0:
+            pad_right += 1
+
+        landmark_data = np.concatenate((np.repeat(landmark_data[:1], repeats=pad_left, axis=0), landmark_data), axis=0)
+        landmark_data = np.concatenate((landmark_data, np.repeat(landmark_data[-1:], repeats=pad_right, axis=0)), axis=0)
+
+        landmark_data = landmark_data.reshape(INPUT_SIZE, -1, N_LANDMARKS, N_DIMS)
+        landmark_data = np.nanmean(landmark_data, axis=1)
+        
+        size = INPUT_SIZE
+    
+    landmark_data = np.where(np.isnan(landmark_data), 0.0, landmark_data)
+
+    return landmark_data, size
 
 def calculate_landmark_length_stats():
     """
@@ -282,9 +335,9 @@ def calculate_avg_landmark_positions(dataset):
             landmarks = data
 
             # Extract left-hand, right-hand, and face landmarks
-            lh_landmarks = landmarks[:, USED_FACE_FEATURES:USED_FACE_FEATURES + USED_HAND_FEATURES, :]
-            rh_landmarks = landmarks[:, USED_FACE_FEATURES + USED_HAND_FEATURES + USED_POSE_FEATURES:, :]
-            face_landmarks = landmarks[:, :USED_FACE_FEATURES, :]
+            lh_landmarks = landmarks[:, LEFT_HAND_INDICES, :]
+            rh_landmarks = landmarks[:, RIGHT_HAND_INDICES, :]
+            face_landmarks = landmarks[:, FACE_INDICES, :]
 
             # Compute the means of the x and y coordinates for left-hand, right-hand, and face landmarks
             lh_mean = np.nanmean(lh_landmarks, axis=(0, 1))
@@ -310,7 +363,6 @@ def calculate_avg_landmark_positions(dataset):
                                    'face': avg_face_landmarks_pos}
 
     return avg_landmarks_pos
-
 
 def remove_outlier_or_missing_data(landmark_len_dict):
     """
@@ -402,8 +454,8 @@ def remove_outlier_or_missing_data(landmark_len_dict):
         landmarks_len = len(landmarks)
 
         # Extract left-hand, right-hand landmarks
-        lh_landmarks = landmarks[:, USED_FACE_FEATURES:USED_FACE_FEATURES + USED_HAND_FEATURES, :]
-        rh_landmarks = landmarks[:, USED_FACE_FEATURES + USED_HAND_FEATURES + USED_POSE_FEATURES:, :]
+        lh_landmarks = landmarks[:, LEFT_HAND_INDICES, :]
+        rh_landmarks = landmarks[:, RIGHT_HAND_INDICES, :]
 
         lh_missings = has_consecutive_zeros(lh_landmarks)
         rh_missings = has_consecutive_zeros(rh_landmarks)
@@ -414,7 +466,7 @@ def remove_outlier_or_missing_data(landmark_len_dict):
 
         # print(f"{landmarks_len < MIN_LEN_THRESHOLD} or {landmarks_len > MAX_LEN_THRESHOLD} or {lh_missings} or {rh_missings}")
         if (
-                landmarks_len < MIN_SEQUENCES  # Sequences of landmark file are too short
+                   landmarks_len < MIN_SEQUENCES  # Sequences of landmark file are too short
                 or landmarks_len > MAX_SEQUENCES  # Sequences of landmark file are too long
                 or landmarks_len < MIN_LEN_THRESHOLD  # Sequences of landmark file are outlier, 3rd of median length
                 or landmarks_len > MAX_LEN_THRESHOLD  # Sequences of landmark file are outlier, 2 std away from average length
