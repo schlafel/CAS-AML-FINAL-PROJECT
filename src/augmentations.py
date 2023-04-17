@@ -18,21 +18,6 @@ def shift_landmarks(frames, max_shift=0.01):
     Returns:
         numpy.ndarray: An array of augmented landmarks.
     """
-    h = np.random.uniform(-max_shift, max_shift)
-    v = np.random.uniform(-max_shift, max_shift)
-    augmented_landmarks = np.array([[[x + h, y + v] for x, y in landmarks] for landmarks in frames])
-    return augmented_landmarks
-def shift_landmarks2(frames, max_shift=0.01):
-    """
-    Shift landmark coordinates randomly by a small amount.
-
-    Args:
-        frames (numpy.ndarray): An array of landmarks data.
-        max_shift (float): Maximum shift for the random shift (default: 0.01).
-
-    Returns:
-        numpy.ndarray: An array of augmented landmarks.
-    """
     h = np.random.uniform(-max_shift, max_shift) * np.ones((frames.shape[0], frames.shape[1], 1))
     v = np.random.uniform(-max_shift, max_shift) * np.ones((frames.shape[0], frames.shape[1], 1))
     augmented_landmarks = frames + np.concatenate((h, v), axis=2)
@@ -49,26 +34,10 @@ def mirror_landmarks(frames):
     Returns:
         numpy.ndarray: An array of inverted landmarks.
     """
-    inverted_frames = frames.copy()
-    inverted_frames = np.array(
-        [[[((x - 0.5) * (-1)) + 0.5, y] for x, y in landmarks] for landmarks in inverted_frames])
-    return inverted_frames
-
-
-def mirror_landmarks2(frames):
-    """
-    Invert/mirror landmark coordinates along the x-axis.
-
-    Args:
-        frames (numpy.ndarray): An array of landmarks data.
-
-    Returns:
-        numpy.ndarray: An array of inverted landmarks.
-    """
-
     inverted_frames = np.copy(frames)
     inverted_frames[:, :, 0] = -inverted_frames[:, :, 0] + 1
     return inverted_frames
+
 def frame_dropout(frames, dropout_rate=0.05):
     """
     Randomly drop frames from the input landmark data.
@@ -85,6 +54,7 @@ def frame_dropout(frames, dropout_rate=0.05):
     keep_indices.sort()
     dropped_landmarks = np.array([frames[i] for i in keep_indices])
     return dropped_landmarks
+
 def random_scaling(frames, scale_range=(0.9, 1.1)):
     """
     Apply random scaling to landmark coordinates.
@@ -98,6 +68,7 @@ def random_scaling(frames, scale_range=(0.9, 1.1)):
     """
     scale_factor = np.random.uniform(scale_range[0], scale_range[1])
     return frames * scale_factor
+
 def random_rotation(frames, max_angle=10):
     """
     Apply random rotation to landmark coordinates.
@@ -115,14 +86,10 @@ def random_rotation(frames, max_angle=10):
 
     return np.einsum('ijk,kl->ijl', frames, rotation_matrix)
 
-
+#TODO 
 def normalize(frames, mn,std):
-
-
     pass
 
-
+#TODO
 def standardize():
-
     pass
-
