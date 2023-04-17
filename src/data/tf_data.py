@@ -192,7 +192,7 @@ def augment(x,y, augmentation_threshold = .5):
         return frames.numpy() * scale_factor
 
     if tf.random.uniform([]) > augmentation_threshold:
-        [x, ] = tf.py_function(random_scaling, [x], [tf.float64])
+        [x, ] = tf.py_function(random_scaling, [x], [tf.float32])
     # # if tf.random.uniform([]) > augmentation_threshold:
     # #     [x, ] = tf.py_function(random_rotation, [x], [tf.float64])
     # if tf.random.uniform([]) > augmentation_threshold:
@@ -210,22 +210,23 @@ def load_data(x,y):
 
         landmarks = pad_sequence(sample)
 
-        return landmarks
+        return landmarks.astype(np.float32)
 
-    x = tf.py_function(load_data_np,inp = [x],Tout=tf.float64)
+    x = tf.py_function(load_data_np,inp = [x],Tout=tf.float32)
     # x = tf.squeeze(x,axis = 0)
 
     return x,y
 
 def get_tf_dataset(csv_path,
                    data_path,
-                   batch_size = 250):
+                   batch_size = 250,
+                   augment_data = True):
 
     df = pd.read_csv(csv_path)
     df["full_path"] = df.path.apply(map_full_path, args=(data_path,))
 
     dataset1 = tf.data.Dataset.from_tensor_slices((df.full_path.values,
-                                                   df.target.values))
+                                                   df.target.values.astype(np.int32)))
     dataset = dataset1.shuffle(len(df))
 
     dataset = dataset.map(load_data,
@@ -233,9 +234,13 @@ def get_tf_dataset(csv_path,
 
     # do the augmentation
     dataset = dataset.map(augment)
+
     dataset = dataset.cache()
 
+
     dataset = dataset.batch(batch_size)
+
+
     dataset = dataset.prefetch(buffer_size=tf.data.AUTOTUNE)
 
 

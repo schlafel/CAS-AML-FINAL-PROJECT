@@ -1,7 +1,8 @@
 
 #Define the paths...
 data_dir: ./../data/processed
-train_csv_file: ./../data/processed/train.csv
+train_csv_file: ./../data/processed/X_train.csv
+val_csv_file: ./../data/processed/X_val.csv
 model_dir: ./../models/TF_LSTM_BASELINE
 experiment_name: Exp_01
 
@@ -41,6 +42,20 @@ training:
       SaveModelCallback:
           model_path: ${model_dir}
           save_best_only: True
+
+      EarlyStoppingCallback:
+        use: True
+        params:
+          monitor: val_accuracy
+          mode: max
+          patience: 5
+          verbose: 1
+
+      ModelCheckpoint:
+        save: True
+        monitor: loss
+        mode: min
+        save_freq: 10
 
       #Always last!
       TensorBoard:

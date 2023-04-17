@@ -53,26 +53,32 @@ if __name__ == '__main__':
         metrics=config_model["training"]["metrics"],
     )
 
-
     x = model(np.zeros((1, *input_shape)))
     print(x.shape)
     print(model.summary(expand_nested=True))
 
-    # Get the data
-    dm = 1
+    ############# LOAD DATA #############
+    tf_dataModule = importlib.import_module(config_model["data"]["type"])
+    train_dataset = tf_dataModule.get_tf_dataset(csv_path=config_model["train_csv_file"],
+                                                 data_path=config_model["data_dir"],
+                                                 batch_size=config_model["data"]["batch_size"],
+                                                 augment_data=True)
+    val_dataset = tf_dataModule.get_tf_dataset(csv_path=config_model["val_csv_file"],
+                                               data_path=config_model["data_dir"],
+                                               batch_size=config_model["data"]["batch_size"],
+                                               augment_data=False)
 
-    # Setup Model Dir
+    print(
+        f"Training Dataset: {tf.data.experimental.cardinality(train_dataset).numpy()} Elements (Batch-Size {config_model['data']['batch_size']}) --> {config_model['data']['batch_size'] * tf.data.experimental.cardinality(train_dataset).numpy()} samples "
+        f"\nValidation Dataset: {tf.data.experimental.cardinality(val_dataset).numpy()} Elements (Batch-Size {config_model['data']['batch_size']}) --> {config_model['data']['batch_size'] * tf.data.experimental.cardinality(val_dataset).numpy()} samples ")
+
+
+
+
+    ############# SETUP PATHS #############
     # TODO: get coorect paths from yaml file (Dynamic Variables)
     if not os.path.exists(config_model["model_dir"]):
         os.makedirs(config_model["model_dir"])
-
-    # Define Callbacks
-    tf_dataModule = importlib.import_module(config_model["data"]["type"])
-    dataset = tf_dataModule.get_tf_dataset(csv_path=config_model["train_csv_file"],
-                                           data_path=config_model["data_dir"],
-                                           batch_size=config_model["data"]["batch_size"])
-
-    print("got data")
 
     # Set Experiment Dir
     experiment_dir = os.path.join(config_model["model_dir"], config_model["experiment_name"])
@@ -84,13 +90,16 @@ if __name__ == '__main__':
     with open(config_path, 'w') as f:
         yaml.dump(config_model, f)
 
-    # Setup Callbacks
+    ############ Callbacks ############
     callback_Module = importlib.import_module(config_model["training"]["callbacks"]["src"])
     cb_list = []
     for callback_name in config_model["training"]["callbacks"]["callbacks"].items():
-        if callback_name[0] == "TensorBoard":
+        if callback_name[0] in ["TensorBoard",
+                             "ModelCheckpoint",
+                             "EarlyStoppingCallback",
+                             ]:
             continue
-        print(callback_name[0])
+        # print(callback_name[0])
         # TODO: Hack: overwrite model_path with model-Dir as dynamic variables do not work somehow....
         if "model_path" in callback_name[1].keys():
             callback_name[1]["model_path"] = experiment_dir
@@ -98,6 +107,33 @@ if __name__ == '__main__':
         cb = getattr(callback_Module, callback_name[0])
         cb_list.append(cb(**callback_name[1]))
 
+
+    ##      EarlyStoppingCallback
+    config_EarlyStop = config_model["training"]["callbacks"]["callbacks"]["EarlyStoppingCallback"]
+    if config_EarlyStop["use"]:
+        early_stop = tf.keras.callbacks.EarlyStopping(**config_EarlyStop["params"])
+
+        cb_list.append(early_stop)
+
+    # Model ckpt
+    mdl_ckpt = config_model["training"]["callbacks"]["callbacks"]["ModelCheckpoint"]
+    if mdl_ckpt["save"]:
+        ckpt_path = os.path.join(experiment_dir, "ckpt")
+        if not os.path.exists(ckpt_path):
+            os.makedirs(ckpt_path)
+
+        mod_ckpt = tf.keras.callbacks.ModelCheckpoint(
+            filepath=os.path.join(experiment_dir, 'checkpoint-{epoch:02d}.h5', ),
+            save_weights_only=True,
+            monitor=mdl_ckpt["monitor"],
+            mode=mdl_ckpt["mode"],
+            save_best_only=False,
+            save_freq=mdl_ckpt["save_freq"]
+        )
+
+        cb_list.append(mod_ckpt)
+
+    # Tensorboard log
     config_model["training"]["callbacks"]["callbacks"]["TensorBoard"]["log_dir"] = os.path.join(
         config_model["model_dir"], config_model["experiment_name"])
 
@@ -107,13 +143,17 @@ if __name__ == '__main__':
     cb_list.append(tensorboard_callback)
 
     # Start training
-    for X_batch, y_batch in dataset:
+    for X_batch, y_batch in train_dataset:
         break
     print(X_batch.shape, X_batch.dtype)
 
-    model.fit(dataset,
+
+
+    ############ FIT MODEL ############
+    model.fit(train_dataset,
               epochs=config_model["training"]["epochs"],
               callbacks=cb_list,
+              validation_data = val_dataset,
 
               )
 
