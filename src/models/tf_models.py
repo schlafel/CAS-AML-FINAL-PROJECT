@@ -166,11 +166,10 @@ class LSTM_BASELINE_TF(Model):
                  num_classes = 250):
         super().__init__()
         self.inp_shp = input_shape
-        self.reshp_1 = tf.keras.layers.Reshape((self.inp_shp[0],
-                                                self.inp_shp[1]*self.inp_shp[2]),
-                                          input_shape=input_shape,
-                                                )
-
+        # self.reshp_1 = tf.keras.layers.Reshape((input_shape[0],input_shape[1]*input_shape[2]),
+        #                                   input_shape=input_shape,
+        #                                         )
+        self.shape_lstm = (input_shape[0],input_shape[1]*input_shape[2])
 
         self.hidden_lstm = [tf.keras.layers.LSTM(n_hidden,
                                                  return_sequences = True,
@@ -182,11 +181,13 @@ class LSTM_BASELINE_TF(Model):
 
         self.fc_layer = tf.keras.layers.Dense(num_classes,activation = "softmax")
 
-        self.model()
+        # self.model()
+
+    @tf.function
     def call(self,inputs,training = False):
         #Reshape the inputs
-        x = self.reshp_1(inputs)
-
+        # x = self.reshp_1(inputs)
+        x = tf.reshape(inputs,shape=[-1, *self.shape_lstm])
         #Run through the hidden_lstm
         for lstm, dropout in zip(self.hidden_lstm, self.dropouts):
             x = lstm(x)
@@ -199,11 +200,28 @@ class LSTM_BASELINE_TF(Model):
         out = self.fc_layer(x)
         return out
 
-    def model(self):
-        x = tf.keras.layers.Input(shape=(self.inp_shp))
-        return Model(inputs=[x], outputs=self.call(x))
+    # def model(self):
+    #     x = tf.keras.layers.Input(shape=(self.inp_shp),dtype = tf.float64)
+    #     return Model(inputs=[x], outputs=self.call(x))
+    #
 
+class Very_simple_model(tf.keras.models.Model):
+    def __init__(self,shapes = (150,184*2)):
+        super().__init__()
+        self.flat = tf.keras.layers.Flatten()
 
+        self.reshape = tf.keras.layers.Reshape((150,184*2))
+        self.dl = [tf.keras.layers.Dense(100) for _ in range(3)]
+        self.otpt = tf.keras.layers.Dense(250,activation = "softmax")
+        self.mdl_shp = shapes
+    @tf.function
+    def call(self, inputs, training=None, mask=None):
+        x = tf.reshape(inputs, shape=[-1, *self.mdl_shp])
+        for lay in self.dl:
+            x = lay(x)
+        x = self.flat(inputs)
+
+        return self.otpt(x)
 if __name__ == '__main__':
     # # test the encoding layer
     # pos_enc = PositionalEncoding(d_model=192, seq_length=150)
@@ -248,7 +266,7 @@ if __name__ == '__main__':
 
     #Test the models
     from src.config import  *
-    from src.data.tf_data_experiment import *
+    from src.data.tf_data import *
     csv_path = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, TRAIN_CSV_FILE)
     data_path = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR)
 
@@ -264,8 +282,21 @@ if __name__ == '__main__':
     print(batchX.shape,batchX.dtype)
 
     model = LSTM_BASELINE_TF()
+    model = Very_simple_model()
+
+    # model = tf.keras.Sequential([
+    #     tf.keras.layers.Reshape((150, 184*2), input_shape=(150,184,2)),
+    #     tf.keras.layers.LSTM(64,return_sequences = True),
+    #     tf.keras.layers.LSTM(128,return_sequences = True),
+    #     tf.keras.layers.LSTM(256),
+    #     tf.keras.layers.Dense(75, activation='relu'),
+    #     tf.keras.layers.Dense(250, activation='softmax')
+    # ])
+
     model.build(input_shape=(None, 150, 184, 2))
-    model.compile(optimizer='adam', loss='SparseCategoricalCrossentropy', metrics=['accuracy'])
+    model.compile(optimizer='adam',
+                  loss='sparse_categorical_crossentropy',
+                  metrics=['accuracy'])
 
     print(model.summary(expand_nested=True))
 

@@ -14,5 +14,6 @@ class SaveModelCallback(tf.keras.callbacks.Callback):
         if current_loss < self.best_loss:
             self.best_loss = current_loss
             self.model.save(self.model_path)
+            print("Saved model as loss is better than previous loss.")
         elif not self.save_best_only:
             self.model.save(self.model_path)

@@ -3,6 +3,7 @@
 data_dir: ./../data/processed
 train_csv_file: ./../data/processed/train.csv
 model_dir: ./../models/TF_LSTM_BASELINE
+experiment_name: Exp_01
 
 #Wheter to log files
 verbose: 1
@@ -10,10 +11,9 @@ verbose: 1
 
 
 data:
-  type: src.data.tf_data_experiment
+  type: src.data.tf_data
   script_name: get_tf_dataset
   batch_size: 250
-
 
 
 model:
@@ -25,22 +25,30 @@ model:
     dropout: .2
 
 
-
-
 training:
   epochs: 300
   optimizer: adam
-  loss_function: SparseCategoricalCrossEntropy
+  learning_rate: 0.0001
+  decay_steps: 1000
+  decay_rate: 0.96
+  staircase: True
+  loss_function: sparse_categorical_crossentropy
   metrics:
     - accuracy
   callbacks:
     src: src.callbacks.tf_callbacks
     callbacks:
       SaveModelCallback:
-          model_path: ${model_dir}/
+          model_path: ${model_dir}
+          save_best_only: True
 
       #Always last!
       TensorBoard:
-          log_dir: ${model_dir}/
+          log_dir: ${model_dir}
+
+
+#Convert to tf-lite
+conversion: True
+
 
 
