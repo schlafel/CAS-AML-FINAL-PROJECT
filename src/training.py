@@ -3,12 +3,11 @@ import sys
 sys.path.insert(0, '../src')
 
 from config import *
-from dataset import ASL_DATASET, label_dict_inference, label_dict
-from data_utils import create_data_loaders
+from src.data.dataset import ASL_DATASET
+from src.data.data_utils import create_data_loaders
 
 import time
 import gc
-import math
 import torch.backends.cudnn as cudnn
 from torch.utils.tensorboard import SummaryWriter
 import torch.nn as nn
@@ -161,7 +160,7 @@ def train():
 
     train_loader, valid_loader, test_loader = create_data_loaders(asl_dataset)
 
-    from models.models import LSTM_BASELINE_Model, ImprovedLSTMModel
+    from models.models import ImprovedLSTMModel
 
     model = ImprovedLSTMModel()
 

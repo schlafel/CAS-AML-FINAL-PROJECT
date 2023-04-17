@@ -1,16 +1,15 @@
 import sys
 
-sys.path.insert(0, '../src')
+sys.path.insert(0, '..')
 from src.config import *
 
 import os
 import json
 import pandas as pd
 import numpy as np
-import pyarrow.parquet as pq
 
 from tqdm import tqdm
-from src.dataset import ASL_DATASET
+from src.data.dataset import ASL_DATASET
 
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader

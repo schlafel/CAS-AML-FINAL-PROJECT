@@ -4,10 +4,13 @@ from src.config import *
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-if __name__ == '__main__':
+
+def run():
 
     # Load your data into a pandas DataFrame
-    df_in = pd.read_csv(os.path.join(ROOT_PATH,PROCESSED_DATA_DIR,TRAIN_CSV_FILE))
+    path_in = os.path.join(ROOT_PATH,PROCESSED_DATA_DIR,TRAIN_CSV_FILE)
+
+    df_in = pd.read_csv(path_in)
 
     # Split the data into training and validation sets
     X_train, X_val, y_train, y_val = train_test_split(df_in,
@@ -30,3 +33,6 @@ if __name__ == '__main__':
     ax.tick_params(axis="y", labelsize=6)
     plt.tight_layout()
     plt.show()
+
+if __name__ == '__main__':
+    run()
