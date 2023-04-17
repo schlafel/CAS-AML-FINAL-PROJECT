@@ -161,7 +161,7 @@ class LSTM_BASELINE_TF(Model):
     def __init__(self,
                  input_shape = (150,184,2),
                  n_hidden = 256,
-                 dropout = .2,
+                 dropout = .25,
                  n_LSTM_LAYERS = 3,
                  num_classes = 250):
         super().__init__()
@@ -189,9 +189,10 @@ class LSTM_BASELINE_TF(Model):
         # x = self.reshp_1(inputs)
         x = tf.reshape(inputs,shape=[-1, *self.shape_lstm])
         #Run through the hidden_lstm
-        for lstm, dropout in zip(self.hidden_lstm, self.dropouts):
+        for lstm,dropout in zip(self.hidden_lstm,self.dropouts):
             x = lstm(x)
             x = dropout(x)
+
 
         #do the final lstm
         x = self.final_lstm(x)

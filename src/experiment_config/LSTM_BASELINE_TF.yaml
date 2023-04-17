@@ -14,15 +14,17 @@ verbose: 1
 data:
   type: src.data.tf_data
   script_name: get_tf_dataset
-  batch_size: 250
+  batch_size: 256
 
 
 model:
-  type: src.models.tf_models.LSTM_BASELINE_TF
+  src: src.models.tf_models
+  model_name: LSTM_BASELINE_TF
   params:
     input_shape: [ 150, 184, 2 ]
     num_classes: 250
     n_LSTM_LAYERS: 4
+    n_hidden: 250
     dropout: .2
 
 
@@ -37,29 +39,34 @@ training:
   metrics:
     - accuracy
   callbacks:
-    src: src.callbacks.tf_callbacks
-    callbacks:
-      SaveModelCallback:
-          model_path: ${model_dir}
-          save_best_only: True
+    SaveModelCallback:
+      src: src.callbacks.tf_callbacks
+      use: True
+      params:
+        model_path: ${model_dir}
+        save_best_only: True
+        monitor: val_accuracy
+        mode: max
 
-      EarlyStoppingCallback:
-        use: True
-        params:
-          monitor: val_accuracy
-          mode: max
-          patience: 5
-          verbose: 1
+    EarlyStoppingCallback:
+      use: True
+      params:
+        monitor: val_accuracy
+        mode: max
+        patience: 5
+        verbose: 1
 
-      ModelCheckpoint:
-        save: True
-        monitor: loss
-        mode: min
-        save_freq: 10
+    ModelCheckpoint:
+      save: True
+      params:
+        monitor: val_accuracy
+        mode: auto
+        save_freq: "epoch"
+        save_best_only: True
 
-      #Always last!
-      TensorBoard:
-          log_dir: ${model_dir}
+    #Always last!
+    TensorBoard:
+        log_dir: ${model_dir}
 
 
 #Convert to tf-lite
