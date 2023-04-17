@@ -4,14 +4,14 @@ Configuration
 #: This file keeps the project configurations
 import os
 import torch
-<<<<<<< HEAD
+#<<<<<<< HEAD
 import numpy as np
 
 #: Set the device for training
-=======
+#=======
 #
 # #: Set the device for training
->>>>>>> 5b2ec828876ab892b2074d69c6582810f64c4b6d
+#>>>>>>> 5b2ec828876ab892b2074d69c6582810f64c4b6d
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # Paths
