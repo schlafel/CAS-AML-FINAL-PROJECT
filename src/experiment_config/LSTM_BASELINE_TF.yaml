@@ -1,0 +1,69 @@
+
+#Define the paths...
+data_dir: ./../data/processed
+train_csv_file: ./../data/processed/X_train.csv
+val_csv_file: ./../data/processed/X_val.csv
+model_dir: ./../models/TF_LSTM_BASELINE
+experiment_name: Exp_01
+
+#Wheter to log files
+verbose: 1
+
+
+
+data:
+  type: src.data.tf_data
+  script_name: get_tf_dataset
+  batch_size: 250
+
+
+model:
+  type: src.models.tf_models.LSTM_BASELINE_TF
+  params:
+    input_shape: [ 150, 184, 2 ]
+    num_classes: 250
+    n_LSTM_LAYERS: 4
+    dropout: .2
+
+
+training:
+  epochs: 300
+  optimizer: adam
+  learning_rate: 0.0001
+  decay_steps: 1000
+  decay_rate: 0.96
+  staircase: True
+  loss_function: sparse_categorical_crossentropy
+  metrics:
+    - accuracy
+  callbacks:
+    src: src.callbacks.tf_callbacks
+    callbacks:
+      SaveModelCallback:
+          model_path: ${model_dir}
+          save_best_only: True
+
+      EarlyStoppingCallback:
+        use: True
+        params:
+          monitor: val_accuracy
+          mode: max
+          patience: 5
+          verbose: 1
+
+      ModelCheckpoint:
+        save: True
+        monitor: loss
+        mode: min
+        save_freq: 10
+
+      #Always last!
+      TensorBoard:
+          log_dir: ${model_dir}
+
+
+#Convert to tf-lite
+conversion: True
+
+
+
