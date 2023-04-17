@@ -1,0 +1,46 @@
+
+#Define the paths...
+data_dir: ./../data/processed
+train_csv_file: ./../data/processed/train.csv
+model_dir: ./../models/TF_LSTM_BASELINE
+
+#Wheter to log files
+verbose: 1
+
+
+
+data:
+  type: src.data.tf_data_experiment
+  script_name: get_tf_dataset
+  batch_size: 250
+
+
+
+model:
+  type: src.models.tf_models.LSTM_BASELINE_TF
+  params:
+    input_shape: [ 150, 184, 2 ]
+    num_classes: 250
+    n_LSTM_LAYERS: 4
+    dropout: .2
+
+
+
+
+training:
+  epochs: 300
+  optimizer: adam
+  loss_function: SparseCategoricalCrossEntropy
+  metrics:
+    - accuracy
+  callbacks:
+    src: src.callbacks.tf_callbacks
+    callbacks:
+      SaveModelCallback:
+          model_path: ${model_dir}/
+
+      #Always last!
+      TensorBoard:
+          log_dir: ${model_dir}/
+
+

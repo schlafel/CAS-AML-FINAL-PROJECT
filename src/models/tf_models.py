@@ -157,43 +157,121 @@ class TransformerClassifierModel(Model):
         )
 
 
+class LSTM_BASELINE_TF(Model):
+    def __init__(self,
+                 input_shape = (150,184,2),
+                 n_hidden = 256,
+                 dropout = .2,
+                 n_LSTM_LAYERS = 3,
+                 num_classes = 250):
+        super().__init__()
+        self.inp_shp = input_shape
+        self.reshp_1 = tf.keras.layers.Reshape((self.inp_shp[0],
+                                                self.inp_shp[1]*self.inp_shp[2]),
+                                          input_shape=input_shape,
+                                                )
+
+
+        self.hidden_lstm = [tf.keras.layers.LSTM(n_hidden,
+                                                 return_sequences = True,
+                                                 name = f"HIDDEN_LSTM_{i}") for i in range(n_LSTM_LAYERS-1)]
+        self.dropouts = [tf.keras.layers.Dropout(dropout) for _ in range(n_LSTM_LAYERS-1)]
+
+        self.final_lstm = tf.keras.layers.LSTM(n_hidden,return_sequences = False,
+                                               name = "Final_LSTM_LAYER")
+
+        self.fc_layer = tf.keras.layers.Dense(num_classes,activation = "softmax")
+
+        self.model()
+    def call(self,inputs,training = False):
+        #Reshape the inputs
+        x = self.reshp_1(inputs)
+
+        #Run through the hidden_lstm
+        for lstm, dropout in zip(self.hidden_lstm, self.dropouts):
+            x = lstm(x)
+            x = dropout(x)
+
+        #do the final lstm
+        x = self.final_lstm(x)
+
+        #Finally the fc-Layer
+        out = self.fc_layer(x)
+        return out
+
+    def model(self):
+        x = tf.keras.layers.Input(shape=(self.inp_shp))
+        return Model(inputs=[x], outputs=self.call(x))
+
+
 if __name__ == '__main__':
-    # test the encoding layer
-    pos_enc = PositionalEncoding(d_model=192, seq_length=150)
-    x_in = np.random.random((1,150, 192))
-    pos_enc(x_in)
-    print("done")
+    # # test the encoding layer
+    # pos_enc = PositionalEncoding(d_model=192, seq_length=150)
+    # x_in = np.random.random((1,150, 192))
+    # pos_enc(x_in)
+    # print("done")
+    #
+    #
+    # #test the encoder
+    # simpl_enc = Encoder(
+    #     d_model = 192,
+    #         num_heads=8,
+    #         )
+    # enc_out = simpl_enc(x_in)
+    # print(enc_out.shape)
+    #
+    # ####### Test the Transformer Architecture #######
+    # input_shape = (150,152)
+    #
+    # model = TransformerClassifierModel(
+    #     num_classes=250,
+    #     input_shape=input_shape,
+    #     num_heads=10,
+    #     dff=128,
+    #     num_encoder_blocks=5,
+    #     dropout_rate=0.1,
+    # )
+    # # generate some data
+    #
+    # model.build(input_shape=input_shape)
+    # model.compile()
+    #
+    #
+    # X_in = np.random.random((64,*input_shape))
+    # mod_out = model(X_in)
+    # print(X_in.shape,mod_out.shape)
+    # #model.build((64,150,128))
+    #
+    #
+    # print(model.summary())
+    #
+
+    #Test the models
+    from src.config import  *
+    from src.data.tf_data_experiment import *
+    csv_path = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, TRAIN_CSV_FILE)
+    data_path = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR)
 
 
-    #test the encoder
-    simpl_enc = Encoder(
-        d_model = 192,
-            num_heads=8,
-            )
-    enc_out = simpl_enc(x_in)
-    print(enc_out.shape)
 
-    ####### Test the Transformer Architecture #######
-    input_shape = (150,152)
+    dataset = get_tf_dataset(csv_path,
+                   data_path,
+                   batch_size = 250)
+    #
+    for batchX,batchY in dataset:
+        break
 
-    model = TransformerClassifierModel(
-        num_classes=250,
-        input_shape=input_shape,
-        num_heads=10,
-        dff=128,
-        num_encoder_blocks=5,
-        dropout_rate=0.1,
-    )
-    # generate some data
+    print(batchX.shape,batchX.dtype)
 
-    model.build(input_shape=input_shape)
-    model.compile()
+    model = LSTM_BASELINE_TF()
+    model.build(input_shape=(None, 150, 184, 2))
+    model.compile(optimizer='adam', loss='SparseCategoricalCrossentropy', metrics=['accuracy'])
+
+    print(model.summary(expand_nested=True))
+
+    model.fit(dataset,
+              epochs = 150,
+              )
 
 
-    X_in = np.random.random((64,*input_shape))
-    mod_out = model(X_in)
-    print(X_in.shape,mod_out.shape)
-    #model.build((64,150,128))
 
-
-    print(model.summary())

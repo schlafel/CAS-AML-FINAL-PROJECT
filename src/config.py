@@ -4,9 +4,9 @@ Configuration
 #: This file keeps the project configurations
 import os
 import torch
-
-#: Set the device for training
-DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
+#
+# #: Set the device for training
+# DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # Paths
 #: Root directory
@@ -34,7 +34,7 @@ OUT_DIR='out/'
 SEED=0
 
 #: Set seed for reproducibility
-torch.manual_seed(SEED)
+# torch.manual_seed(SEED)
 
 #: Training hyperparameters
 #: Training Batch Size
