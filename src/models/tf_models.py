@@ -4,8 +4,12 @@ import tensorflow as tf
 from tensorflow.keras import layers
 from tensorflow.keras.models import Model
 import tensorflow.keras.layers as layers
+from src.models.utils import scaled_dot_product
 import numpy as np
 #import pydevd
+
+
+
 class FeedForward(tf.keras.layers.Layer):
     def __init__(self, d_model, dff, dropout_rate=0.1):
         super().__init__()
@@ -223,6 +227,202 @@ class Very_simple_model(tf.keras.models.Model):
         x = self.flat(inputs)
 
         return self.otpt(x)
+
+
+
+class MultiHeadAttention(tf.keras.layers.Layer):
+    def __init__(self, d_model, num_of_heads):
+        super(MultiHeadAttention, self).__init__()
+        self.d_model = d_model
+        self.num_of_heads = num_of_heads
+        self.depth = d_model // num_of_heads
+        self.wq = [tf.keras.layers.Dense(self.depth) for i in range(num_of_heads)]
+        self.wk = [tf.keras.layers.Dense(self.depth) for i in range(num_of_heads)]
+        self.wv = [tf.keras.layers.Dense(self.depth) for i in range(num_of_heads)]
+        self.wo = tf.keras.layers.Dense(d_model)
+        self.softmax = tf.keras.layers.Softmax()
+
+    def call(self, x, attention_mask):
+        multi_attn = []
+        for i in range(self.num_of_heads):
+            Q = self.wq[i](x)
+            K = self.wk[i](x)
+            V = self.wv[i](x)
+            multi_attn.append(scaled_dot_product(Q, K, V, self.softmax, attention_mask))
+
+        multi_head = tf.concat(multi_attn, axis=-1)
+        multi_head_attention = self.wo(multi_head)
+        return multi_head_attention
+
+
+# Full Transformer
+class Transformer(tf.keras.Model):
+    def __init__(self,
+                 num_blocks,
+                 mha_units = 384,
+                 mlp_ratio = 2,
+                 layer_norm_epsilon = 1e-6,
+                 mlp_dropout = 0.3,
+                 tansformer_heads = 8):
+        super(Transformer, self).__init__(name='transformer')
+        self.num_blocks = num_blocks
+
+        self.mha_units = mha_units #embedding size
+        self.mlp_ratio = mlp_ratio
+        self.layer_norm_epsilon = layer_norm_epsilon #embedding size
+        self.mlp_dropout = mlp_dropout #embedding size
+        self.tansformer_heads = tansformer_heads #embedding size
+
+
+
+    def build(self, input_shape):
+        self.ln_1s = []
+        self.mhas = []
+        self.ln_2s = []
+        self.mlps = []
+        # Make Transformer Blocks
+        for i in range(self.num_blocks):
+            # First Layer Normalisation
+            self.ln_1s.append(tf.keras.layers.LayerNormalization(epsilon=self.layer_norm_epsilon))
+            # Multi Head Attention
+            self.mhas.append(MultiHeadAttention(self.mha_units, self.tansformer_heads))
+            # Second Layer Normalisation
+            self.ln_2s.append(tf.keras.layers.LayerNormalization(epsilon=self.layer_norm_epsilon))
+            # Multi Layer Perception
+            self.mlps.append(tf.keras.Sequential([
+                tf.keras.layers.Dense(self.mha_units * self.mlp_ratio,
+                                      activation=tf.keras.activations.gelu,
+                                      kernel_initializer=tf.keras.initializers.glorot_uniform),
+                tf.keras.layers.Dropout(self.mlp_dropout),
+                tf.keras.layers.Dense(self.mha_units,
+                                      kernel_initializer=tf.keras.initializers.he_uniform),
+            ]))
+
+    def call(self, x, attention_mask):
+        # Iterate input over transformer blocks
+        for ln_1, mha, ln_2, mlp in zip(self.ln_1s, self.mhas, self.ln_2s, self.mlps):
+            x1 = ln_1(x)
+            attention_output = mha(x1, attention_mask)
+            x2 = x1 + attention_output
+            x3 = ln_2(x2)
+            x3 = mlp(x3)
+            x = x3 + x2
+
+        return x
+
+
+class LandmarkEmbedding(tf.keras.Model):
+    def __init__(self, units, name):
+        super(LandmarkEmbedding, self).__init__(name=f'{name}_embedding')
+        self.units = units
+
+    def build(self, input_shape):
+        # Initiailizers
+        INIT_HE_UNIFORM = tf.keras.initializers.he_uniform
+        INIT_GLOROT_UNIFORM = tf.keras.initializers.glorot_uniform
+        INIT_ZEROS = tf.keras.initializers.constant(0.0)
+
+
+        # Embedding for missing landmark in frame, initizlied with zeros
+        self.empty_embedding = self.add_weight(
+            name=f'{self.name}_empty_embedding',
+            shape=[self.units],
+            initializer=INIT_ZEROS,
+        )
+        # Embedding
+        self.dense = tf.keras.Sequential([
+            tf.keras.layers.Dense(self.units, name=f'{self.name}_dense_1', use_bias=True,
+                                  kernel_initializer=INIT_GLOROT_UNIFORM, activation=GELU),
+            tf.keras.layers.Dense(self.units, name=f'{self.name}_dense_2', use_bias=True,
+                                  kernel_initializer=INIT_HE_UNIFORM),
+        ], name=f'{self.name}_dense')
+
+    def call(self, x):
+        return tf.where(
+            # Checks whether landmark is missing in frame
+            tf.reduce_sum(x, axis=2, keepdims=True) == 0,
+            # If so, the empty embedding is used
+            self.empty_embedding,
+            # Otherwise the landmark data is embedded
+            self.dense(x),
+        )
+
+
+class Embedding(tf.keras.Model):
+    def __init__(self, lips_units= 384,
+                 hands_units= 384,
+                 pose_units= 384,
+                 units = 384):
+        super(Embedding, self,).__init__()
+
+        self.lips_units = lips_units
+        self.hands_units = hands_units
+        self.pose_units = pose_units
+        self.units = units
+
+    def get_diffs(self, l):
+        S = l.shape[2]
+        other = tf.expand_dims(l, 3)
+        other = tf.repeat(other, S, axis=3)
+        other = tf.transpose(other, [0, 1, 3, 2])
+        diffs = tf.expand_dims(l, 3) - other
+        diffs = tf.reshape(diffs, [-1, INPUT_SIZE, S * S])
+        return diffs
+
+    def build(self, input_shape):
+        INIT_HE_UNIFORM = tf.keras.initializers.he_uniform
+        INIT_GLOROT_UNIFORM = tf.keras.initializers.glorot_uniform
+        INIT_ZEROS = tf.keras.initializers.constant(0.0)
+
+
+        # Positional Embedding, initialized with zeros
+        self.positional_embedding = tf.keras.layers.Embedding(INPUT_SIZE + 1, UNITS, embeddings_initializer=INIT_ZEROS)
+        self.positional_weight = tf.Variable(1.)
+        # Embedding layer for Landmarks
+        self.lips_embedding = LandmarkEmbedding(self.lips_units, 'lips')
+        self.left_hand_embedding = LandmarkEmbedding(self.hands_units, 'left_hand')
+        self.right_hand_embedding = LandmarkEmbedding(self.hands_units, 'right_hand')
+        self.pose_embedding = LandmarkEmbedding(self.pose_units, 'pose')
+        # Landmark Weights
+        self.landmark_weights = tf.Variable(tf.zeros([4], dtype=tf.float32), name='landmark_weights')
+        # Fully Connected Layers for combined landmarks
+        self.fc = tf.keras.Sequential([
+            tf.keras.layers.Dense(self.units, name='fully_connected_1', use_bias=False,
+                                  kernel_initializer=INIT_GLOROT_UNIFORM, activation=GELU),
+            tf.keras.layers.Dense(self.units, name='fully_connected_2', use_bias=False, kernel_initializer=INIT_HE_UNIFORM),
+        ], name='fc')
+
+    def call(self, lips0, left_hand0, right_hand0, pose0, non_empty_frame_idxs, training=False):
+        # Lips
+        lips_embedding = self.lips_embedding(lips0)
+        # Left Hand
+        left_hand_embedding = self.left_hand_embedding(left_hand0)
+        # Right Hand
+        right_hand_embedding = self.right_hand_embedding(right_hand0)
+        # Pose
+        pose_embedding = self.pose_embedding(pose0)
+        # Merge Embeddings of all landmarks with mean pooling
+        x = tf.stack((lips_embedding, left_hand_embedding, right_hand_embedding, pose_embedding), axis=3)
+        # Merge Landmarks with trainable attention weights
+        x = x * tf.nn.softmax(self.landmark_weights)
+        x = tf.reduce_sum(x, axis=3)
+        # Fully Connected Layers
+        x = self.fc(x)
+        # Add Positional Embedding
+        normalised_non_empty_frame_idxs = tf.where(
+            tf.math.equal(non_empty_frame_idxs, -1.0),
+            INPUT_SIZE,
+            tf.cast(
+                non_empty_frame_idxs / tf.reduce_max(non_empty_frame_idxs, axis=1, keepdims=True) * INPUT_SIZE,
+                tf.int32,
+            ),
+        )
+        x = x + self.positional_weight * self.positional_embedding(normalised_non_empty_frame_idxs)
+
+        return x
+
+
+
 if __name__ == '__main__':
     # # test the encoding layer
     # pos_enc = PositionalEncoding(d_model=192, seq_length=150)
