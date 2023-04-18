@@ -3,7 +3,7 @@ from src.config import *
 from src.data.data_utils import load_relevant_data_subset, load_train_frame
 from tqdm import tqdm
 import pyarrow.parquet as pq
-from src.data.tf_data import augment
+
 
 """
     Tensorflow layer to process data in TFLite
@@ -232,25 +232,6 @@ def run_prepLayer(x,y):
 #
 #     return model
 #
-
-
-def get_dataset_FROM_RAW(path_csv = os.path.join(ROOT_PATH,RAW_DATA_DIR,TRAIN_CSV_FILE)):
-
-    df_train =  load_train_frame(path_csv)
-
-    dataset = tf.data.Dataset.from_tensor_slices((df_train.file_path.values,
-                                                  df_train.target.values.astype(np.int32)))
-    dataset = dataset.shuffle(len(df_train))
-    dataset = dataset.map(load_prepare_data)
-    # do the augmentation
-    dataset = dataset.map(augment)
-    dataset = dataset.map(run_prepLayer)
-    #
-    dataset = dataset.cache()
-    dataset = dataset.batch(250)
-    dataset = dataset.prefetch(buffer_size=tf.data.AUTOTUNE)
-    return dataset
-
 
 def get_means(df):
     li_out = []
