@@ -10,6 +10,8 @@ import numpy as np
 import random
 import json
 
+import tensorflow as tf
+
 # Label dictionaries
 label_dict = json.load(open(os.path.join(ROOT_PATH,RAW_DATA_DIR,MAP_JSON_FILE)))
 label_dict_inference = dict(zip(label_dict.values(),label_dict.keys()))
@@ -19,7 +21,7 @@ class ASL_DATASET:
     """
 
     # Constructor method
-    def __init__(self, metadata_df=None, transform=None, max_seq_length=INPUT_SIZE, augment=False):
+    def __init__(self, metadata_df=None, transform=None, max_seq_length=INPUT_SIZE, augment=False, augmentation_threshold = .1):
         """
         Initialize the dataset.
 
@@ -27,7 +29,8 @@ class ASL_DATASET:
             metadata_df (pd.DataFrame, optional): A dataframe containing the metadata for the dataset.
             transform (callable, optional): A function/transform to apply to the data.
             max_seq_length (int): The maximum sequence length for the data.
-            augment (bool): Whether to apply data augmentation.
+            augment (bool): Whether to apply data augmentation. The augmentation_threshold parameter defines at which
+            probability the transformation will happen.
 
         Functionality:
             Constructor method
@@ -40,12 +43,15 @@ class ASL_DATASET:
         :type max_seq_length: int
         :param augment: Whether to apply data augmentation.
         :type augment: bool
+        :param augmentation_threshold: Probability of augmentation happening. Only if augment == True
+        :type augmentation_threshold: float
         """
 
         super().__init__()
 
         self.transform = transform
         self.augment = augment
+        self.augmentation_threshold = augmentation_threshold
 
         # [TODO] get this from data
         self.max_seq_length = max_seq_length
@@ -131,15 +137,15 @@ class ASL_DATASET:
             landmarks = self.transform(landmarks)
 
         if self.augment:
-            if random.random() < 0.1:
+            if random.random() < self.augmentation_threshold:
                 landmarks = shift_landmarks(landmarks)
-            if random.random() < 0.1:
+            if random.random() < self.augmentation_threshold:
                 landmarks = mirror_landmarks(landmarks)  # TODO : Change Names
-            if random.random() < 0.1:
+            if random.random() < self.augmentation_threshold:
                 landmarks = random_scaling(landmarks)
-            if random.random() < 0.1:
+            if random.random() < self.augmentation_threshold:
                 landmarks = random_rotation(landmarks)  # TODO : Change Names
-            if random.random() < 0.1:
+            if random.random() < self.augmentation_threshold:
                 landmarks = frame_dropout(landmarks)
                 size = len(landmarks)
 
@@ -170,9 +176,99 @@ class ASL_DATASET:
 
         return f'ASL_DATASET(Participants: {len(set(self.participant_ids))}, Length: {len(self.df_train)}'
 
+
+class ASL_DATASET_TF(ASL_DATASET):
+    """
+    Subclass of ASL_DATASET to get the parent class working also in tensorflow...
+    """
+    def __init__(self,metadata_df=None, transform=None, max_seq_length=INPUT_SIZE, augment=False):
+        super().__init__(metadata_df=metadata_df, transform=transform, max_seq_length=max_seq_length, augment=augment)
+
+        print("Instantiated ASL_DATASET_TF")
+    def create_dataset(self,
+                       batch_size:int = 32):
+        """
+        Main Method to get the TensorFlow-Dataset
+
+        :param batch_size: Batchsize
+        type: int
+        :return: dataset tf.data.Dataset
+
+        """
+
+        def augment(x, y, augmentation_threshold = self.augmentation_threshold):
+            # tf.print("Augmenting Data!!! ")
+            # x = x
+            if tf.random.uniform([]) > augmentation_threshold:
+                [x, ] = tf.py_function(random_scaling, [x,(0.9,2)], [tf.float32])
+            if tf.random.uniform([]) > augmentation_threshold:
+                [x, ] = tf.py_function(random_rotation, [x], [tf.float32])
+            if tf.random.uniform([]) > augmentation_threshold:
+                [x, ] = tf.py_function(mirror_landmarks, [x], [tf.float32])
+            # if tf.random.uniform([]) > augmentation_threshold:
+            #     [x, ] = tf.py_function(frame_dropout, [x], [tf.float32])
+
+            return x, y
+
+        def load_data(x, y):
+            def load_data_np(fp):
+                # load the data
+                sample = np.load(fp.numpy())
+
+                return sample.astype(np.float32)
+
+            x = tf.py_function(load_data_np, inp=[x], Tout=tf.float32)
+            # x = tf.squeeze(x,axis = 0)
+
+            return x, y
+
+        dataset = tf.data.Dataset.from_tensor_slices((self.file_paths,
+                                                       self.target.astype(np.int32)))
+        dataset = dataset.shuffle(len(self))
+
+        dataset = dataset.map(load_data,
+                              num_parallel_calls=tf.data.AUTOTUNE)
+
+        # do the augmentation
+        if self.augment:
+            dataset = dataset.map(augment)
+
+        dataset = dataset.cache()
+
+        dataset = dataset.batch(batch_size)
+
+        dataset = dataset.prefetch(buffer_size=tf.data.AUTOTUNE)
+
+        return dataset
+
+    def __repr__(self):
+        """
+        Return a string representation of the dataset.
+
+        Returns:
+            str: A string representation of the dataset.
+
+        Functionality:
+            Return a string representation of the dataset
+
+        :return: A string representation of the dataset.
+        :rtype: str
+        """
+
+        return f'ASL_DATASET_TF(Participants: {len(set(self.participant_ids))}, Length: {len(self.df_train)}'
+
+
+
 if __name__ == '__main__':
 
     dataset = ASL_DATASET(augment=True)
+
+    tf_dataset = ASL_DATASET_TF(augment=True).create_dataset()
+
+
+    for X,y in tf_dataset:
+        print(X.shape)
+
 
     from torch.utils.data import DataLoader
     ## ASL Data loader

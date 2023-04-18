@@ -15,7 +15,9 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 
 import warnings
+
 warnings.filterwarnings("ignore")
+
 
 def load_relevant_data_subset(pq_path):
     data_columns = COLUMNS_TO_USE
@@ -23,6 +25,7 @@ def load_relevant_data_subset(pq_path):
     n_frames = int(len(data) / ROWS_PER_FRAME)
     data = data.values.reshape(n_frames, ROWS_PER_FRAME, len(data_columns))
     return data.astype(np.float32)
+
 
 def interpolate_missing_values(arr, max_gap=INTEREMOLATE_MISSING):
     nan_mask = np.isnan(arr)
@@ -33,21 +36,21 @@ def interpolate_missing_values(arr, max_gap=INTEREMOLATE_MISSING):
             if len(good_indices) == 0:
                 continue
 
-            curr_idx  = good_indices[0]
-            
+            curr_idx = good_indices[0]
+
             for idx in good_indices[1:]:
-                
+
                 last_idx = curr_idx
                 curr_idx = idx
-                
-                if curr_idx == last_idx + 1 :
+
+                if curr_idx == last_idx + 1:
                     continue
-                                
-                left_boundary  = last_idx
+
+                left_boundary = last_idx
                 right_boundary = curr_idx
-                
+
                 if right_boundary - left_boundary <= max_gap:
-                    
+
                     if left_boundary >= 0 and right_boundary < arr.shape[0]:
                         arr[left_boundary + 1:right_boundary, lm_idx, coord_idx] = np.interp(
                             np.arange(left_boundary + 1, right_boundary),
@@ -58,8 +61,9 @@ def interpolate_missing_values(arr, max_gap=INTEREMOLATE_MISSING):
                         arr[:idx, lm_idx, coord_idx] = arr[right_boundary, lm_idx, coord_idx]
                     elif left_boundary >= 0 and right_boundary >= arr.shape[0]:
                         arr[start_idx:, lm_idx, coord_idx] = arr[left_boundary, lm_idx, coord_idx]
-                
+
     return arr
+
 
 def preprocess_raw_data(sample=100000):
     """
@@ -192,16 +196,17 @@ def preprocess_data_item(raw_landmark_path, targets_sign):
 
     # Read in the parquet file and process the data
     landmarks = load_relevant_data_subset(raw_landmark_path)
-    
+
     landmarks, size, orig_size, usable_size = preprocess_data_to_same_size(landmarks)
 
     # Create a dictionary with the processed data
-    return {'landmarks': landmarks, 'target': targets_sign, 'size': size, 'orig_size': orig_size, 'usable_size': usable_size}
+    return {'landmarks': landmarks, 'target': targets_sign, 'size': size, 'orig_size': orig_size,
+            'usable_size': usable_size}
+
 
 def preprocess_data_to_same_size(landmarks):
-    
     num_orig_frames = landmarks.shape[0]
-    
+
     frames_hands_nansum = np.nanmean(landmarks[:, USEFUL_HAND_LANDMARKS], axis=(1, 2))
     non_empty_frames_idxs = np.where(frames_hands_nansum > 0)[0]
     landmark_data = landmarks[non_empty_frames_idxs]
@@ -221,10 +226,10 @@ def preprocess_data_to_same_size(landmarks):
         landmark_data = upsampled_landmark_data
         size = INPUT_SIZE
     elif num_frames > INPUT_SIZE:
-        if num_frames < INPUT_SIZE**2:
+        if num_frames < INPUT_SIZE ** 2:
             repeats = INPUT_SIZE * INPUT_SIZE // num_frames
             landmark_data = np.repeat(landmark_data, repeats=repeats, axis=0)
-            
+
         pool_size = len(landmark_data) // INPUT_SIZE
         if len(landmark_data) % INPUT_SIZE > 0:
             pool_size += 1
@@ -240,11 +245,12 @@ def preprocess_data_to_same_size(landmarks):
             pad_right += 1
 
         landmark_data = np.concatenate((np.repeat(landmark_data[:1], repeats=pad_left, axis=0), landmark_data), axis=0)
-        landmark_data = np.concatenate((landmark_data, np.repeat(landmark_data[-1:], repeats=pad_right, axis=0)), axis=0)
+        landmark_data = np.concatenate((landmark_data, np.repeat(landmark_data[-1:], repeats=pad_right, axis=0)),
+                                       axis=0)
 
         landmark_data = landmark_data.reshape(INPUT_SIZE, -1, N_LANDMARKS, N_DIMS)
         landmark_data = np.nanmean(landmark_data, axis=1)
-        
+
     size = INPUT_SIZE
 
     landmark_data = np.where(np.isnan(landmark_data), 0.0, landmark_data)
@@ -266,10 +272,10 @@ def preprocess_data(landmarks):
         landmark_data = np.pad(landmark_data, ((0, INPUT_SIZE - num_frames), (0, 0), (0, 0)), constant_values=0)
         size = num_frames
     else:
-        if num_frames < INPUT_SIZE**2:
+        if num_frames < INPUT_SIZE ** 2:
             repeats = INPUT_SIZE * INPUT_SIZE // num_frames
             landmark_data = np.repeat(landmark_data, repeats=repeats, axis=0)
-            
+
         pool_size = len(landmark_data) // INPUT_SIZE
         if len(landmark_data) % INPUT_SIZE > 0:
             pool_size += 1
@@ -285,16 +291,18 @@ def preprocess_data(landmarks):
             pad_right += 1
 
         landmark_data = np.concatenate((np.repeat(landmark_data[:1], repeats=pad_left, axis=0), landmark_data), axis=0)
-        landmark_data = np.concatenate((landmark_data, np.repeat(landmark_data[-1:], repeats=pad_right, axis=0)), axis=0)
+        landmark_data = np.concatenate((landmark_data, np.repeat(landmark_data[-1:], repeats=pad_right, axis=0)),
+                                       axis=0)
 
         landmark_data = landmark_data.reshape(INPUT_SIZE, -1, N_LANDMARKS, N_DIMS)
         landmark_data = np.nanmean(landmark_data, axis=1)
-        
+
         size = INPUT_SIZE
-    
+
     landmark_data = np.where(np.isnan(landmark_data), 0.0, landmark_data)
 
     return landmark_data, size
+
 
 def calculate_landmark_length_stats():
     """
@@ -333,7 +341,7 @@ def calculate_landmark_length_stats():
 
     # Loop through each unique sign and its corresponding rows in the grouped dataframe
     for i, (sign, sign_rows) in tqdm(enumerate(grouped_signs), total=len(grouped_signs)):
-    
+
         # Initialize a list to store the length of landmarks for each example of the current sign
         sign_data = []
 
@@ -425,8 +433,8 @@ def calculate_avg_landmark_positions(dataset):
 
     return avg_landmarks_pos
 
+
 def remove_unusable_data():
-    
     marker_file_path = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, CLEANED_FILE)
 
     if os.path.exists(os.path.join(marker_file_path)):
@@ -441,7 +449,7 @@ def remove_unusable_data():
 
     # Iterate over each row in the DataFrame
     for index, row in tqdm(df_train.iterrows(), total=len(df_train)):
-        
+
         missing_file = False
 
         # Load the file and get the length of its landmarks data
@@ -452,18 +460,17 @@ def remove_unusable_data():
         except Exception as e:
             print(f"Error loading file {file_path}: {e}")
             missing_file = True
-            continue    
-        
+            continue
+
         usable_size = row['usable_size']
-        
-        
+
         if (
-                   usable_size < MIN_SEQUEENCES or missing_file  # Has land mark file missing
+                usable_size < MIN_SEQUEENCES or missing_file  # Has land mark file missing
         ):
 
             # Delete the processed file
             if os.path.exists(file_path):
-                #print(f"removing {file_path}: landmarks_len {landmarks_len} {landmarks_len < MIN_LEN_THRESHOLD} {landmarks_len > MAX_LEN_THRESHOLD} lh_missings {lh_missings} rh_missings {rh_missings}")
+                # print(f"removing {file_path}: landmarks_len {landmarks_len} {landmarks_len < MIN_LEN_THRESHOLD} {landmarks_len > MAX_LEN_THRESHOLD} lh_missings {lh_missings} rh_missings {rh_missings}")
                 os.remove(file_path)
 
             # Mark the row for deletion
@@ -479,7 +486,6 @@ def remove_unusable_data():
     with open(marker_file_path, 'w') as f:
         f.write('')
 
-        
 
 def remove_outlier_or_missing_data(landmark_len_dict):
     """
@@ -583,14 +589,14 @@ def remove_outlier_or_missing_data(landmark_len_dict):
 
         # print(f"{landmarks_len < MIN_LEN_THRESHOLD} or {landmarks_len > MAX_LEN_THRESHOLD} or {lh_missings} or {rh_missings}")
         if (
-                   landmarks_len < MIN_LEN_THRESHOLD  # Sequences of landmark file are outlier, 3rd of median length
+                landmarks_len < MIN_LEN_THRESHOLD  # Sequences of landmark file are outlier, 3rd of median length
                 or landmarks_len > MAX_LEN_THRESHOLD  # Sequences of landmark file are outlier, 2 std away from average length
                 or missing_file  # Has land mark file missing
         ):
 
             # Delete the processed file
             if os.path.exists(file_path):
-                #print(f"removing {file_path}: landmarks_len {landmarks_len} {landmarks_len < MIN_LEN_THRESHOLD} {landmarks_len > MAX_LEN_THRESHOLD} lh_missings {lh_missings} rh_missings {rh_missings}")
+                # print(f"removing {file_path}: landmarks_len {landmarks_len} {landmarks_len < MIN_LEN_THRESHOLD} {landmarks_len > MAX_LEN_THRESHOLD} lh_missings {lh_missings} rh_missings {rh_missings}")
                 os.remove(file_path)
 
             # Mark the row for deletion
@@ -650,7 +656,7 @@ def create_data_loaders(asl_dataset, train_size=TRAIN_SIZE, valid_size=VALID_SIZ
     # Create dataset instances for each split
     train_dataset = ASL_DATASET(metadata_df=train_df)
     valid_dataset = ASL_DATASET(metadata_df=valid_df)
-    test_dataset  = ASL_DATASET(metadata_df=test_df)
+    test_dataset = ASL_DATASET(metadata_df=test_df)
 
     # Create data loaders for each split
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
@@ -659,22 +665,60 @@ def create_data_loaders(asl_dataset, train_size=TRAIN_SIZE, valid_size=VALID_SIZ
 
     return train_loader, valid_loader, test_loader
 
-def get_file_path(path):
-    return os.path.join(ROOT_PATH,RAW_DATA_DIR,path)
 
-def assign_target(df):
-    import json
-    map_dict = json.load(open(os.path.join(ROOT_PATH,RAW_DATA_DIR,
-                                           MAP_JSON_FILE)))
-    return df.sign.map(map_dict)
+# Old stuff.... Probably not used anymore....
+# def get_file_path(path):
+#     return os.path.join(ROOT_PATH,RAW_DATA_DIR,path)
+#
+# def assign_target(df):
+#     import json
+#     map_dict = json.load(open(os.path.join(ROOT_PATH,RAW_DATA_DIR,
+#                                            MAP_JSON_FILE)))
+#     return df.sign.map(map_dict)
+#
+# def load_train_frame(path_csv = os.path.join(ROOT_PATH,RAW_DATA_DIR,TRAIN_CSV_FILE)):
+#     df_train = pd.read_csv(path_csv)
+#     df_train['file_path'] = df_train['path'].apply(get_file_path)
+#     df_train["target"] = assign_target(df_train)
+#
+#     return df_train
+#
 
-def load_train_frame(path_csv = os.path.join(ROOT_PATH,RAW_DATA_DIR,TRAIN_CSV_FILE)):
-    df_train = pd.read_csv(path_csv)
-    df_train['file_path'] = df_train['path'].apply(get_file_path)
-    df_train["target"] = assign_target(df_train)
+def create_data_loaders_TF(asl_dataset,
+                           train_size=TRAIN_SIZE,
+                           valid_size=VALID_SIZE,
+                           test_size=TEST_SIZE,
+                           batch_size=BATCH_SIZE,
+                           random_state=SEED):
+    """
+    Split the ASL dataset into training, validation, and testing sets and create data loaders for each set as a TensorFlow Dataset.
 
-    return df_train
+    Args:
+    asl_dataset (ASLDataset): The ASL dataset to load data from.
+    train_size (float, optional): The proportion of the dataset to include in the training set. Defaults to 0.8.
+    valid_size (float, optional): The proportion of the dataset to include in the validation set. Defaults to 0.1.
+    test_size (float, optional): The proportion of the dataset to include in the testing set. Defaults to 0.1.
+    batch_size (int, optional): The number of samples per batch to load. Defaults to BATCH_SIZE.
+    random_state (int, optional): The seed used by the random number generator for shuffling the data. Defaults to SEED.
 
+    Returns:
+    tuple of DataLoader: A tuple containing the data loaders for training, validation, and testing sets.
+
+    :param asl_dataset: The ASL dataset to load data from.
+    :type asl_dataset: ASLDataset
+    :param train_size: The proportion of the dataset to include in the training set.
+    :type train_size: float
+    :param valid_size: The proportion of the dataset to include in the validation set.
+    :type valid_size: float
+    :param test_size: The proportion of the dataset to include in the testing set.
+    :type test_size: float
+    :param batch_size: The number of samples per batch to load.
+    :type batch_size: int
+    :param random_state: The seed used by the random number generator for shuffling the data.
+    :type random_state: int
+    :return: A tuple containing the data loaders for training, validation, and testing sets.
+    :rtype: tuple of DataSets
+    """
 
 
 
@@ -699,16 +743,3 @@ if __name__ == '__main__':
         if seq_len > max_seq_len:
             max_seq_len = seq_len
     print(max_seq_len)
-
-
-def get_stratified_TrainValFrames(path_in = os.path.join(ROOT_PATH,RAW_DATA_DIR,TRAIN_CSV_FILE),
-                                  test_size = .1,
-                                  random_state = 42):
-    df_in = load_train_frame(path_in)
-    # Split the data into training and validation sets
-    X_train, X_val, _, _ = train_test_split(df_in,
-                                                      df_in['target'],
-                                                      test_size=test_size,
-                                                      random_state=random_state,
-                                                      stratify=df_in['target'])
-    return X_train, X_val

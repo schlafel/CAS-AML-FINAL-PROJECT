@@ -1,7 +1,6 @@
 import sys
 sys.path.insert(0, '../src')
 from config import *
-
 import numpy as np
 
 """
@@ -74,6 +73,7 @@ def random_scaling(frames, scale_range=(0.9, 1.1)):
     """
     if not isinstance(frames, np.ndarray):
         frames = frames.numpy()
+        tf.print(scale_range)
     scale_factor = np.random.uniform(scale_range[0], scale_range[1])
     return frames * scale_factor
 
