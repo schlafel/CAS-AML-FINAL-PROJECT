@@ -184,19 +184,25 @@ class ASL_DATASET_TF(ASL_DATASET):
     def __init__(self,metadata_df=None, transform=None, max_seq_length=INPUT_SIZE, augment=False):
         super().__init__(metadata_df=metadata_df, transform=transform, max_seq_length=max_seq_length, augment=augment)
 
-        print("Instantiated ASL_DATASET_TF")
     def create_dataset(self,
-                       batch_size:int = 32):
+                       batch_size:int = 32,
+                       shuffle = False,
+                       augment = False
+                       ):
         """
         Main Method to get the TensorFlow-Dataset
 
         :param batch_size: Batchsize
-        type: int
+        :type batch_size: int
+        :param shuffle: Shuffle the dataset
+        :type shuffle: bool
+        :param augment: Augment the dataset
+        :type augment: bool
         :return: dataset tf.data.Dataset
 
         """
 
-        def augment(x, y, augmentation_threshold = self.augmentation_threshold):
+        def augment_fn(x, y, augmentation_threshold = self.augmentation_threshold):
             # tf.print("Augmenting Data!!! ")
             # x = x
             if tf.random.uniform([]) > augmentation_threshold:
@@ -224,14 +230,15 @@ class ASL_DATASET_TF(ASL_DATASET):
 
         dataset = tf.data.Dataset.from_tensor_slices((self.file_paths,
                                                        self.target.astype(np.int32)))
-        dataset = dataset.shuffle(len(self))
+        if shuffle:
+            dataset = dataset.shuffle(len(self))
 
         dataset = dataset.map(load_data,
                               num_parallel_calls=tf.data.AUTOTUNE)
 
         # do the augmentation
-        if self.augment:
-            dataset = dataset.map(augment)
+        if augment:
+            dataset = dataset.map(augment_fn)
 
         dataset = dataset.cache()
 

@@ -5,6 +5,10 @@ from tensorflow.keras.callbacks import TensorBoard
 import yaml
 import argparse
 from config import *
+from data.data_utils import create_data_loaders_TF
+from data.dataset import ASL_DATASET_TF
+from sklearn.metrics import classification_report
+
 # tf.config.experimental_run_functions_eagerly(True)
 
 
@@ -16,7 +20,7 @@ def run_training(PATH_TRAINING_CONFIG):
     :return: None
     """
 
-
+    print(30 * "*", os.path.basename(PATH_TRAINING_CONFIG),30*"*")
 
     # Load the YAML config file
     with open(PATH_TRAINING_CONFIG, 'r') as f:
@@ -55,16 +59,17 @@ def run_training(PATH_TRAINING_CONFIG):
     print(model.summary(expand_nested=True))
 
     ### Get DataLoaders
-    tf_dataModule = importlib.import_module(config_model["data"]["type"])
-    train_dataset = tf_dataModule.get_tf_dataset(csv_path=config_model["train_csv_file"],
-                                                 data_path=config_model["data_dir"],
-                                                 batch_size=config_model["data"]["batch_size"],
-                                                 augment_data=True)
-    val_dataset = tf_dataModule.get_tf_dataset(csv_path=config_model["val_csv_file"],
-                                               data_path=config_model["data_dir"],
-                                               batch_size=config_model["data"]["batch_size"],
-                                               augment_data=False)
-
+    data = ASL_DATASET_TF(augment=config_model["data"]["augment_train"])
+    train_dataset,val_dataset,test_dataset = create_data_loaders_TF(data,
+                                                                    train_size=TRAIN_SIZE,
+                                                                    valid_size=VALID_SIZE,
+                                                                    test_size=TEST_SIZE,
+                                                                    batch_size = config_model["data"]["batch_size"],
+                                                                    augment_train =   config_model["data"]["augment_train"])
+    #Log the Datasizes to the conifg_model
+    config_model["data"]["TRAIN_SIZE"] = TRAIN_SIZE
+    config_model["data"]["VAL_SIZE"] = VALID_SIZE
+    config_model["data"]["TEST_SIZE"] = TEST_SIZE
     print(
         f"Training Dataset: {tf.data.experimental.cardinality(train_dataset).numpy()} Elements (Batch-Size {config_model['data']['batch_size']}) --> {config_model['data']['batch_size'] * tf.data.experimental.cardinality(train_dataset).numpy()} samples "
         f"\nValidation Dataset: {tf.data.experimental.cardinality(val_dataset).numpy()} Elements (Batch-Size {config_model['data']['batch_size']}) --> {config_model['data']['batch_size'] * tf.data.experimental.cardinality(val_dataset).numpy()} samples ")
@@ -116,7 +121,7 @@ def run_training(PATH_TRAINING_CONFIG):
             os.makedirs(ckpt_path)
 
         mod_ckpt = tf.keras.callbacks.ModelCheckpoint(
-            filepath=os.path.join(ckpt_path, 'checkpoint-{epoch:02d}', ),
+            filepath=os.path.join(ckpt_path, 'best_model', ),
                 **mdl_ckpt["params"]
         )
 
@@ -147,7 +152,23 @@ def run_training(PATH_TRAINING_CONFIG):
 
               )
 
+    # TODO do the TEST
+    ######## TEST Dataset!!
+    loss, accuracy = model.evaluate(test_dataset)
+    print(f'Test loss: {loss}, Test accuracy: {accuracy}')
+
+    # Get the total number of samples in the dataset
+    num_samples = test_dataset.reduce(0, lambda state, _: state + 1)
+    X_test, y_test = test_dataset.map(lambda x, y: (x, y)).unbatch().batch(num_samples).as_numpy_iterator().next()
+    y_pred = model.predict(X_test)
+    y_pred = tf.argmax(y_pred, axis=1)
+    print(classification_report(y_test, y_pred))
+
+
     # Save Model to tflite?
+
+
+    # Load the best model
 
 
 
