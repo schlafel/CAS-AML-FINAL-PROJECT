@@ -585,3 +585,15 @@ if __name__ == '__main__':
             max_seq_len = seq_len
     print(max_seq_len)
 
+
+def get_stratified_TrainValFrames(path_in = os.path.join(ROOT_PATH,RAW_DATA_DIR,TRAIN_CSV_FILE),
+                                  test_size = .1,
+                                  random_state = 42):
+    df_in = load_train_frame(path_in)
+    # Split the data into training and validation sets
+    X_train, X_val, _, _ = train_test_split(df_in,
+                                                      df_in['target'],
+                                                      test_size=test_size,
+                                                      random_state=random_state,
+                                                      stratify=df_in['target'])
+    return X_train, X_val

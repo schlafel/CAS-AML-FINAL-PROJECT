@@ -101,9 +101,9 @@ class ASL_TF_DATASET():
         if tf.random.uniform([]) >  self.augmentation_threshold:
             [x, ] = tf.py_function(random_rotation, [x], [tf.float64])
         if tf.random.uniform([]) >  self.augmentation_threshold:
-            [x, ] = tf.py_function(mirror_landmarks2, [x], [tf.float64])
+            [x, ] = tf.py_function(mirror_landmarks, [x], [tf.float64])
         if tf.random.uniform([]) >  self.augmentation_threshold:
-            [x, ] = tf.py_function(shift_landmarks2, [x], [tf.float64])
+            [x, ] = tf.py_function(shift_landmarks, [x], [tf.float64])
 
 
         #Reset the shape
