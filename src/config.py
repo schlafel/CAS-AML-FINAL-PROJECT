@@ -4,14 +4,9 @@ Configuration
 #: This file keeps the project configurations
 import os
 import torch
-<<<<<<< HEAD
 import numpy as np
 
 #: Set the device for training
-=======
-#
-# #: Set the device for training
->>>>>>> 5b2ec828876ab892b2074d69c6582810f64c4b6d
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # Paths
@@ -68,17 +63,20 @@ ROWS_PER_FRAME=543
 FACE_FEATURES=468
 HAND_FEATURES=21
 POSE_FEATURES=33
-MAX_SEQUENCES=150
-MIN_SEQUENCES=15
 
 #: Columns to use
-COLUMNS_TO_USE = ["x","y","z"]
+COLUMNS_TO_USE = ["x","y"]
 
 # Landmarks to select
+FACE_FEATURE_START=0
+POSE_FEATURE_START=489
+LEFT_HAND_FEATURE_START=468
+RIGHT_HAND_FEATURE_START=522
+
 #: Landmarks for face
 USEFUL_FACE_LANDMARKS = np.array([0, 7, 10, 13, 14, 17, 21, 33, 37, 39, 40, 46, 52, 53, 54, 55, 58, 61, 63, 65, 66, 67, 70, 78, 80, 81, 82, 84, 87, 88, 91, 93, 95, 103, 105, 107, 109, 127, 132, 133, 136, 144, 145, 146, 148, 149, 150, 152, 153, 154, 155, 157, 158, 159, 160, 161, 162, 163, 172, 173, 176, 178, 181, 185, 191, 234, 246, 249, 251, 263, 267, 269, 270, 276, 282, 283, 284, 285, 288, 291, 293, 295, 296, 297, 300, 308, 310, 311, 312, 314, 317, 318, 321, 323, 324, 332, 334, 336, 338, 356, 361, 362, 365, 373, 374, 375, 377, 378, 379, 380, 381, 382, 384, 385, 386, 387, 388, 389, 390, 397, 398, 400, 402, 405, 409, 415, 454, 466])
 #: Landmarks for pose
-USEFUL_POSE_LANDMARKS = np.arange(502, 543)
+USEFUL_POSE_LANDMARKS = np.arange(500, 514)
 #: Landmarks for left hand
 USEFUL_LEFT_HAND_LANDMARKS = np.arange(468,489)
 #: Landmarks for right hand
@@ -104,4 +102,6 @@ LEFT_HAND_INDICES  = np.argwhere(np.isin(USEFUL_ALL_LANDMARKS, USEFUL_LEFT_HAND_
 RIGHT_HAND_INDICES = np.argwhere(np.isin(USEFUL_ALL_LANDMARKS, USEFUL_RIGHT_HAND_LANDMARKS)).squeeze()
 
 INTEREMOLATE_MISSING=3
+SKIP_CONSECUTIVE_ZEROS=4
 INPUT_SIZE=32
+MIN_SEQUEENCES=INPUT_SIZE/4

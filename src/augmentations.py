@@ -1,6 +1,7 @@
 import sys
 
 sys.path.insert(0, '../src')
+from config import *
 
 import numpy as np
 
@@ -18,9 +19,12 @@ def shift_landmarks(frames, max_shift=0.01):
     Returns:
         numpy.ndarray: An array of augmented landmarks.
     """
-    h = np.random.uniform(-max_shift, max_shift) * np.ones((frames.shape[0], frames.shape[1], 1))
-    v = np.random.uniform(-max_shift, max_shift) * np.ones((frames.shape[0], frames.shape[1], 1))
-    augmented_landmarks = frames + np.concatenate((h, v), axis=2)
+    # Compute random shifts for all dimensions
+    shifts = np.random.uniform(-max_shift, max_shift, size=frames.shape)
+
+    # Apply shifts to frames
+    augmented_landmarks = frames + shifts
+
     return augmented_landmarks
 
 
@@ -84,7 +88,9 @@ def random_rotation(frames, max_angle=10):
     cos_a, sin_a = np.cos(angle), np.sin(angle)
     rotation_matrix = np.array([[cos_a, -sin_a], [sin_a, cos_a]])
 
-    return np.einsum('ijk,kl->ijl', frames, rotation_matrix)
+    frames[:, :, :2] = np.einsum('ijk,kl->ijl', frames[:, :, :2], rotation_matrix)
+
+    return frames
 
 #TODO 
 def normalize(frames, mn,std):

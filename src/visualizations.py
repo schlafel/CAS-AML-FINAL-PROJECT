@@ -58,13 +58,14 @@ def visualize_target_sign(dataset, target_sign, n_samples=6):
 
     fig, ax = plt.subplots(1, figsize=(8 * len(samples) / 2, 10))
 
-    size = 0
+    #size = 0
     target = int(samples[0]['target'])
 
-    for i, sample in enumerate(samples):
-        if sample['size'] > size:
-            size = int(sample['size'])
+    #for i, sample in enumerate(samples):
+    #    if sample['size'] > size:
+    #        size = int(sample['size'])
 
+    size = INPUT_SIZE
     offset = 20
 
     def update(frame):
@@ -79,10 +80,10 @@ def visualize_target_sign(dataset, target_sign, n_samples=6):
             landmark_offset = 192 * sample_idx
 
             # `landmark_lists` is a list containing sequence of mediapipe landmarks for face, left_hand, pose, and right_hand
-            face_landmarks = landmark_lists[:, :USED_FACE_FEATURES, :]
-            left_hand_landmarks = landmark_lists[:, USED_FACE_FEATURES:USED_FACE_FEATURES + USED_HAND_FEATURES, :]
-            pose_landmarks = landmark_lists[:, USED_FACE_FEATURES + USED_HAND_FEATURES:USED_FACE_FEATURES + USED_HAND_FEATURES + USED_POSE_FEATURES, :]
-            right_hand_landmarks = landmark_lists[:, USED_FACE_FEATURES + USED_HAND_FEATURES + USED_POSE_FEATURES:, :]
+            face_landmarks = landmark_lists[:, FACE_INDICES, :]
+            left_hand_landmarks = landmark_lists[:, LEFT_HAND_INDICES, :]
+            pose_landmarks = landmark_lists[:, POSE_INDICES, :]
+            right_hand_landmarks = landmark_lists[:, RIGHT_HAND_INDICES, :]
 
             face_connections = mp.solutions.face_mesh_connections.FACEMESH_CONTOURS
             pose_connections = mp.solutions.pose.POSE_CONNECTIONS
@@ -91,8 +92,9 @@ def visualize_target_sign(dataset, target_sign, n_samples=6):
             new_face_landmark_map = {x: i for i, x in enumerate(USEFUL_FACE_LANDMARKS)}
             face_connections = frozenset((new_face_landmark_map[x], new_face_landmark_map[y]) for (x, y) in face_connections if x in USEFUL_FACE_LANDMARKS and y in USEFUL_FACE_LANDMARKS)
 
-            new_pose_landmark_map = {x: i for i, x in enumerate(USEFUL_POSE_LANDMARKS)}
-            pose_connections = frozenset((new_pose_landmark_map[x], new_pose_landmark_map[y]) for (x, y) in pose_connections if x in USEFUL_POSE_LANDMARKS and y in USEFUL_POSE_LANDMARKS)
+            pose_first_idx=USEFUL_POSE_LANDMARKS[0]-POSE_FEATURE_START
+            new_pose_landmark_map = new_pose_landmark_map = {i+pose_first_idx: x for i, x in enumerate(USEFUL_POSE_LANDMARKS-USEFUL_POSE_LANDMARKS[0])}
+            pose_connections = frozenset((new_pose_landmark_map[x], new_pose_landmark_map[y]) for (x, y) in pose_connections if x in new_pose_landmark_map.keys() and y in new_pose_landmark_map.keys())
 
             face_x = [-float(x) + sample_idx * 2 for x in face_landmarks[frame][:, 0]]
             face_y = [-float(y) for y in face_landmarks[frame][:, 1]]

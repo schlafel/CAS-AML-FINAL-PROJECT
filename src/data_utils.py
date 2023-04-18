@@ -15,6 +15,9 @@ from dataset import ASL_DATASET
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 
+import warnings
+warnings.filterwarnings("ignore")
+
 def load_relevant_data_subset(pq_path):
     data_columns = COLUMNS_TO_USE
     data = pd.read_parquet(pq_path, columns=data_columns)
@@ -127,6 +130,8 @@ def preprocess_raw_data(sample=100000):
 
     # Keep track of sequence sizes
     size = []
+    orig_size = []
+    usable_size = []
 
     # Process the data and return result it
     for i, idx in tqdm(enumerate(range(len(df_train))), total=len(df_train)):
@@ -135,10 +140,14 @@ def preprocess_raw_data(sample=100000):
         # Save the processed data to disk as numpy arrays
         np.save(os.path.join(landmarks_dir_path, processed_files[idx]), sample['landmarks'])
         size.append(sample['size'])
+        orig_size.append(sample['orig_size'])
+        usable_size.append(sample['usable_size'])
 
     df_train["path"] = [LANDMARK_FILES + '/' + f for f in processed_files]
     df_train["size"] = size
+    df_train["orig_size"] = orig_size
     df_train["target"] = targets
+    df_train["usable_size"] = usable_size
 
     train_csv_output_path = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, TRAIN_CSV_FILE)
     df_train.to_csv(train_csv_output_path, sep=',', index=False)
@@ -185,10 +194,64 @@ def preprocess_data_item(raw_landmark_path, targets_sign):
     # Read in the parquet file and process the data
     landmarks = load_relevant_data_subset(raw_landmark_path)
     
-    landmarks, size = preprocess_data(landmarks)
+    landmarks, size, orig_size, usable_size = preprocess_data_to_same_size(landmarks)
 
     # Create a dictionary with the processed data
-    return {'landmarks': landmarks, 'target': targets_sign, 'size': size}
+    return {'landmarks': landmarks, 'target': targets_sign, 'size': size, 'orig_size': orig_size, 'usable_size': usable_size}
+
+def preprocess_data_to_same_size(landmarks):
+    
+    num_orig_frames = landmarks.shape[0]
+    
+    frames_hands_nansum = np.nanmean(landmarks[:, USEFUL_HAND_LANDMARKS], axis=(1, 2))
+    non_empty_frames_idxs = np.where(frames_hands_nansum > 0)[0]
+    landmark_data = landmarks[non_empty_frames_idxs]
+
+    landmark_data = landmark_data[:, USEFUL_ALL_LANDMARKS]
+
+    num_frames = landmark_data.shape[0]
+
+    if num_frames < INPUT_SIZE:
+        new_frame_indices = np.linspace(0, num_frames - 1, INPUT_SIZE)
+        upsampled_landmark_data = np.empty((INPUT_SIZE, landmark_data.shape[1], landmark_data.shape[2]))
+        for lm_idx in range(landmark_data.shape[1]):
+            for coord_idx in range(landmark_data.shape[2]):
+                upsampled_landmark_data[:, lm_idx, coord_idx] = np.interp(
+                    new_frame_indices, np.arange(num_frames), landmark_data[:, lm_idx, coord_idx]
+                )
+        landmark_data = upsampled_landmark_data
+        size = INPUT_SIZE
+    elif num_frames > INPUT_SIZE:
+        if num_frames < INPUT_SIZE**2:
+            repeats = INPUT_SIZE * INPUT_SIZE // num_frames
+            landmark_data = np.repeat(landmark_data, repeats=repeats, axis=0)
+            
+        pool_size = len(landmark_data) // INPUT_SIZE
+        if len(landmark_data) % INPUT_SIZE > 0:
+            pool_size += 1
+
+        if pool_size == 1:
+            pad_size = (pool_size * INPUT_SIZE) - len(landmark_data)
+        else:
+            pad_size = (pool_size * INPUT_SIZE) % len(landmark_data)
+
+        pad_left = pad_size // 2 + INPUT_SIZE // 2
+        pad_right = pad_size // 2 + INPUT_SIZE // 2
+        if pad_size % 2 > 0:
+            pad_right += 1
+
+        landmark_data = np.concatenate((np.repeat(landmark_data[:1], repeats=pad_left, axis=0), landmark_data), axis=0)
+        landmark_data = np.concatenate((landmark_data, np.repeat(landmark_data[-1:], repeats=pad_right, axis=0)), axis=0)
+
+        landmark_data = landmark_data.reshape(INPUT_SIZE, -1, N_LANDMARKS, N_DIMS)
+        landmark_data = np.nanmean(landmark_data, axis=1)
+        
+    size = INPUT_SIZE
+
+    landmark_data = np.where(np.isnan(landmark_data), 0.0, landmark_data)
+
+    return landmark_data, size, num_orig_frames, num_frames
+
 
 def preprocess_data(landmarks):
     frames_hands_nansum = np.nanmean(landmarks[:, USEFUL_HAND_LANDMARKS], axis=(1, 2))
@@ -204,7 +267,7 @@ def preprocess_data(landmarks):
         landmark_data = np.pad(landmark_data, ((0, INPUT_SIZE - num_frames), (0, 0), (0, 0)), constant_values=0)
         size = num_frames
     else:
-        if N_FRAMES < INPUT_SIZE**2:
+        if num_frames < INPUT_SIZE**2:
             repeats = INPUT_SIZE * INPUT_SIZE // num_frames
             landmark_data = np.repeat(landmark_data, repeats=repeats, axis=0)
             
@@ -270,18 +333,17 @@ def calculate_landmark_length_stats():
     avg_landmarks = {}
 
     # Loop through each unique sign and its corresponding rows in the grouped dataframe
-    for sign, sign_rows in grouped_signs:
-
+    for i, (sign, sign_rows) in tqdm(enumerate(grouped_signs), total=len(grouped_signs)):
+    
         # Initialize a list to store the length of landmarks for each example of the current sign
         sign_data = []
 
         # Loop through each row of the current sign type
         for _, row in sign_rows.iterrows():
-            file_path = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, row['path'])
-            data = np.load(file_path)
+            size = row['size']
 
             # Add the length of landmarks of the current example to the list of current sign data
-            sign_data.append(len(data))
+            sign_data.append(size)
 
         # Calculate the minimum, maximum, mean, standard deviation, and median of the landmarks for the current sign
         avg_landmarks[sign] = {
@@ -364,6 +426,62 @@ def calculate_avg_landmark_positions(dataset):
 
     return avg_landmarks_pos
 
+def remove_unusable_data():
+    
+    marker_file_path = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, CLEANED_FILE)
+
+    if os.path.exists(os.path.join(marker_file_path)):
+        print('Cleansed data found. Skipping...')
+        return
+
+    # Load the training data
+    df_train = pd.read_csv(os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, TRAIN_CSV_FILE))
+
+    # List of row indices to drop
+    rows_to_drop = []
+
+    # Iterate over each row in the DataFrame
+    for index, row in tqdm(df_train.iterrows(), total=len(df_train)):
+        
+        missing_file = False
+
+        # Load the file and get the length of its landmarks data
+        file_path = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, row['path'])
+
+        try:
+            data = np.load(file_path)
+        except Exception as e:
+            print(f"Error loading file {file_path}: {e}")
+            missing_file = True
+            continue    
+        
+        usable_size = row['usable_size']
+        
+        
+        if (
+                   usable_size < MIN_SEQUEENCES or missing_file  # Has land mark file missing
+        ):
+
+            # Delete the processed file
+            if os.path.exists(file_path):
+                #print(f"removing {file_path}: landmarks_len {landmarks_len} {landmarks_len < MIN_LEN_THRESHOLD} {landmarks_len > MAX_LEN_THRESHOLD} lh_missings {lh_missings} rh_missings {rh_missings}")
+                os.remove(file_path)
+
+            # Mark the row for deletion
+            rows_to_drop.append(index)
+
+    # Drop marked rows from the DataFrame
+    df_train.drop(rows_to_drop, inplace=True)
+
+    # Save the updated DataFrame to the CSV file
+    df_train.to_csv(os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, TRAIN_CSV_FILE), index=False)
+
+    # Create the marker file
+    with open(marker_file_path, 'w') as f:
+        f.write('')
+
+        
+
 def remove_outlier_or_missing_data(landmark_len_dict):
     """
     Remove rows from the training data with missing or outlier landmark data.
@@ -430,7 +548,7 @@ def remove_outlier_or_missing_data(landmark_len_dict):
     rows_to_drop = []
 
     # Iterate over each row in the DataFrame
-    for index, row in df_train.iterrows():
+    for index, row in tqdm(df_train.iterrows(), total=len(df_train)):
 
         missing_file = False
 
@@ -466,17 +584,14 @@ def remove_outlier_or_missing_data(landmark_len_dict):
 
         # print(f"{landmarks_len < MIN_LEN_THRESHOLD} or {landmarks_len > MAX_LEN_THRESHOLD} or {lh_missings} or {rh_missings}")
         if (
-                   landmarks_len < MIN_SEQUENCES  # Sequences of landmark file are too short
-                or landmarks_len > MAX_SEQUENCES  # Sequences of landmark file are too long
-                or landmarks_len < MIN_LEN_THRESHOLD  # Sequences of landmark file are outlier, 3rd of median length
+                   landmarks_len < MIN_LEN_THRESHOLD  # Sequences of landmark file are outlier, 3rd of median length
                 or landmarks_len > MAX_LEN_THRESHOLD  # Sequences of landmark file are outlier, 2 std away from average length
-                or lh_missings  # Has 4 or more hand larmarks missing for left hand
-                or rh_missings  # Has 4 or more hand larmarks missing for right hand
                 or missing_file  # Has land mark file missing
         ):
 
             # Delete the processed file
             if os.path.exists(file_path):
+                #print(f"removing {file_path}: landmarks_len {landmarks_len} {landmarks_len < MIN_LEN_THRESHOLD} {landmarks_len > MAX_LEN_THRESHOLD} lh_missings {lh_missings} rh_missings {rh_missings}")
                 os.remove(file_path)
 
             # Mark the row for deletion
@@ -536,7 +651,7 @@ def create_data_loaders(asl_dataset, train_size=TRAIN_SIZE, valid_size=VALID_SIZ
     # Create dataset instances for each split
     train_dataset = ASL_DATASET(metadata_df=train_df)
     valid_dataset = ASL_DATASET(metadata_df=valid_df)
-    test_dataset = ASL_DATASET(metadata_df=test_df)
+    test_dataset  = ASL_DATASET(metadata_df=test_df)
 
     # Create data loaders for each split
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)

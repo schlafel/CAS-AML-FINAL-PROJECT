@@ -19,7 +19,7 @@ class ASL_DATASET:
     """
 
     # Constructor method
-    def __init__(self, metadata_df=None, transform=None, max_seq_length=MAX_SEQUENCES, augment=False):
+    def __init__(self, metadata_df=None, transform=None, max_seq_length=INPUT_SIZE, augment=False):
         """
         Initialize the dataset.
 
