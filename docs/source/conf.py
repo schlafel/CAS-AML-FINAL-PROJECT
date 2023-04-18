@@ -20,8 +20,8 @@ sys.path.insert(0, os.path.abspath('../../src'))
 # -- Project information -----------------------------------------------------
 
 project = 'American Sign Language Recognition'
-copyright = '2023, Asad Bin Imtiaz, Felix Schalter'
-author = 'Asad Bin Imtiaz, Felix Schalter'
+copyright = '2023, Asad Bin Imtiaz, Felix Schlatter'
+author = 'Asad Bin Imtiaz, Felix Schlatter'
 
 # The full version, including alpha/beta/rc tags
 release = '0.0.1'

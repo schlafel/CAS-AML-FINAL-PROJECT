@@ -48,8 +48,8 @@ Remember: This is all bullshit here as just a placeholder.
 In the future, the model could be further improved by incorporating additional features, such as hand motion trajectories, or by training on a larger dataset. The model could also be deployed in a mobile app to help parents learn sign language and communicate with their deaf children.
 
 ## Contributors
-Asad Bin Imtiza
-Felix Schalter
+Asad Bin Imtiaz
+Felix Schlatter
 
 ## License
 This project is licensed under the MIT License - see the LICENSE file for details.

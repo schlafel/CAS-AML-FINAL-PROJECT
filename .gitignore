@@ -135,6 +135,7 @@ dmypy.json
 # my ignored files #
 data/raw/train_landmark_files/*
 data/processed/train_landmark_files/*
+data/processed/*
 *.parquet
 *.pt
 *.npy
