@@ -1,5 +1,4 @@
 import sys
-
 sys.path.insert(0, '../src')
 from config import *
 
@@ -24,7 +23,6 @@ def shift_landmarks(frames, max_shift=0.01):
 
     # Apply shifts to frames
     augmented_landmarks = frames + shifts
-
     return augmented_landmarks
 
 
@@ -38,6 +36,8 @@ def mirror_landmarks(frames):
     Returns:
         numpy.ndarray: An array of inverted landmarks.
     """
+    if not isinstance(frames, np.ndarray):
+        frames = frames.numpy()
     inverted_frames = np.copy(frames)
     inverted_frames[:, :, 0] = -inverted_frames[:, :, 0] + 1
     return inverted_frames
@@ -53,6 +53,8 @@ def frame_dropout(frames, dropout_rate=0.05):
     Returns:
         numpy.ndarray: An array of landmarks with dropped frames.
     """
+    if not isinstance(frames, np.ndarray):
+        frames = frames.numpy()
     keep_rate = 1 - dropout_rate
     keep_indices = np.random.choice(len(frames), int(len(frames) * keep_rate), replace=False)
     keep_indices.sort()
@@ -70,12 +72,14 @@ def random_scaling(frames, scale_range=(0.9, 1.1)):
     Returns:
         numpy.ndarray: An array of landmarks with randomly scaled coordinates.
     """
+    if not isinstance(frames, np.ndarray):
+        frames = frames.numpy()
     scale_factor = np.random.uniform(scale_range[0], scale_range[1])
     return frames * scale_factor
 
 def random_rotation(frames, max_angle=10):
     """
-    Apply random rotation to landmark coordinates.
+    Apply random rotation to landmark coordinates. (on X and Y only)
 
     Args:
         frames (numpy.ndarray): An array of landmarks data.
@@ -84,6 +88,10 @@ def random_rotation(frames, max_angle=10):
     Returns:
         numpy.ndarray: An array of landmarks with randomly rotated coordinates.
     """
+    if not isinstance(frames, np.ndarray):
+        frames = frames.numpy()
+
+
     angle = np.radians(np.random.uniform(-max_angle, max_angle))
     cos_a, sin_a = np.cos(angle), np.sin(angle)
     rotation_matrix = np.array([[cos_a, -sin_a], [sin_a, cos_a]])

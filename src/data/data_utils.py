@@ -1,16 +1,15 @@
 import sys
 
-sys.path.insert(0, '../src')
-from config import *
+sys.path.insert(0, '..')
+from src.config import *
 
 import os
 import json
 import pandas as pd
 import numpy as np
-import pyarrow.parquet as pq
 
 from tqdm import tqdm
-from dataset import ASL_DATASET
+from src.data.dataset import ASL_DATASET
 
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
@@ -660,6 +659,24 @@ def create_data_loaders(asl_dataset, train_size=TRAIN_SIZE, valid_size=VALID_SIZ
 
     return train_loader, valid_loader, test_loader
 
+def get_file_path(path):
+    return os.path.join(ROOT_PATH,RAW_DATA_DIR,path)
+
+def assign_target(df):
+    import json
+    map_dict = json.load(open(os.path.join(ROOT_PATH,RAW_DATA_DIR,
+                                           MAP_JSON_FILE)))
+    return df.sign.map(map_dict)
+
+def load_train_frame(path_csv = os.path.join(ROOT_PATH,RAW_DATA_DIR,TRAIN_CSV_FILE)):
+    df_train = pd.read_csv(path_csv)
+    df_train['file_path'] = df_train['path'].apply(get_file_path)
+    df_train["target"] = assign_target(df_train)
+
+    return df_train
+
+
+
 
 if __name__ == '__main__':
 
@@ -683,3 +700,15 @@ if __name__ == '__main__':
             max_seq_len = seq_len
     print(max_seq_len)
 
+
+def get_stratified_TrainValFrames(path_in = os.path.join(ROOT_PATH,RAW_DATA_DIR,TRAIN_CSV_FILE),
+                                  test_size = .1,
+                                  random_state = 42):
+    df_in = load_train_frame(path_in)
+    # Split the data into training and validation sets
+    X_train, X_val, _, _ = train_test_split(df_in,
+                                                      df_in['target'],
+                                                      test_size=test_size,
+                                                      random_state=random_state,
+                                                      stratify=df_in['target'])
+    return X_train, X_val

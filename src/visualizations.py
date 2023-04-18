@@ -3,8 +3,6 @@ import sys
 sys.path.insert(0, '../src')
 from config import *
 
-import os
-
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
@@ -13,7 +11,8 @@ import random
 
 random.seed(SEED)
 
-from dataset import ASL_DATASET, label_dict_inference, label_dict
+from src.data.dataset import label_dict_inference
+
 
 def visualize_target_sign(dataset, target_sign, n_samples=6):
     """

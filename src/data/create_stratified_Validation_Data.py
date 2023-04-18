@@ -1,20 +1,16 @@
-import pandas as pd
-from sklearn.model_selection import train_test_split
 from src.config import *
 import matplotlib.pyplot as plt
 import seaborn as sns
+from src.data.data_utils import get_stratified_TrainValFrames
 
-if __name__ == '__main__':
+
+def run():
 
     # Load your data into a pandas DataFrame
-    df_in = pd.read_csv(os.path.join(ROOT_PATH,PROCESSED_DATA_DIR,TRAIN_CSV_FILE))
+    path_in = os.path.join(ROOT_PATH,PROCESSED_DATA_DIR,TRAIN_CSV_FILE)
 
-    # Split the data into training and validation sets
-    X_train, X_val, y_train, y_val = train_test_split(df_in,
-                                                      df_in['target'],
-                                                      test_size=0.1,
-                                                      random_state=42,
-                                                      stratify=df_in['target'])
+    X_train, X_val = get_stratified_TrainValFrames(path_in,
+                                                   test_size = .1)
 
     #Save
     X_train.to_csv(os.path.join(ROOT_PATH,PROCESSED_DATA_DIR,"X_train.csv"))
@@ -30,3 +26,7 @@ if __name__ == '__main__':
     ax.tick_params(axis="y", labelsize=6)
     plt.tight_layout()
     plt.show()
+
+
+if __name__ == '__main__':
+    run()

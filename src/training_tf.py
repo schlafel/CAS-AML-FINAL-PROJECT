@@ -11,6 +11,7 @@ import argparse
 
 # tf.config.experimental_run_functions_eagerly(True)
 if __name__ == '__main__':
+    tf.keras.backend.clear_session()
     # Define arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--training_config", type=str,
@@ -29,7 +30,8 @@ if __name__ == '__main__':
     ####### Import the Model CLASS #######
 
     # Import the module and class specified in the YAML file
-    module_path, class_name = config_model['model']['type'].rsplit('.', 1)
+    module_path = config_model['model']['src']
+    class_name = config_model['model']['model_name']
     module = importlib.import_module(module_path)
     model_class = getattr(module, class_name)
 
@@ -91,64 +93,57 @@ if __name__ == '__main__':
         yaml.dump(config_model, f)
 
     ############ Callbacks ############
-    callback_Module = importlib.import_module(config_model["training"]["callbacks"]["src"])
+
     cb_list = []
-    for callback_name in config_model["training"]["callbacks"]["callbacks"].items():
-        if callback_name[0] in ["TensorBoard",
-                             "ModelCheckpoint",
-                             "EarlyStoppingCallback",
-                             ]:
-            continue
-        # print(callback_name[0])
-        # TODO: Hack: overwrite model_path with model-Dir as dynamic variables do not work somehow....
-        if "model_path" in callback_name[1].keys():
-            callback_name[1]["model_path"] = experiment_dir
-
-        cb = getattr(callback_Module, callback_name[0])
-        cb_list.append(cb(**callback_name[1]))
 
 
-    ##      EarlyStoppingCallback
-    config_EarlyStop = config_model["training"]["callbacks"]["callbacks"]["EarlyStoppingCallback"]
+    ##       SaveModelCallback
+    config_SaveModel = config_model["training"]["callbacks"]["SaveModelCallback"]
+
+    if config_SaveModel["use"]:
+        callback_Module = importlib.import_module(config_SaveModel["src"])
+        SaveModellCB = getattr(callback_Module, "SaveModelCallback")
+
+        early_stop = SaveModellCB(**config_SaveModel["params"])
+        cb_list.append(early_stop)
+
+    ## EarlyStoppingCallback
+    config_EarlyStop = config_model["training"]["callbacks"]["EarlyStoppingCallback"]
     if config_EarlyStop["use"]:
         early_stop = tf.keras.callbacks.EarlyStopping(**config_EarlyStop["params"])
-
         cb_list.append(early_stop)
 
     # Model ckpt
-    mdl_ckpt = config_model["training"]["callbacks"]["callbacks"]["ModelCheckpoint"]
+    mdl_ckpt = config_model["training"]["callbacks"]["ModelCheckpoint"]
     if mdl_ckpt["save"]:
         ckpt_path = os.path.join(experiment_dir, "ckpt")
         if not os.path.exists(ckpt_path):
             os.makedirs(ckpt_path)
 
         mod_ckpt = tf.keras.callbacks.ModelCheckpoint(
-            filepath=os.path.join(experiment_dir, 'checkpoint-{epoch:02d}.h5', ),
-            save_weights_only=True,
-            monitor=mdl_ckpt["monitor"],
-            mode=mdl_ckpt["mode"],
-            save_best_only=False,
-            save_freq=mdl_ckpt["save_freq"]
+            filepath=os.path.join(ckpt_path, 'checkpoint-{epoch:02d}', ),
+                **mdl_ckpt["params"]
         )
 
         cb_list.append(mod_ckpt)
 
     # Tensorboard log
-    config_model["training"]["callbacks"]["callbacks"]["TensorBoard"]["log_dir"] = os.path.join(
+    config_model["training"]["callbacks"]["TensorBoard"]["log_dir"] = os.path.join(
         config_model["model_dir"], config_model["experiment_name"])
 
     tensorboard_callback = TensorBoard(
-        log_dir=config_model["training"]["callbacks"]["callbacks"]["TensorBoard"]["log_dir"],
+        log_dir=config_model["training"]["callbacks"]["TensorBoard"]["log_dir"],
         histogram_freq=1)
     cb_list.append(tensorboard_callback)
 
-    # Start training
-    for X_batch, y_batch in train_dataset:
-        break
-    print(X_batch.shape, X_batch.dtype)
+    # # Start training
+    # for X_batch, y_batch in train_dataset:
+    #     break
+    # print(X_batch.shape, X_batch.dtype)
 
 
-
+    print("Logging tensorboard to ",
+          os.path.abspath(config_model["training"]["callbacks"]["TensorBoard"]["log_dir"] ))
     ############ FIT MODEL ############
     model.fit(train_dataset,
               epochs=config_model["training"]["epochs"],
