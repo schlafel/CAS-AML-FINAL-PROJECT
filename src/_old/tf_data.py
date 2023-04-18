@@ -39,6 +39,7 @@ class ASL_TF_DATASET():
         self.augmentation_threshold = .5
 
     def __getitem__(self, idx):
+        #load the data
         sample = np.load(self.path[idx])
         target = np.array([self.target[idx]])
 
@@ -100,9 +101,9 @@ class ASL_TF_DATASET():
         if tf.random.uniform([]) >  self.augmentation_threshold:
             [x, ] = tf.py_function(random_rotation, [x], [tf.float64])
         if tf.random.uniform([]) >  self.augmentation_threshold:
-            [x, ] = tf.py_function(mirror_landmarks2, [x], [tf.float64])
+            [x, ] = tf.py_function(mirror_landmarks, [x], [tf.float64])
         if tf.random.uniform([]) >  self.augmentation_threshold:
-            [x, ] = tf.py_function(shift_landmarks2, [x], [tf.float64])
+            [x, ] = tf.py_function(shift_landmarks, [x], [tf.float64])
 
 
         #Reset the shape
@@ -165,11 +166,181 @@ def get_TF_ASL_DATASET(csv_path = os.path.join(ROOT_PATH,PROCESSED_DATA_DIR,TRAI
     return dataset
 
 
+def pad_sequence(sample,max_seq_length = MAX_SEQUENCES):
+    # pad the sequence
+    if sample.shape[0] < max_seq_length:
+        landmarks = np.append(sample, np.zeros(((max_seq_length - sample.shape[0]), sample.shape[1], 2)),
+                              axis=0)
+    else:
+        # crop
+        landmarks = sample[:max_seq_length, :, :]
+    return landmarks
+
+def augment(x,y, augmentation_threshold = .5):
+    def random_scaling(frames, scale_range=(0.9, 1.1)):
+        """
+        Apply random scaling to landmark coordinates.
+
+        Args:
+            frames (numpy.ndarray): An array of landmarks data.
+            scale_range (tuple): A tuple containing the minimum and maximum scaling factors (default: (0.9, 1.1)).
+
+        Returns:
+            numpy.ndarray: An array of landmarks with randomly scaled coordinates.
+        """
+        scale_factor = np.random.uniform(scale_range[0], scale_range[1])
+        return frames.numpy() * scale_factor
+
+    def random_rotation(frames, max_angle=10):
+        """
+        Apply random rotation to landmark coordinates.
+
+        Args:
+            frames (numpy.ndarray): An array of landmarks data.
+            max_angle (int): The maximum rotation angle in degrees (default: 10).
+
+        Returns:
+            numpy.ndarray: An array of landmarks with randomly rotated coordinates.
+        """
+        #Define Rotation Matrix
+        angle = np.radians(np.random.uniform(-max_angle, max_angle))
+        cos_a, sin_a = np.cos(angle), np.sin(angle)
+        rotation_matrix = np.array([[cos_a, -sin_a], [sin_a, cos_a]])
+
+        if frames.shape[-1] == 3:
+            arr_rot_2d = np.einsum('ijk,kl->ijl', frames.numpy()[:,:,0:2], rotation_matrix)
+            c = frames.numpy()[:,:,2][...,np.newaxis]
+            arr_rot = np.concatenate([arr_rot_2d,c ],axis = 2)
+
+        else:
+            arr_rot = np.einsum('ijk,kl->ijl', frames.numpy(), rotation_matrix)
+
+
+
+
+        return arr_rot
+
+    def mirror_landmarks(frames):
+        """
+        Invert/mirror landmark coordinates along the x-axis.
+
+        Args:
+            frames (numpy.ndarray): An array of landmarks data.
+
+        Returns:
+            numpy.ndarray: An array of inverted landmarks.
+        """
+        inverted_frames = np.copy(frames.numpy())
+        inverted_frames[:, :, 0] = -inverted_frames[:, :, 0] + 1
+        return inverted_frames
+
+    def frame_dropout(frames, dropout_rate=0.05):
+        """
+        Randomly drop frames from the input landmark data.
+
+        Args:
+            frames (numpy.ndarray): An array of landmarks data.
+            dropout_rate (float): The proportion of frames to drop (default: 0.05).
+
+        Returns:
+            numpy.ndarray: An array of landmarks with dropped frames.
+        """
+        keep_rate = 1 - dropout_rate
+        keep_indices = np.random.choice(len(frames), int(len(frames) * keep_rate), replace=False)
+        keep_indices = np.sort(keep_indices)
+        dropped_landmarks = frames.numpy()[keep_indices]
+        return dropped_landmarks
+
+    if tf.random.uniform([]) > augmentation_threshold:
+        [x, ] = tf.py_function(random_scaling, [x], [tf.float32])
+    if tf.random.uniform([]) > augmentation_threshold:
+        [x, ] = tf.py_function(random_rotation, [x], [tf.float32])
+    if tf.random.uniform([]) > augmentation_threshold:
+        [x, ] = tf.py_function(mirror_landmarks, [x], [tf.float32])
+    if tf.random.uniform([]) > augmentation_threshold:
+        [x, ] = tf.py_function(frame_dropout, [x], [tf.float32])
+
+    return x,y
+
+
+def load_data(x,y):
+    def load_data_np(fp):
+        # load the data
+        sample = np.load(fp.numpy())
+
+        landmarks = pad_sequence(sample)
+
+        return landmarks.astype(np.float32)
+
+    x = tf.py_function(load_data_np,inp = [x],Tout=tf.float32)
+    # x = tf.squeeze(x,axis = 0)
+
+    return x,y
+
+
+def get_tf_dataset(csv_path,
+                   data_path,
+                   batch_size = 250,
+                   augment_data = True):
+
+    df = pd.read_csv(csv_path)
+    df["full_path"] = df.path.apply(map_full_path, args=(data_path,))
+
+    dataset1 = tf.data.Dataset.from_tensor_slices((df.full_path.values,
+                                                   df.target.values.astype(np.int32)))
+    dataset = dataset1.shuffle(len(df))
+
+    dataset = dataset.map(load_data,
+                          num_parallel_calls=tf.data.AUTOTUNE)
+
+    # do the augmentation
+    dataset = dataset.map(augment)
+
+    dataset = dataset.cache()
+
+
+    dataset = dataset.batch(batch_size)
+
+
+    dataset = dataset.prefetch(buffer_size=tf.data.AUTOTUNE)
+
+
+    return dataset
 
 if __name__ == '__main__':
+    csv_path = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, TRAIN_CSV_FILE)
+    data_path = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR)
 
 
-    dataset = get_TF_ASL_DATASET(batch_size=32)
+    df = pd.read_csv(csv_path)
+    df["full_path"] = df.path.apply(map_full_path, args=(data_path,))
+
+
+    dataset = get_tf_dataset(csv_path,
+                   data_path,
+                   batch_size = 250)
+    #
+    # dataset1 = tf.data.Dataset.from_tensor_slices((df.full_path.values,
+    #                                                df.target.values))
+    # dataset = dataset1.shuffle(len(df))
+    #
+    # dataset = dataset.map(load_data,
+    #                       num_parallel_calls=tf.data.AUTOTUNE)
+    #
+    #
+    # #do the augmentation
+    # dataset = dataset.map(augment)
+    # dataset = dataset.cache()
+    #
+    # dataset = dataset.batch(250)
+    # dataset = dataset.prefetch(buffer_size=tf.data.AUTOTUNE)
+    t0 = time.time()
+    for batchX,batchY in tqdm(dataset):
+        break
+    print(time.time()-t0)
+
+
+    #dataset = get_TF_ASL_DATASET(batch_size=32)
     # df = pd.read_csv(os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, TRAIN_CSV_FILE))
     # df["full_path"] = df.path.apply(map_full_path)
     # cDM = ASL_TF_DATASET(df.sample(1000), )
@@ -194,12 +365,14 @@ if __name__ == '__main__':
     # print(batch_X.shape  )
 
     #### Run it through a mlp
-
+    input_shape = (MAX_SEQUENCES,N_LANDMARKS,len(COLUMNS_TO_USE))
     # Define the model architecture
     model = tf.keras.Sequential([
-        tf.keras.layers.Flatten(input_shape=(150,184,2,)),
-        tf.keras.layers.Dense(50, activation='relu'),
-        tf.keras.layers.Dense(90, activation='relu'),
+        tf.keras.layers.Reshape((150, N_LANDMARKS*2), input_shape=input_shape),
+        tf.keras.layers.LSTM(64,return_sequences = True),
+        tf.keras.layers.LSTM(128,return_sequences = True),
+        tf.keras.layers.LSTM(256),
+        tf.keras.layers.Dense(75, activation='relu'),
         tf.keras.layers.Dense(N_CLASSES, activation='softmax')
     ])
 
@@ -210,7 +383,7 @@ if __name__ == '__main__':
     model.summary()
 
     model.fit(dataset,
-              epochs = 15,
+              epochs = 150,
               #validation_split=.1
               #steps_per_epoch=n_steps,
               )
