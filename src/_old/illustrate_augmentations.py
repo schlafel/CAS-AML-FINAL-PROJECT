@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
 
     #Load a sample....
-    frame_array = np.load(r".\..\data\processed\train_landmark_files\2044-14994870.npy")
+    frame_array = np.load(r"../../data/processed/train_landmark_files/2044-14994870.npy")
     frame_array[:,:,1] =  frame_array[:,:,1]*-1
 
 
