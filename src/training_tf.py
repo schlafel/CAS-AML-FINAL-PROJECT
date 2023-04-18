@@ -84,6 +84,9 @@ def run_training(PATH_TRAINING_CONFIG):
 
     # Set Experiment Dir
     experiment_dir = os.path.join(config_model["model_dir"], config_model["experiment_name"])
+    if os.path.exists(experiment_dir):
+        raise Exception(f'Experiment already exists {experiment_dir}')
+
     if not os.path.exists(experiment_dir):
         os.makedirs(experiment_dir)
 

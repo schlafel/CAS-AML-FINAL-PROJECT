@@ -2,7 +2,7 @@
 #Define the paths...
 
 model_dir: ./../models/TF_LSTM_BASELINE
-experiment_name: Exp_02
+experiment_name: Exp_03
 
 #Wheter to log files
 verbose: 1
