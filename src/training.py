@@ -16,6 +16,20 @@ import torch.optim as optim
 import torch
 def train_model(model, train_loader, valid_loader, criterion, optimizer, scheduler=None, num_epochs=EPOCHS,
                 save_freq=5, verbose=True):
+
+    """
+    Cooments
+    :param model:
+    :param train_loader:
+    :param valid_loader:
+    :param criterion:
+    :param optimizer:
+    :param scheduler:
+    :param num_epochs:
+    :param save_freq:
+    :param verbose:
+    :return:
+    """
     print(f"Training started")
     print(f"    Mode          : {DEVICE}")
     print(f"    Model type    : {type(model)}")

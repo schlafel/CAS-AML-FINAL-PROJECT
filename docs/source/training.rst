@@ -1,0 +1,5 @@
+Training
+======
+
+.. automodule:: training
+   :members:

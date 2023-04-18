@@ -15,6 +15,7 @@ Welcome to American Sign Language Recognition's documentation!
    data_utils
    dataset
    visualizations
+   training
 
 
 Indices and tables
