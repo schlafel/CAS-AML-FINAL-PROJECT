@@ -376,7 +376,7 @@ class Embedding(tf.keras.Model):
 
 
         # Positional Embedding, initialized with zeros
-        self.positional_embedding = tf.keras.layers.Embedding(INPUT_SIZE + 1, UNITS, embeddings_initializer=INIT_ZEROS)
+        self.positional_embedding = tf.keras.layers.Embedding(INPUT_SIZE + 1, self.units, embeddings_initializer=INIT_ZEROS)
         self.positional_weight = tf.Variable(1.)
         # Embedding layer for Landmarks
         self.lips_embedding = LandmarkEmbedding(self.lips_units, 'lips')

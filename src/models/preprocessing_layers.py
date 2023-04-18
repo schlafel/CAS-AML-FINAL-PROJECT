@@ -38,7 +38,12 @@ class PreprocessLayer(tf.keras.layers.Layer):
         N_FRAMES0 = tf.shape(data0)[0]
 
         # Filter Out Frames With Empty Hand Data
-        frames_hands_nansum = tf.experimental.numpy.nanmean(tf.gather(data0, self.HAND_IDX, axis=1), axis=[1, 2])
+        # frames_hands_nansum = tf.experimental.numpy.nanmean(tf.gather(data0, self.HAND_IDX, axis=1), axis=[1, 2])
+        frames_hands_nansum = tf.math.reduce_sum(
+            tf.cast(tf.math.is_nan(tf.gather(data0, self.HAND_IDX, axis=1)), tf.int32),
+            axis=[1, 2],
+        )
+
         non_empty_frames_idxs = tf.where(frames_hands_nansum > 0)
         non_empty_frames_idxs = tf.squeeze(non_empty_frames_idxs, axis=1)
         data = tf.gather(data0, non_empty_frames_idxs, axis=0)

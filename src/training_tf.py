@@ -1,27 +1,22 @@
 import importlib
-import torch
 
-import os
-from tqdm import tqdm
-import numpy as np
 import tensorflow as tf
 from tensorflow.keras.callbacks import TensorBoard
 import yaml
 import argparse
-
+from config import *
 # tf.config.experimental_run_functions_eagerly(True)
-if __name__ == '__main__':
-    tf.keras.backend.clear_session()
-    # Define arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--training_config", type=str,
-                        default="default_value1", help="Path to the Config YAML-File")
 
-    # Parse arguments
-    args = parser.parse_args()
 
-    # Access argument values
-    PATH_TRAINING_CONFIG = args.training_config
+def run_training(PATH_TRAINING_CONFIG):
+    """
+    Runs a machine learning training script using configuration specified in a YAML file.
+
+    :param PATH_TRAINING_CONFIG (str): Path to the YAML configuration file.
+    :return: None
+    """
+
+
 
     # Load the YAML config file
     with open(PATH_TRAINING_CONFIG, 'r') as f:
@@ -47,7 +42,7 @@ if __name__ == '__main__':
         staircase=config_model['training']['staircase']
     )
 
-    ###Build the model
+    ### Build the model
     model.build([None, *input_shape])
     model.compile(
         loss=config_model["training"]["loss_function"],
@@ -59,7 +54,7 @@ if __name__ == '__main__':
     print(x.shape)
     print(model.summary(expand_nested=True))
 
-    ############# LOAD DATA #############
+    ### Get DataLoaders
     tf_dataModule = importlib.import_module(config_model["data"]["type"])
     train_dataset = tf_dataModule.get_tf_dataset(csv_path=config_model["train_csv_file"],
                                                  data_path=config_model["data_dir"],
@@ -153,3 +148,29 @@ if __name__ == '__main__':
               )
 
     # Save Model to tflite?
+
+
+
+
+
+
+def main():
+    # Clear the TensorFlow session
+    tf.keras.backend.clear_session()
+
+    # Define arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--training_config", type=str,
+                        default="default_value1", help="Path to the Config YAML-File")
+
+    # Parse arguments
+    args = parser.parse_args()
+
+    # Access argument values
+    PATH_TRAINING_CONFIG = args.training_config
+
+    # Call the `run_training()` function with the `PATH_TRAINING_CONFIG` argument
+    run_training(PATH_TRAINING_CONFIG=PATH_TRAINING_CONFIG)
+
+if __name__ == '__main__':
+    main()

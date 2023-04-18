@@ -102,19 +102,34 @@ def run_transformer():
                                        useful_landmarks=useful_landmarks,
                                        hand_idxs=(USEFUL_LEFT_HAND_LANDMARKS.tolist() +
                                                   USEFUL_RIGHT_HAND_LANDMARKS.tolist()))
-    # Preprocess the data
+    ######### Preprocess the data #########
     if PREPROCESS:
         prepare_data_Masking(X_train, preprocess_layer, flag="train")
         prepare_data_Masking(X_val, preprocess_layer, flag="val")
 
-    # create dataset
+    ######### GET DATA #########
     train_data = get_dataloader(
         flag="train",
         augment_data=True,
-        batch_size=32)
+        batch_size=BATCH_SIZE)
 
-    for (X, idx), y in train_data:
-        print(X.shape, idx.shape, y.shape)
+    val_data = get_dataloader(
+        flag="validation",
+        augment_data=False,
+        batch_size=BATCH_SIZE)
+
+
+    ######### DEFINE MODEL #########
+
+    from src.models.tf_models import Transformer
+
+
+
+
+
+
+    # for (X, idx), y in train_data:
+    #     print(X.shape, idx.shape, y.shape)
 
     # val_data = prepare_data_Masking(X_val, preprocess_layer)
 
@@ -132,7 +147,8 @@ def get_dataloader(flag="train",
 
     dataset = dataset.shuffle(len(idx_0))
     if augment_data:
-        dataset = dataset.map(augment,num_parallel_calls=tf.data.AUTOTUNE)
+        dataset = dataset.map(augment,
+                              num_parallel_calls=tf.data.AUTOTUNE)
 
     dataset = dataset.cache()
 
@@ -178,4 +194,5 @@ def prepare_data_Masking(df,
 
 if __name__ == '__main__':
     PREPROCESS = False
+    BATCH_SIZE = 256
     run_transformer()
