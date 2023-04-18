@@ -1,11 +1,9 @@
 import tensorflow as tf
-import keras
-import tensorflow as tf
-from tensorflow.keras import layers
 from tensorflow.keras.models import Model
 import tensorflow.keras.layers as layers
 from src.models.utils import scaled_dot_product
-import numpy as np
+
+
 #import pydevd
 
 
@@ -467,15 +465,16 @@ if __name__ == '__main__':
 
     #Test the models
     from src.config import  *
-    from src.data.tf_data import *
+    from src.data.dataset import ASL_DATASET_TF
+    dataset_cls = ASL_DATASET_TF()
+    dataset = dataset_cls.create_dataset(batch_size = 250)
+
     csv_path = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, TRAIN_CSV_FILE)
     data_path = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR)
 
 
 
-    dataset = get_tf_dataset(csv_path,
-                   data_path,
-                   batch_size = 250)
+
     #
     for batchX,batchY in dataset:
         break
@@ -494,7 +493,7 @@ if __name__ == '__main__':
     #     tf.keras.layers.Dense(250, activation='softmax')
     # ])
 
-    model.build(input_shape=(None, 150, 184, 2))
+    model.build(input_shape=(None, 32, 184, 2))
     model.compile(optimizer='adam',
                   loss='sparse_categorical_crossentropy',
                   metrics=['accuracy'])

@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 
 from tqdm import tqdm
-from src.data.dataset import ASL_DATASET
+from src.data.dataset import ASL_DATASET,ASL_DATASET_TF
 
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
@@ -665,6 +665,56 @@ def create_data_loaders(asl_dataset, train_size=TRAIN_SIZE, valid_size=VALID_SIZ
 
     return train_loader, valid_loader, test_loader
 
+def create_data_loaders_TF(asl_dataset, train_size=TRAIN_SIZE, valid_size=VALID_SIZE, test_size=TEST_SIZE,
+                        batch_size=BATCH_SIZE, random_state=SEED,
+                           augment_train = False):
+    """
+    Split the ASL dataset into training, validation, and testing sets and create data loaders for each set.
+
+    Args:
+    asl_dataset (ASLDataset): The ASL dataset to load data from.
+    train_size (float, optional): The proportion of the dataset to include in the training set. Defaults to 0.8.
+    valid_size (float, optional): The proportion of the dataset to include in the validation set. Defaults to 0.1.
+    test_size (float, optional): The proportion of the dataset to include in the testing set. Defaults to 0.1.
+    batch_size (int, optional): The number of samples per batch to load. Defaults to BATCH_SIZE.
+    random_state (int, optional): The seed used by the random number generator for shuffling the data. Defaults to SEED.
+    augment_train (bool, optional): To augment the training data?
+    Returns:
+    tuple of DataSets: A tuple containing the datsets for training, validation, and testing sets.
+
+    :param asl_dataset: The ASL dataset to load data from.
+    :type asl_dataset: ASLDataset
+    :param train_size: The proportion of the dataset to include in the training set.
+    :type train_size: float
+    :param valid_size: The proportion of the dataset to include in the validation set.
+    :type valid_size: float
+    :param test_size: The proportion of the dataset to include in the testing set.
+    :type test_size: float
+    :param batch_size: The number of samples per batch to load.
+    :type batch_size: int
+    :param random_state: The seed used by the random number generator for shuffling the data.
+    :type random_state: int
+    :param augment_train: Augment the training dataset
+    :type augment_train: bool
+    :return: A tuple containing the data loaders for training, validation, and testing sets.
+    :rtype: tuple of DataLoader
+    """
+
+    # Split the data into train and test sets
+    train_df, test_df = train_test_split(asl_dataset.df_train, test_size=test_size, random_state=random_state,
+                                         stratify=asl_dataset.df_train['target'])
+
+    # Split the train set further into train and validation sets
+    train_df, valid_df = train_test_split(train_df, test_size=valid_size / (train_size + valid_size),
+                                          random_state=random_state, stratify=train_df['target'])
+
+    # Create dataset instances for each split
+    train_dataset = ASL_DATASET_TF(metadata_df=train_df).create_dataset(batch_size=batch_size, shuffle=True,augment = augment_train)
+    valid_dataset = ASL_DATASET_TF(metadata_df=valid_df).create_dataset(batch_size=batch_size, shuffle=False,augment = False)
+    test_dataset = ASL_DATASET_TF(metadata_df=test_df).create_dataset(batch_size=batch_size, shuffle=False,augment = False)
+
+    return train_dataset, valid_dataset, test_dataset
+
 
 # Old stuff.... Probably not used anymore....
 # def get_file_path(path):
@@ -683,43 +733,6 @@ def create_data_loaders(asl_dataset, train_size=TRAIN_SIZE, valid_size=VALID_SIZ
 #
 #     return df_train
 #
-
-def create_data_loaders_TF(asl_dataset,
-                           train_size=TRAIN_SIZE,
-                           valid_size=VALID_SIZE,
-                           test_size=TEST_SIZE,
-                           batch_size=BATCH_SIZE,
-                           random_state=SEED):
-    """
-    Split the ASL dataset into training, validation, and testing sets and create data loaders for each set as a TensorFlow Dataset.
-
-    Args:
-    asl_dataset (ASLDataset): The ASL dataset to load data from.
-    train_size (float, optional): The proportion of the dataset to include in the training set. Defaults to 0.8.
-    valid_size (float, optional): The proportion of the dataset to include in the validation set. Defaults to 0.1.
-    test_size (float, optional): The proportion of the dataset to include in the testing set. Defaults to 0.1.
-    batch_size (int, optional): The number of samples per batch to load. Defaults to BATCH_SIZE.
-    random_state (int, optional): The seed used by the random number generator for shuffling the data. Defaults to SEED.
-
-    Returns:
-    tuple of DataLoader: A tuple containing the data loaders for training, validation, and testing sets.
-
-    :param asl_dataset: The ASL dataset to load data from.
-    :type asl_dataset: ASLDataset
-    :param train_size: The proportion of the dataset to include in the training set.
-    :type train_size: float
-    :param valid_size: The proportion of the dataset to include in the validation set.
-    :type valid_size: float
-    :param test_size: The proportion of the dataset to include in the testing set.
-    :type test_size: float
-    :param batch_size: The number of samples per batch to load.
-    :type batch_size: int
-    :param random_state: The seed used by the random number generator for shuffling the data.
-    :type random_state: int
-    :return: A tuple containing the data loaders for training, validation, and testing sets.
-    :rtype: tuple of DataSets
-    """
-
 
 
 if __name__ == '__main__':

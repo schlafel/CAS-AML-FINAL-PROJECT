@@ -1,0 +1,74 @@
+
+#Define the paths...
+
+model_dir: ./../models/TF_LSTM_BASELINE
+experiment_name: Exp_02
+
+#Wheter to log files
+verbose: 1
+
+
+
+data:
+  augment_train: True
+  batch_size: 256
+
+
+
+model:
+  src: src.models.tf_models
+  model_name: LSTM_BASELINE_TF
+  params:
+    input_shape: [ 32, 184, 2 ]
+    num_classes: 250
+    n_LSTM_LAYERS: 4
+    n_hidden: 250
+    dropout: .2
+
+
+training:
+  epochs: 300
+  optimizer: adam
+  learning_rate: 0.0001
+  decay_steps: 1000
+  decay_rate: 0.96
+  staircase: True
+  loss_function: sparse_categorical_crossentropy
+  metrics:
+    - accuracy
+  callbacks:
+    SaveModelCallback:
+      src: src.callbacks.tf_callbacks
+      use: True
+      params:
+        model_path: ${model_dir}
+        save_best_only: True
+        monitor: val_accuracy
+        mode: max
+
+    EarlyStoppingCallback:
+      use: True
+      params:
+        monitor: val_accuracy
+        mode: max
+        patience: 5
+        verbose: 1
+
+    ModelCheckpoint:
+      save: True
+      params:
+        monitor: val_accuracy
+        mode: max
+        save_freq: "epoch"
+        save_best_only: True
+
+    #Always last!
+    TensorBoard:
+        log_dir: ${model_dir}
+
+
+#Convert to tf-lite
+conversion: True
+
+
+
