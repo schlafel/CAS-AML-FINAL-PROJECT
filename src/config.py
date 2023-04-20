@@ -109,7 +109,7 @@ N_DIMS = len(COLUMNS_TO_USE)
 
 # List with landmarks to use
 FACE_INDICES = np.argwhere(np.isin(USEFUL_ALL_LANDMARKS, USEFUL_FACE_LANDMARKS)).squeeze()
-LIPS_INDICES = np.argwhere(np.isin(USEFUL_ALL_LANDMARKS, USEFUL_FACE_LANDMARKS)).squeeze()
+LIPS_INDICES = np.argwhere(np.isin(USEFUL_ALL_LANDMARKS, LIPS_LANDMARKS)).squeeze()
 POSE_INDICES = np.argwhere(np.isin(USEFUL_ALL_LANDMARKS, USEFUL_POSE_LANDMARKS)).squeeze()
 HAND_INDICES = np.argwhere(np.isin(USEFUL_ALL_LANDMARKS, USEFUL_HAND_LANDMARKS)).squeeze()
 LEFT_HAND_INDICES = np.argwhere(np.isin(USEFUL_ALL_LANDMARKS, USEFUL_LEFT_HAND_LANDMARKS)).squeeze()
