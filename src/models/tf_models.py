@@ -2,7 +2,7 @@ import tensorflow as tf
 from tensorflow.keras.models import Model
 import tensorflow.keras.layers as layers
 from src.models.utils import scaled_dot_product
-
+from config import *
 
 #import pydevd
 
@@ -90,7 +90,7 @@ class EncoderLayer(tf.keras.layers.Layer):
                  d_model: int = 256,
                  num_heads: int = 8,
                  dff: int = 1024,
-                 dropout_rate: float = 0.1
+                 dropout_rate: float = 0.1,
                  ):
         super().__init__()
         self.self_att_block = SelfAttentionBlock(d_model = d_model,num_heads = num_heads)
@@ -165,9 +165,12 @@ class LSTM_BASELINE_TF(Model):
                  n_hidden = 256,
                  dropout = .25,
                  n_LSTM_LAYERS = 3,
-                 num_classes = 250):
+                 num_classes = 250,
+                 landmarks_to_use = None
+                 ):
         super().__init__()
         self.inp_shp = input_shape
+
         # self.reshp_1 = tf.keras.layers.Reshape((input_shape[0],input_shape[1]*input_shape[2]),
         #                                   input_shape=input_shape,
         #                                         )
