@@ -21,7 +21,7 @@ DATA_DIR = 'data/'
 #: Raw Data files Directory path
 RAW_DATA_DIR = 'data/raw/'
 #: Processed Data files Directory path
-PROCESSED_DATA_DIR = 'data/processed/'
+PROCESSED_DATA_DIR = 'data/processed_faceless/'
 #: Model files Directory path
 MODEL_DIR = 'models/'
 #: Checkpoint files Directory path
@@ -87,7 +87,7 @@ FACE_LANDMARKS = np.array(
      282, 283, 284, 285, 288, 293, 295, 296, 297, 300, 323, 332, 334, 336, 338, 356, 361, 362, 365, 373, 374, 377, 378,
      379, 380, 381, 382, 384, 385, 386, 387, 388, 389, 390, 397, 398, 400, 454, 466])
 #: Landmarks for face
-USEFUL_FACE_LANDMARKS = np.array(LIPS_LANDMARKS.tolist() + FACE_LANDMARKS.tolist())
+USEFUL_FACE_LANDMARKS = np.array(LIPS_LANDMARKS.tolist()) #+ FACE_LANDMARKS.tolist())
 #: Landmarks for pose
 USEFUL_POSE_LANDMARKS = np.arange(500, 514)
 #: Landmarks for left hand
@@ -118,4 +118,5 @@ RIGHT_HAND_INDICES = np.argwhere(np.isin(USEFUL_ALL_LANDMARKS, USEFUL_RIGHT_HAND
 INTEREMOLATE_MISSING = 3
 SKIP_CONSECUTIVE_ZEROS = 4
 INPUT_SIZE = 32
+MAX_SEQUENCES = 32
 MIN_SEQUEENCES = INPUT_SIZE / 4

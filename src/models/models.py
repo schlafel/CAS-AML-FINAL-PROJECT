@@ -164,13 +164,16 @@ class LSTM_Predictor(pl.LightningModule):
             num_classes=n_classes
         )
 
+        self.validation_step_outputs = []
+        self.test_step_outputs = []
+
     def forward(self, x):
         y_hat = self.model(x)
         return y_hat
 
     def training_step(self, batch, batch_idx):
-        landmarks = batch[0]
-        labels = batch[1]
+        landmarks = batch["landmarks"]
+        labels = batch["target"]
 
         # forward pass through the model
         out = self(landmarks)
@@ -188,18 +191,119 @@ class LSTM_Predictor(pl.LightningModule):
         return {"loss": loss, "train_accuracy": step_accuracy}
 
     def validation_step(self, batch, batch_idx):
-        pass
+
+        landmarks = batch["landmarks"]
+        labels = batch["target"]
+
+        # forward pass through the model
+        out = self(landmarks)
+
+        # calculate loss
+        loss = 0
+        if labels is not None:
+            loss = self.criterion(out, labels.view(-1))  # need to "flatten" the labels
+
+        y_hat = torch.argmax(out, dim=1)
+        step_accuracy = self.accuracy(y_hat, labels.view(-1))
+
+        self.validation_step_outputs.append(dict({"val_accuracy":step_accuracy,
+                                                  "val_loss":loss}))
+
+        self.log("val_loss", loss, prog_bar=True, logger=True,on_epoch=True)
+        self.log("val_accuracy", step_accuracy, prog_bar=True, logger=True,on_epoch=True)
+        return y_hat
+
+    def on_validation_end(self):
+
+        avg_loss = torch.stack([x['val_loss'] for x in self.validation_step_outputs]).mean()
+
+        val_acc = torch.stack([x['val_accuracy'] for x in self.validation_step_outputs]).mean()
+
+        tensorboard_logs = {'loss/validation': avg_loss,
+                            'accuracy/validation': val_acc,
+                            'step': self.current_epoch,
+                            # 'learning rate': self.lr_schedulers().get_last_lr()[0],
+                            }
+        # self.log_dict(tensorboard_logs,prog_bar=False)
+        self.print(f"EPOCH {self.current_epoch}, Accuracy: {val_acc}")
+        self.validation_step_outputs.clear()  # free memory
+
+    def test_step(self,batch,batch_idx) :
+        landmarks = batch["landmarks"]
+        labels = batch["target"]
+
+        # forward pass through the model
+        out = self(landmarks)
+
+        # calculate loss
+        loss = 0
+        if labels is not None:
+            loss = self.criterion(out, labels.view(-1))  # need to "flatten" the labels
+
+        y_hat = torch.argmax(out, dim=1)
+        step_accuracy = self.accuracy(y_hat, labels.view(-1))
+
+        self.test_step_outputs.append(dict({"test_accuracy":step_accuracy,
+                                                  "test_loss":loss,
+                                            "preds":y_hat,
+                                            "target":labels.view(-1)}))
+
+        self.log_dict(dict({"test_loss": loss,
+                            "test_accuracy":step_accuracy}),
+                      logger=True,
+                      on_epoch=True)
+        return y_hat
+
+    def on_test_end(self) -> None:
+        avg_loss = torch.stack([x['test_loss'] for x in self.test_step_outputs]).mean()
+
+        val_acc = torch.stack([x['test_accuracy'] for x in self.test_step_outputs]).mean()
+
+        tensorboard_logs = {'loss/test': avg_loss,
+                            'accuracy/test': val_acc,
+                            'step': self.current_epoch,
+                            # 'learning rate': self.lr_schedulers().get_last_lr()[0],
+                            }
+        # self.log_dict(tensorboard_logs,prog_bar=False)
+        self.print(f"EPOCH {self.current_epoch}, Accuracy: {val_acc}")
+        self.test_step_outputs.clear()  # free memory
+
+
+
+
 
     def configure_optimizers(self, ):
         return torch.optim.Adam(self.parameters(), lr=LEARNING_RATE)
 
 
+    def on_training_epoch_end(self,):
+
+        avg_loss = torch.stack([x['train_loss'] for x in outputs]).mean()
+
+        train_acc = torch.stack([x['train_accuracy'] for x in outputs]).mean()
+
+        tensorboard_logs = {'loss/train': avg_loss,
+                            'accuracy/train': train_acc,
+                            'step': self.current_epoch,
+                            'learning rate': self.lr_schedulers().get_last_lr()[0]}
+        self.log_dict(tensorboard_logs,prog_bar=True)
+
+
+
+
+
+
+
+
 
 class TransformerPredictor(LSTM_Predictor):
-    def __init__(self,seq_length:int =150, hidden_size:int=256,num_classes:int = 250,num_heads:int = 8):
+    def __init__(self,seq_length:int =150, hidden_size:int=256,num_classes:int = 250,num_heads:int = 8,dropout = .1):
         super().__init__()
-        self.model = TransformerSequenceClassifier(input_dim =seq_length,  num_heads = num_heads,
-                                                   hidden_size = hidden_size, num_classes = num_classes)
+        self.model = TransformerSequenceClassifier(input_dim =seq_length,
+                                                   num_heads = num_heads,
+                                                   hidden_size = hidden_size,
+                                                   num_classes = num_classes,
+                                                   dropout=dropout)
         # Define criterion
         self.criterion = nn.CrossEntropyLoss()
 
@@ -210,11 +314,11 @@ class TransformerPredictor(LSTM_Predictor):
 
     def forward(self,x):
 
-        x_padded = torch.nn.functional.pad(x, [0, 68], mode='constant', value=0, )
-        y_hat = self.model(x_padded)
+        # x_padded = torch.nn.functional.pad(x, [0, 68], mode='constant', value=0, )
+        x = x.reshape(x.shape[0],x.shape[1],x.shape[2]*x.shape[3]) #Flatten the inputs
+        y_hat = self.model(x)
         return y_hat
-    def validation_step(self, batch, batch_idx):
-        pass
+
 
     def configure_optimizers(self, ):
         return torch.optim.Adam(self.parameters(), lr=LEARNING_RATE)
@@ -227,23 +331,28 @@ class TransformerPredictor(LSTM_Predictor):
 
 # Added Transformer Model
 class TransformerSequenceClassifier(nn.Module):
-    def __init__(self, input_dim , num_classes, num_layers=2, hidden_size=256, num_heads=8, dropout=0.1):
+    def __init__(self, input_dim , num_classes,
+                 num_layers=2,
+                 hidden_size=256,
+                 num_heads=8,
+                 dropout=0.1):
         super().__init__()
 
         # Transformer layers
         self.transformer = nn.TransformerEncoder(
-            nn.TransformerEncoderLayer(hidden_size, num_heads, hidden_size * 4, dropout),
+            nn.TransformerEncoderLayer(hidden_size, num_heads, hidden_size * 4, dropout,batch_first=True),
             num_layers)
 
         # Output layer
         self.output_layer = nn.Linear(hidden_size, num_classes)
 
     def forward(self, inputs):
+        # inputs = inputs.reshape([inputs.shape[0],inputs.shape[1],inputs.shape[2]*inputs.shape[3]])
         # Permute the input sequence to match the expected format of the Transformer
         inputs = inputs.permute(1, 0, 2)
 
         # Pass the input sequence through the Transformer layers
-        transformed = self.transformer(inputs)
+        transformed = self.transformer(inputs.to(torch.float32))
 
         # Take the mean of the transformed sequence over the time dimension
         pooled = torch.mean(transformed, dim=0)

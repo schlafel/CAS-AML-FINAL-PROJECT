@@ -1,9 +1,8 @@
 import tensorflow as tf
 from src.config import *
-from src.data.data_utils import load_relevant_data_subset, load_train_frame
+from src.data.data_utils import load_relevant_data_subset
 from tqdm import tqdm
 import pyarrow.parquet as pq
-
 
 """
     Tensorflow layer to process data in TFLite
@@ -14,15 +13,15 @@ import pyarrow.parquet as pq
 class PreprocessLayer(tf.keras.layers.Layer):
     def __init__(self,
                  seq_length=32,
-                 useful_landmarks: list = [],
-                 hand_idxs: list = []
+                 useful_landmarks = USEFUL_ALL_LANDMARKS.tolist(),
+                 hand_idxs = USEFUL_HAND_LANDMARKS.tolist(),
                  ):
         super(PreprocessLayer, self).__init__()
         self.SEQ_LENGTH = seq_length
         self.USEFUL_LANDMARKS_IDX = useful_landmarks
-        self.HAND_IDX = hand_idxs
-
+        self.USEFUL_HAND_LANDMARKS = hand_idxs
         self.N_COLS = len(self.USEFUL_LANDMARKS_IDX)
+        self.N_DIMS = 3
 
     def pad_edge(self, t, repeats, side):
         if side == 'LEFT':
@@ -30,26 +29,21 @@ class PreprocessLayer(tf.keras.layers.Layer):
         elif side == 'RIGHT':
             return tf.concat((t, tf.repeat(t[-1:], repeats=repeats, axis=0)), axis=0)
 
-    @tf.function(
-        input_signature=(tf.TensorSpec(shape=[None, 543, 3], dtype=tf.float32),),
-    )
+    #@tf.function(
+    #    input_signature=(tf.TensorSpec(shape=[None, 543, 3], dtype=tf.float32),), )
     def call(self, data0):
         # Number of Frames in Video
         N_FRAMES0 = tf.shape(data0)[0]
 
         # Filter Out Frames With Empty Hand Data
         # frames_hands_nansum = tf.experimental.numpy.nanmean(tf.gather(data0, self.HAND_IDX, axis=1), axis=[1, 2])
-        frames_hands_nansum = tf.math.reduce_sum(
-            tf.cast(tf.math.is_nan(tf.gather(data0, self.HAND_IDX, axis=1)), tf.int32),
-            axis=[1, 2],
-        )
+        data_hands = tf.gather(data0, self.USEFUL_HAND_LANDMARKS, axis=1)
+        non_empty_frames_idxs =  tf.squeeze(tf.where(tf.experimental.numpy.nansum(data_hands, axis=(1, 2)) != 0))
 
-        non_empty_frames_idxs = tf.where(frames_hands_nansum > 0)
-        non_empty_frames_idxs = tf.squeeze(non_empty_frames_idxs, axis=1)
+
         data = tf.gather(data0, non_empty_frames_idxs, axis=0)
+        # tf.print(data0.shape, data.shape)
 
-        # Cast Indices in float32 to be compatible with Tensorflow Lite
-        non_empty_frames_idxs = tf.cast(non_empty_frames_idxs, tf.float32)
 
         # Number of Frames in Filtered Video
         N_FRAMES = tf.shape(data)[0]
@@ -65,18 +59,16 @@ class PreprocessLayer(tf.keras.layers.Layer):
             data = tf.pad(data, [[0, self.SEQ_LENGTH - N_FRAMES], [0, 0], [0, 0]], constant_values=0)
             # Fill NaN Values With 0
             data = tf.where(tf.math.is_nan(data), 0.0, data)
-            return data, non_empty_frames_idxs
+            return data, tf.cast(non_empty_frames_idxs,tf.float32)
         # Video needs to be downsampled to INPUT_SIZE
         else:
             # Repeat
             if N_FRAMES < self.SEQ_LENGTH ** 2:
-                repeats = tf.math.floordiv(self.SEQ_LENGTH * self.SEQ_LENGTH, N_FRAMES0)
+                repeats = self.SEQ_LENGTH * self.SEQ_LENGTH // N_FRAMES
                 data = tf.repeat(data, repeats=repeats, axis=0)
-                non_empty_frames_idxs = tf.repeat(non_empty_frames_idxs, repeats=repeats, axis=0)
 
-            # Pad To Multiple Of Input Size
-            pool_size = tf.math.floordiv(len(data), self.SEQ_LENGTH)
-            if tf.math.mod(len(data), self.SEQ_LENGTH) > 0:
+            pool_size = len(data) // self.SEQ_LENGTH
+            if len(data) % self.SEQ_LENGTH > 0:
                 pool_size += 1
 
             if pool_size == 1:
@@ -84,32 +76,25 @@ class PreprocessLayer(tf.keras.layers.Layer):
             else:
                 pad_size = (pool_size * self.SEQ_LENGTH) % len(data)
 
-            # Pad Start/End with Start/End value
-            pad_left = tf.math.floordiv(pad_size, 2) + tf.math.floordiv(self.SEQ_LENGTH, 2)
-            pad_right = tf.math.floordiv(pad_size, 2) + tf.math.floordiv(self.SEQ_LENGTH, 2)
-            if tf.math.mod(pad_size, 2) > 0:
+            pad_left = pad_size // 2 + self.SEQ_LENGTH // 2
+            pad_right = pad_size // 2 + self.SEQ_LENGTH // 2
+            if pad_size % 2 > 0:
                 pad_right += 1
 
-            # Pad By Concatenating Left/Right Edge Values
-            data = self.pad_edge(data, pad_left, 'LEFT')
-            data = self.pad_edge(data, pad_right, 'RIGHT')
+            data = tf.experimental.numpy.concatenate((tf.repeat(data[:1], repeats=pad_left, axis=0), data),
+                                           axis=0)
+            data = tf.experimental.numpy.concatenate((data, tf.repeat(data[-1:], repeats=pad_right, axis=0)),
+                                           axis=0)
 
-            # Pad Non Empty Frame Indices
-            non_empty_frames_idxs = self.pad_edge(non_empty_frames_idxs, pad_left, 'LEFT')
-            non_empty_frames_idxs = self.pad_edge(non_empty_frames_idxs, pad_right, 'RIGHT')
-
-            # Reshape to Mean Pool
-            data = tf.reshape(data, [self.SEQ_LENGTH, -1, self.N_COLS, 3])
-            non_empty_frames_idxs = tf.reshape(non_empty_frames_idxs, [self.SEQ_LENGTH, -1])
-
-            # Mean Pool
+            data = tf.reshape(data,[INPUT_SIZE, -1, N_LANDMARKS, self.N_DIMS])
             data = tf.experimental.numpy.nanmean(data, axis=1)
-            non_empty_frames_idxs = tf.experimental.numpy.nanmean(non_empty_frames_idxs, axis=1)
 
-            # Fill NaN Values With 0
+            size = INPUT_SIZE
+
+            non_empty_frames_idxs = tf.linspace(0, len(USEFUL_ALL_LANDMARKS), INPUT_SIZE)
+
             data = tf.where(tf.math.is_nan(data), 0.0, data)
-
-            return data, non_empty_frames_idxs
+            return data, tf.cast(non_empty_frames_idxs,tf.float32)
 
 
 # Get complete file path to file

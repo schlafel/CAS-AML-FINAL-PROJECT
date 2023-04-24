@@ -4,8 +4,8 @@ import tensorflow.keras.layers as layers
 from src.models.utils import scaled_dot_product
 from config import *
 
-#import pydevd
 
+# import pydevd
 
 
 class FeedForward(tf.keras.layers.Layer):
@@ -19,7 +19,7 @@ class FeedForward(tf.keras.layers.Layer):
         self.layer_norm = layers.LayerNormalization(epsilon=1e-6)
 
     @tf.function
-    def call(self, inputs,training = False,**kwargs):
+    def call(self, inputs, training=False, **kwargs):
         x = self.dense_1(inputs)
         x = self.dense_2(x)
         x = self.dropout(x)
@@ -27,6 +27,7 @@ class FeedForward(tf.keras.layers.Layer):
         x = self.add([inputs, x])
         x = self.layer_norm(x)
         return x
+
 
 @tf.function
 def positional_encoding(length, depth):
@@ -52,7 +53,7 @@ class PositionalEncoding(tf.keras.layers.Layer):
         self.pos_encoding = positional_encoding(length=seq_length, depth=d_model)
 
     @tf.function
-    def call(self, x,training = False, **kwargs):
+    def call(self, x, training=False, **kwargs):
         length = tf.shape(x)[1]
         # This factor sets the relative scale of the embedding and positonal_encoding.
         x *= tf.math.sqrt(tf.cast(self.d_model, tf.float32))
@@ -67,23 +68,24 @@ class SelfAttentionBlock(tf.keras.layers.Layer):
                  dropout_rate: float = 0.1):
         super().__init__()
         self.mha = layers.MultiHeadAttention(num_heads=num_heads,
-                                                      key_dim = d_model,
-                                                      value_dim=d_model
-                                                      )
+                                             key_dim=d_model,
+                                             value_dim=d_model
+                                             )
         self.layernorm = layers.LayerNormalization(epsilon=1e-6)
         self.add = tf.keras.layers.Add()
         self.dropout = layers.Dropout(rate=dropout_rate)
 
     @tf.function
-    def call(self, x, training = False, **kwargs):
+    def call(self, x, training=False, **kwargs):
         attn_output = self.mha(
             query=x,
             value=x,
             key=x)
         x = self.add([x, attn_output])
-        #tf.print(x.shape)
+        # tf.print(x.shape)
         x = self.layernorm(x)
         return x
+
 
 class EncoderLayer(tf.keras.layers.Layer):
     def __init__(self,
@@ -93,14 +95,15 @@ class EncoderLayer(tf.keras.layers.Layer):
                  dropout_rate: float = 0.1,
                  ):
         super().__init__()
-        self.self_att_block = SelfAttentionBlock(d_model = d_model,num_heads = num_heads)
-        self.ff_block = FeedForward(d_model=d_model,dff=dff,dropout_rate=dropout_rate)
+        self.self_att_block = SelfAttentionBlock(d_model=d_model, num_heads=num_heads)
+        self.ff_block = FeedForward(d_model=d_model, dff=dff, dropout_rate=dropout_rate)
 
     @tf.function
-    def call(self, inputs, training = False, **kwargs):
+    def call(self, inputs, training=False, **kwargs):
         x = self.self_att_block(inputs)
         x = self.ff_block(x)
         return x
+
 
 class Encoder(tf.keras.layers.Layer):
     def __init__(self, n_encoder_blocks: int = 1,
@@ -110,13 +113,15 @@ class Encoder(tf.keras.layers.Layer):
                  dropout_rate: float = 0.1
                  ):
         super().__init__()
-        self.enc = [EncoderLayer(d_model=d_model, num_heads=num_heads, dff=dff, dropout_rate=dropout_rate) for n in range(n_encoder_blocks)]
+        self.enc = [EncoderLayer(d_model=d_model, num_heads=num_heads, dff=dff, dropout_rate=dropout_rate) for n in
+                    range(n_encoder_blocks)]
 
     @tf.function
-    def call(self, x, training = False, **kwargs):
+    def call(self, x, training=False, **kwargs):
         for enc in self.enc:
-            x = enc(x,training = training)
+            x = enc(x, training=training)
         return x
+
 
 class TransformerClassifierModel(Model):
     def __init__(self,
@@ -139,14 +144,13 @@ class TransformerClassifierModel(Model):
         self.avgPool = layers.GlobalAveragePooling1D()
         self.fc = layers.Dense(num_classes, activation='softmax')
 
-
     @tf.function
     def call(self, inputs, training=False, **kwargs):
         x = self.pos_encoding(inputs)
-        x = self.encoder(x,training=training)
+        x = self.encoder(x, training=training)
         x = self.avgPool(x)
-        #pydevd.settrace(suspend=False)
-#        tf.print(x.shape,type(x))
+        # pydevd.settrace(suspend=False)
+        #        tf.print(x.shape,type(x))
         return self.fc(x)
 
     def compile(self, **kwargs):
@@ -161,48 +165,63 @@ class TransformerClassifierModel(Model):
 
 class LSTM_BASELINE_TF(Model):
     def __init__(self,
-                 input_shape = (150,184,2),
-                 n_hidden = 256,
-                 dropout = .25,
-                 n_LSTM_LAYERS = 3,
-                 num_classes = 250,
-                 landmarks_to_use = None
+                 input_shape=(150, 184, 2),
+                 n_hidden=256,
+                 dropout=.25,
+                 n_LSTM_LAYERS=3,
+                 num_classes=250,
+                 means=None,
+                 stds=None,
+                 landmarks_to_use=None
                  ):
         super().__init__()
         self.inp_shp = input_shape
 
+        if means is not None:
+            self.means = tf.convert_to_tensor(means)
+            self.stds = tf.convert_to_tensor(stds)
+        else:
+            self.means = tf.zeros((input_shape[1:]))
+            self.stds = tf.ones((input_shape[1:]))
+
         # self.reshp_1 = tf.keras.layers.Reshape((input_shape[0],input_shape[1]*input_shape[2]),
         #                                   input_shape=input_shape,
         #                                         )
-        self.shape_lstm = (input_shape[0],input_shape[1]*input_shape[2])
+        self.shape_lstm = (input_shape[0], input_shape[1] * input_shape[2])
 
         self.hidden_lstm = [tf.keras.layers.LSTM(n_hidden,
-                                                 return_sequences = True,
-                                                 name = f"HIDDEN_LSTM_{i}") for i in range(n_LSTM_LAYERS-1)]
-        self.dropouts = [tf.keras.layers.Dropout(dropout) for _ in range(n_LSTM_LAYERS-1)]
+                                                 return_sequences=True,
+                                                 name=f"HIDDEN_LSTM_{i}") for i in range(n_LSTM_LAYERS - 1)]
+        self.dropouts = [tf.keras.layers.Dropout(dropout) for _ in range(n_LSTM_LAYERS - 1)]
 
-        self.final_lstm = tf.keras.layers.LSTM(n_hidden,return_sequences = False,
-                                               name = "Final_LSTM_LAYER")
+        self.final_lstm = tf.keras.layers.LSTM(n_hidden, return_sequences=False,
+                                               name="Final_LSTM_LAYER")
 
-        self.fc_layer = tf.keras.layers.Dense(num_classes,activation = "softmax")
+        self.fc_layer = tf.keras.layers.Dense(num_classes, activation="softmax")
 
         # self.model()
 
-    @tf.function
-    def call(self,inputs,training = False):
-        #Reshape the inputs
+    # @tf.function(input_signature=[
+    #     tf.TensorSpec(shape=(None, 32, 96, 2), dtype=tf.float32),
+    #     tf.TensorSpec(shape=(None, 32), dtype=tf.float32),
+    # ])
+    def call(self, inputs):
+        # Reshape the inputs
         # x = self.reshp_1(inputs)
-        x = tf.reshape(inputs,shape=[-1, *self.shape_lstm])
-        #Run through the hidden_lstm
-        for lstm,dropout in zip(self.hidden_lstm,self.dropouts):
+        inputs, non_empty_idx = inputs
+        if self.means is not None:
+            x = (inputs - self.means) / self.stds
+
+        x = tf.reshape(x, shape=[-1, *self.shape_lstm])
+        # Run through the hidden_lstm
+        for lstm, dropout in zip(self.hidden_lstm, self.dropouts):
             x = lstm(x)
             x = dropout(x)
 
-
-        #do the final lstm
+        # do the final lstm
         x = self.final_lstm(x)
 
-        #Finally the fc-Layer
+        # Finally the fc-Layer
         out = self.fc_layer(x)
         return out
 
@@ -211,15 +230,17 @@ class LSTM_BASELINE_TF(Model):
     #     return Model(inputs=[x], outputs=self.call(x))
     #
 
+
 class Very_simple_model(tf.keras.models.Model):
-    def __init__(self,shapes = (150,184*2)):
+    def __init__(self, shapes=(150, 184 * 2)):
         super().__init__()
         self.flat = tf.keras.layers.Flatten()
 
-        self.reshape = tf.keras.layers.Reshape((150,184*2))
+        self.reshape = tf.keras.layers.Reshape((150, 184 * 2))
         self.dl = [tf.keras.layers.Dense(100) for _ in range(3)]
-        self.otpt = tf.keras.layers.Dense(250,activation = "softmax")
+        self.otpt = tf.keras.layers.Dense(250, activation="softmax")
         self.mdl_shp = shapes
+
     @tf.function
     def call(self, inputs, training=None, mask=None):
         x = tf.reshape(inputs, shape=[-1, *self.mdl_shp])
@@ -228,7 +249,6 @@ class Very_simple_model(tf.keras.models.Model):
         x = self.flat(inputs)
 
         return self.otpt(x)
-
 
 
 class MultiHeadAttention(tf.keras.layers.Layer):
@@ -260,21 +280,19 @@ class MultiHeadAttention(tf.keras.layers.Layer):
 class Transformer(tf.keras.Model):
     def __init__(self,
                  num_blocks,
-                 mha_units = 384,
-                 mlp_ratio = 2,
-                 layer_norm_epsilon = 1e-6,
-                 mlp_dropout = 0.3,
-                 tansformer_heads = 8):
+                 mha_units=384,
+                 mlp_ratio=2,
+                 layer_norm_epsilon=1e-6,
+                 mlp_dropout=0.3,
+                 tansformer_heads=8):
         super(Transformer, self).__init__(name='transformer')
         self.num_blocks = num_blocks
 
-        self.mha_units = mha_units #embedding size
+        self.mha_units = mha_units  # embedding size
         self.mlp_ratio = mlp_ratio
-        self.layer_norm_epsilon = layer_norm_epsilon #embedding size
-        self.mlp_dropout = mlp_dropout #embedding size
-        self.tansformer_heads = tansformer_heads #embedding size
-
-
+        self.layer_norm_epsilon = layer_norm_epsilon  # embedding size
+        self.mlp_dropout = mlp_dropout  # embedding size
+        self.tansformer_heads = tansformer_heads  # embedding size
 
     def build(self, input_shape):
         self.ln_1s = []
@@ -323,7 +341,6 @@ class LandmarkEmbedding(tf.keras.Model):
         INIT_GLOROT_UNIFORM = tf.keras.initializers.glorot_uniform
         INIT_ZEROS = tf.keras.initializers.constant(0.0)
 
-
         # Embedding for missing landmark in frame, initizlied with zeros
         self.empty_embedding = self.add_weight(
             name=f'{self.name}_empty_embedding',
@@ -350,11 +367,11 @@ class LandmarkEmbedding(tf.keras.Model):
 
 
 class Embedding(tf.keras.Model):
-    def __init__(self, lips_units= 384,
-                 hands_units= 384,
-                 pose_units= 384,
-                 units = 384):
-        super(Embedding, self,).__init__()
+    def __init__(self, lips_units=384,
+                 hands_units=384,
+                 pose_units=384,
+                 units=384):
+        super(Embedding, self, ).__init__()
 
         self.lips_units = lips_units
         self.hands_units = hands_units
@@ -375,9 +392,9 @@ class Embedding(tf.keras.Model):
         INIT_GLOROT_UNIFORM = tf.keras.initializers.glorot_uniform
         INIT_ZEROS = tf.keras.initializers.constant(0.0)
 
-
         # Positional Embedding, initialized with zeros
-        self.positional_embedding = tf.keras.layers.Embedding(INPUT_SIZE + 1, self.units, embeddings_initializer=INIT_ZEROS)
+        self.positional_embedding = tf.keras.layers.Embedding(INPUT_SIZE + 1, self.units,
+                                                              embeddings_initializer=INIT_ZEROS)
         self.positional_weight = tf.Variable(1.)
         # Embedding layer for Landmarks
         self.lips_embedding = LandmarkEmbedding(self.lips_units, 'lips')
@@ -390,7 +407,8 @@ class Embedding(tf.keras.Model):
         self.fc = tf.keras.Sequential([
             tf.keras.layers.Dense(self.units, name='fully_connected_1', use_bias=False,
                                   kernel_initializer=INIT_GLOROT_UNIFORM, activation=GELU),
-            tf.keras.layers.Dense(self.units, name='fully_connected_2', use_bias=False, kernel_initializer=INIT_HE_UNIFORM),
+            tf.keras.layers.Dense(self.units, name='fully_connected_2', use_bias=False,
+                                  kernel_initializer=INIT_HE_UNIFORM),
         ], name='fc')
 
     def call(self, lips0, left_hand0, right_hand0, pose0, non_empty_frame_idxs, training=False):
@@ -421,7 +439,6 @@ class Embedding(tf.keras.Model):
         x = x + self.positional_weight * self.positional_embedding(normalised_non_empty_frame_idxs)
 
         return x
-
 
 
 if __name__ == '__main__':
@@ -466,23 +483,21 @@ if __name__ == '__main__':
     # print(model.summary())
     #
 
-    #Test the models
-    from src.config import  *
+    # Test the models
+    from src.config import *
     from src.data.dataset import ASL_DATASET_TF
+
     dataset_cls = ASL_DATASET_TF()
-    dataset = dataset_cls.create_dataset(batch_size = 250)
+    dataset = dataset_cls.create_dataset(batch_size=250)
 
     csv_path = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, TRAIN_CSV_FILE)
     data_path = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR)
 
-
-
-
     #
-    for batchX,batchY in dataset:
+    for batchX, batchY in dataset:
         break
 
-    print(batchX.shape,batchX.dtype)
+    print(batchX.shape, batchX.dtype)
 
     model = LSTM_BASELINE_TF()
     model = Very_simple_model()
@@ -504,8 +519,5 @@ if __name__ == '__main__':
     print(model.summary(expand_nested=True))
 
     model.fit(dataset,
-              epochs = 150,
+              epochs=150,
               )
-
-
-

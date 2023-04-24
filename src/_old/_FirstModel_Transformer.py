@@ -16,6 +16,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint,DeviceStatsMonitor
 from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.tuner import Tuner
 from src.config import *
+from src.data import data_utils
 
 from data_models import ASL_DATSET, ASLDataModule, ASLDataModule_Preprocessed
 from src.models.models import LSTM_BASELINE_Model, LSTM_Predictor, TransformerPredictor
@@ -31,23 +32,25 @@ if __name__ == '__main__':
     #4. Fit the Model
     """
 
-    MAX_SEQUENCES = 150
+    # MAX_SEQUENCES = 150
     BATCH_SIZE = 64  #Not optimal as not a perfect power of 2, but maximum that fits in my GPU
     num_workers = os.cpu_count() // 2  # or 0
     mod_name = "FIRST_TRANSFORMER_MODEL_2"
 
     # ------------ 1. Load data ------------
-    dM = ASLDataModule_Preprocessed(batch_size=BATCH_SIZE,
-                                    max_seq_length=MAX_SEQUENCES,
-                                    num_workers=num_workers)
-    dM.setup()
-    dL = dM.train_dataloader()
-    print(next(iter(dL))[0].shape)
-    batch = next(iter(dL))[0]
+    asl_dataset = data_utils.ASL_DATASET(augment = True, )
+
+    train_ds, val_ds, test_ds = data_utils.create_data_loaders(asl_dataset)
+
+    # dM.setup()
+    # dL = dM.train_dataloader()
+    print(next(iter(train_ds))["landmarks"].shape)
+    batch = next(iter(train_ds))["landmarks"]
     # ------------ 2. Create Model PL------------
-    model = TransformerPredictor(seq_length=MAX_SEQUENCES,
-                                 hidden_size=436,
-                                 num_heads=2
+    model = TransformerPredictor(seq_length=INPUT_SIZE,
+                                 hidden_size=192,
+                                 num_heads=4,
+                                 dropout = .2
                                  )
 
     print(model)
@@ -56,11 +59,11 @@ if __name__ == '__main__':
     # Model checkpoints
     checkpoint_callback = ModelCheckpoint(
         dirpath=os.path.join(ROOT_PATH, "checkpoints"),
-        filename=mod_name + "-{epoch:02d}-{train_accuracy:.2f}",
+        filename=mod_name + "-{epoch:02d}-{val_accuracy:.2f}",
         save_top_k=1,
-        monitor="train_loss",
+        monitor="val_accuracy",
         verbose=True,
-        mode="min"
+        mode="max"
     )
     # Tensorboard logger
     tb_logger = TensorBoardLogger(
@@ -74,8 +77,9 @@ if __name__ == '__main__':
         accelerator="gpu",
         logger=tb_logger,
         callbacks=[DeviceStatsMonitor(),checkpoint_callback],
-        max_epochs=50,
-        limit_val_batches=0,
+        max_epochs=100,
+        #limit_train_batches=10,
+        # limit_val_batches=0,
         num_sanity_val_steps=0,
         profiler=None,#select from None
     )
@@ -93,5 +97,15 @@ if __name__ == '__main__':
     # ------------ 5. Train Model ------------
     trainer.fit(
         model=model,
-        datamodule=dM,
+        train_dataloaders=train_ds,
+        val_dataloaders=val_ds,
+
+
     )
+
+
+    # ----------- 6. Test Model ------------
+
+    trainer.test(ckpt_path="best",
+                 dataloaders=test_ds
+                 )
