@@ -21,7 +21,7 @@ DATA_DIR = 'data/'
 #: Raw Data files Directory path
 RAW_DATA_DIR = 'data/raw/'
 #: Processed Data files Directory path
-PROCESSED_DATA_DIR = 'data/processed/'
+PROCESSED_DATA_DIR = 'data/processed_faceless/'
 #: Model files Directory path
 MODEL_DIR = 'models/'
 #: Checkpoint files Directory path
