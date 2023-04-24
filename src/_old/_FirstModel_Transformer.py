@@ -58,7 +58,6 @@ if __name__ == '__main__':
     # ------------ 3. Create Model Callbacks------------
     # Model checkpoints
     checkpoint_callback = ModelCheckpoint(
-        dirpath=os.path.join(ROOT_PATH, "checkpoints","lighthning_logs","version_{version number}"),
         filename=mod_name + "-{epoch:02d}-{val_accuracy:.2f}",
         save_top_k=1,
         monitor="val_accuracy",

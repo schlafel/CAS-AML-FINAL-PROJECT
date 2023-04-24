@@ -19,8 +19,8 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-def load_relevant_data_subset(pq_path):
-    data_columns = COLUMNS_TO_USE
+def load_relevant_data_subset(pq_path,cols_to_use = COLUMNS_TO_USE):
+    data_columns = cols_to_use
     data = pd.read_parquet(pq_path, columns=data_columns)
     n_frames = int(len(data) / ROWS_PER_FRAME)
     data = data.values.reshape(n_frames, ROWS_PER_FRAME, len(data_columns))
@@ -125,7 +125,7 @@ def preprocess_raw_data(sample=100000):
 
     # Generate Absolute path to store landmark processed files
     processed_files = np.array(
-        [f"{x}-{y}.npy" for (x, y) in zip(df_train["participant_id"].values, df_train["sequence_id"].values)])
+        [f"{x}-{y}.npz" for (x, y) in zip(df_train["participant_id"].values, df_train["sequence_id"].values)])
 
     # keep tect signs and their respective indices
     signs = df_train["sign"].values
@@ -136,24 +136,40 @@ def preprocess_raw_data(sample=100000):
     orig_size = []
     usable_size = []
 
+    # Create lists for all landmarks
+    lm_list = []
+
     # Process the data and return result it
     for i, idx in tqdm(enumerate(range(len(df_train))), total=len(df_train)):
         sample = preprocess_data_item(raw_landmark_path=file_paths[idx], targets_sign=targets[idx])
 
         # Save the processed data to disk as numpy arrays
-        np.save(os.path.join(landmarks_dir_path, processed_files[idx]), sample['landmarks'])
+        np.savez(os.path.join(landmarks_dir_path, processed_files[idx]),
+                 landmarks = sample['landmarks'],
+                 non_empty_idx = sample['non_empty_idx'])
+
+        lm_list.append(np.where(sample['landmarks']==0,np.nan,sample['landmarks']))
         size.append(sample['size'])
         orig_size.append(sample['orig_size'])
-        usable_size.append(sample['usable_size'])
+        # usable_size.append(sample['usable_size'])
 
     df_train["path"] = [LANDMARK_FILES + '/' + f for f in processed_files]
     df_train["size"] = size
     df_train["orig_size"] = orig_size
     df_train["target"] = targets
-    df_train["usable_size"] = usable_size
+    #df_train["usable_size"] = usable_size
 
     train_csv_output_path = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, TRAIN_CSV_FILE)
     df_train.to_csv(train_csv_output_path, sep=',', index=False)
+
+
+    # Calculate the statistics
+    lm_array = np.concatenate(lm_list)
+    lm_means = np.nanmean(lm_array, axis=0)
+    lm_std = np.nanstd(lm_array, axis=0)
+    np.save(os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, "mean.npy"), lm_means)
+    np.save(os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, "std.npy"), lm_std)
+
 
     # Create the marker file
     with open(marker_file_path, 'w') as f:
@@ -196,12 +212,13 @@ def preprocess_data_item(raw_landmark_path, targets_sign):
 
     # Read in the parquet file and process the data
     landmarks = load_relevant_data_subset(raw_landmark_path)
-
-    landmarks, size, orig_size, usable_size = preprocess_data_to_same_size(landmarks)
-
+    orig_size = landmarks.shape[0]
+    #landmarks, size, orig_size, usable_size = preprocess_data_to_same_size(landmarks)
+    landmarks,non_empty_idx, size = preprocess_data(landmarks=landmarks)
     # Create a dictionary with the processed data
-    return {'landmarks': landmarks, 'target': targets_sign, 'size': size, 'orig_size': orig_size,
-            'usable_size': usable_size}
+    return {'landmarks': landmarks, 'target': targets_sign, 'size': size,
+            'orig_size': orig_size,
+            'non_empty_idx':non_empty_idx}
 
 
 def preprocess_data_to_same_size(landmarks):
@@ -299,9 +316,11 @@ def preprocess_data(landmarks):
 
         size = INPUT_SIZE
 
+        non_empty_frames_idxs = np.linspace(0,len(landmarks),INPUT_SIZE)
+
     landmark_data = np.where(np.isnan(landmark_data), 0.0, landmark_data)
 
-    return landmark_data, size
+    return landmark_data,  non_empty_frames_idxs,size
 
 
 def calculate_landmark_length_stats():
@@ -561,7 +580,15 @@ def remove_outlier_or_missing_data(landmark_len_dict):
         file_path = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, row['path'])
 
         try:
-            data = np.load(file_path)
+            if file_path.endswith(".npz"):
+                data = np.load(file_path)
+                landmarks = data["landmarks"]
+                non_empty_idx = data["non_empty_idx"]
+                data.close()
+
+            else:
+                data = np.load(file_path)
+                landmarks = np.array(data)
         except Exception as e:
             print(f"Error loading file {file_path}: {e}")
             missing_file = True
@@ -573,7 +600,7 @@ def remove_outlier_or_missing_data(landmark_len_dict):
         average_len = landmark_len_dict[sign]['mean']
         std_len = landmark_len_dict[sign]['std']
 
-        landmarks = np.array(data)
+
         landmarks_len = len(landmarks)
 
         # Extract left-hand, right-hand landmarks

@@ -164,6 +164,7 @@ class LSTM_Predictor(pl.LightningModule):
             num_classes=n_classes
         )
 
+        self.train_step_outputs = []
         self.validation_step_outputs = []
         self.test_step_outputs = []
 
@@ -186,10 +187,22 @@ class LSTM_Predictor(pl.LightningModule):
         y_hat = torch.argmax(out, dim=1)
         step_accuracy = self.accuracy(y_hat, labels.view(-1))
 
-        self.log("train_loss", loss, prog_bar=True, logger=True)
-        self.log("train_accuracy", step_accuracy, prog_bar=True, logger=True)
-        return {"loss": loss, "train_accuracy": step_accuracy}
+        self.validation_step_outputs.append(dict({"train_accuracy":step_accuracy,
+                                                  "train_loss":loss}))
 
+
+        self.log("train_loss", loss, prog_bar=True, logger=True)
+        self.log("train_accuracy", step_accuracy,
+                 prog_bar=True,
+                 logger=True)
+        return {"loss": loss, "train_accuracy": step_accuracy}
+    def on_train_epoch_end(self) -> None:
+        #get average training accuracy
+        avg_loss = torch.stack([x['train_loss'] for x in self.training_step_outputs]).mean()
+
+        train_acc = torch.stack([x['train_accuracy'] for x in self.training_step_outputs]).mean()
+        print(f"EPOCH {self.current_epoch}: Train accuracy: {train_acc}")
+        self.train_step_outputs.clear()
     def validation_step(self, batch, batch_idx):
 
         landmarks = batch["landmarks"]
@@ -212,7 +225,8 @@ class LSTM_Predictor(pl.LightningModule):
         self.log_dict(dict({"val_loss": loss,
                             "val_accuracy":step_accuracy}),
                       prog_bar=False,
-                      logger=True,on_epoch=True)
+                      logger=True,
+                      on_epoch=True)
         #self.log("val_accuracy", step_accuracy, prog_bar=True, logger=True,on_epoch=True)
         return y_hat
 
