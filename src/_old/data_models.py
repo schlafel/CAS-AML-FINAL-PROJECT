@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import torch
 from torch.utils.data import Dataset, DataLoader
 import pyarrow.parquet as pq
 import json
@@ -12,7 +13,7 @@ from src.config import *
 
 
 class ASL_DATSET(Dataset):
-    def __init__(self, transform=None, max_seq_length=MAX_SEQUENCES, ):
+    def __init__(self, transform=None, max_seq_length=INPUT_SIZE, ):
         super().__init__()
 
         self.transform = transform
@@ -92,7 +93,7 @@ class ASL_DATSET(Dataset):
         #    sample = self.transform(landmarks)
 
         # create tensor
-        lm = torch.from_numpy(landmarks).float().reshape(self.max_seq_length, self.n_features * 2)
+        lm = torch.from_numpy(landmarks).float().reshape(self.max_seq_length, self.n_features * 2).to(torch.float32)
 
         return {'landmarks': lm, 'target': torch.Tensor([target]).long()}
 
@@ -101,7 +102,7 @@ class ASL_DATSET(Dataset):
 
 
 class ASL_DATSET_PROCESSED(ASL_DATSET):
-    def __init__(self, transform=None, max_seq_length=MAX_SEQUENCES):
+    def __init__(self, transform=None, max_seq_length=INPUT_SIZE):
         super(ASL_DATSET_PROCESSED, self).__init__(transform=None, max_seq_length=max_seq_length)
         self.max_seq_length = max_seq_length
     def __getitem__(self, idx):
@@ -120,12 +121,12 @@ class ASL_DATSET_PROCESSED(ASL_DATSET):
 
         #Reshape
         landmarks = landmarks.reshape(self.max_seq_length,sample.shape[1]*2)
-        return (torch.from_numpy(landmarks).float(),torch.Tensor([target]).long())
+        return (torch.from_numpy(landmarks).float().to(torch.float32),torch.Tensor([target]).long())
 
 
 class ASLDataModule(pl.LightningDataModule):
     def __init__(self,
-                 max_seq_length=MAX_SEQUENCES,
+                 max_seq_length=INPUT_SIZE,
                  batch_size=16,
                  num_workers=0):
         super().__init__()

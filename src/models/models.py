@@ -209,8 +209,11 @@ class LSTM_Predictor(pl.LightningModule):
         self.validation_step_outputs.append(dict({"val_accuracy":step_accuracy,
                                                   "val_loss":loss}))
 
-        self.log("val_loss", loss, prog_bar=True, logger=True,on_epoch=True)
-        self.log("val_accuracy", step_accuracy, prog_bar=True, logger=True,on_epoch=True)
+        self.log_dict(dict({"val_loss": loss,
+                            "val_accuracy":step_accuracy}),
+                      prog_bar=False,
+                      logger=True,on_epoch=True)
+        #self.log("val_accuracy", step_accuracy, prog_bar=True, logger=True,on_epoch=True)
         return y_hat
 
     def on_validation_end(self):
@@ -225,7 +228,7 @@ class LSTM_Predictor(pl.LightningModule):
                             # 'learning rate': self.lr_schedulers().get_last_lr()[0],
                             }
         # self.log_dict(tensorboard_logs,prog_bar=False)
-        self.print(f"EPOCH {self.current_epoch}, Accuracy: {val_acc}")
+        self.print(f"EPOCH {self.current_epoch}, Validation Accuracy: {val_acc}")
         self.validation_step_outputs.clear()  # free memory
 
     def test_step(self,batch,batch_idx) :

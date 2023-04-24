@@ -9,6 +9,7 @@ from data.data_utils import create_data_loaders_TF
 from data.dataset import ASL_DATASET_TF
 from sklearn.metrics import classification_report
 
+
 # tf.config.experimental_run_functions_eagerly(True)
 
 
@@ -20,7 +21,7 @@ def run_training(PATH_TRAINING_CONFIG):
     :return: None
     """
 
-    print(30 * "*", os.path.basename(PATH_TRAINING_CONFIG),30*"*")
+    print(30 * "*", os.path.basename(PATH_TRAINING_CONFIG), 30 * "*")
 
     # Load the YAML config file
     with open(PATH_TRAINING_CONFIG, 'r') as f:
@@ -36,7 +37,12 @@ def run_training(PATH_TRAINING_CONFIG):
 
     input_shape = tuple(config_model["model"]["params"]["input_shape"])
 
-    model = model_class(**config_model['model']["params"])
+    means = np.load(os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, "mean.npy"))
+    stds = np.load(os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, "std.npy"))
+
+    model = model_class(**config_model['model']["params"],
+                        means=means,
+                        stds=stds)
 
     # Set up the learning rate scheduler
     lr_scheduler = tf.keras.optimizers.schedules.ExponentialDecay(
@@ -47,26 +53,35 @@ def run_training(PATH_TRAINING_CONFIG):
     )
 
     ### Build the model
-    model.build([None, *input_shape])
+    # load x_means
+    x = model((np.ones((1, *input_shape)),
+               np.ones((1,input_shape[0]))))
+
+    # model.build([
+    #     (None, *input_shape),
+    #     (None, input_shape[0]),
+    # ])
+
     model.compile(
         loss=config_model["training"]["loss_function"],
         optimizer=tf.keras.optimizers.Adam(learning_rate=lr_scheduler),
         metrics=config_model["training"]["metrics"],
     )
 
-    x = model(np.zeros((1, *input_shape)))
+
     print(x.shape)
     print(model.summary(expand_nested=True))
 
     ### Get DataLoaders
     data = ASL_DATASET_TF(augment=config_model["data"]["augment_train"])
-    train_dataset,val_dataset,test_dataset = create_data_loaders_TF(data,
-                                                                    train_size=TRAIN_SIZE,
-                                                                    valid_size=VALID_SIZE,
-                                                                    test_size=TEST_SIZE,
-                                                                    batch_size = config_model["data"]["batch_size"],
-                                                                    augment_train =   config_model["data"]["augment_train"])
-    #Log the Datasizes to the conifg_model
+    train_dataset, val_dataset, test_dataset = create_data_loaders_TF(data,
+                                                                      train_size=TRAIN_SIZE,
+                                                                      valid_size=VALID_SIZE,
+                                                                      test_size=TEST_SIZE,
+                                                                      batch_size=config_model["data"]["batch_size"],
+                                                                      augment_train=config_model["data"][
+                                                                          "augment_train"])
+    # Log the Datasizes to the conifg_model
     config_model["data"]["TRAIN_SIZE"] = TRAIN_SIZE
     config_model["data"]["VAL_SIZE"] = VALID_SIZE
     config_model["data"]["TEST_SIZE"] = TEST_SIZE
@@ -74,8 +89,9 @@ def run_training(PATH_TRAINING_CONFIG):
         f"Training Dataset: {tf.data.experimental.cardinality(train_dataset).numpy()} Elements (Batch-Size {config_model['data']['batch_size']}) --> {config_model['data']['batch_size'] * tf.data.experimental.cardinality(train_dataset).numpy()} samples "
         f"\nValidation Dataset: {tf.data.experimental.cardinality(val_dataset).numpy()} Elements (Batch-Size {config_model['data']['batch_size']}) --> {config_model['data']['batch_size'] * tf.data.experimental.cardinality(val_dataset).numpy()} samples ")
 
-
-
+    ######### SANITY CHECK run on a BATCH:
+    # for (X),y in train_dataset:
+    #     model(X)
 
     ############# SETUP PATHS #############
     # TODO: get coorect paths from yaml file (Dynamic Variables)
@@ -98,7 +114,6 @@ def run_training(PATH_TRAINING_CONFIG):
     ############ Callbacks ############
 
     cb_list = []
-
 
     ##       SaveModelCallback
     config_SaveModel = config_model["training"]["callbacks"]["SaveModelCallback"]
@@ -125,7 +140,7 @@ def run_training(PATH_TRAINING_CONFIG):
 
         mod_ckpt = tf.keras.callbacks.ModelCheckpoint(
             filepath=os.path.join(ckpt_path, 'best_model', ),
-                **mdl_ckpt["params"]
+            **mdl_ckpt["params"]
         )
 
         cb_list.append(mod_ckpt)
@@ -144,14 +159,13 @@ def run_training(PATH_TRAINING_CONFIG):
     #     break
     # print(X_batch.shape, X_batch.dtype)
 
-
     print("Logging tensorboard to ",
-          os.path.abspath(config_model["training"]["callbacks"]["TensorBoard"]["log_dir"] ))
+          os.path.abspath(config_model["training"]["callbacks"]["TensorBoard"]["log_dir"]))
     ############ FIT MODEL ############
     model.fit(train_dataset,
               epochs=config_model["training"]["epochs"],
               callbacks=cb_list,
-              validation_data = val_dataset,
+              validation_data=val_dataset,
 
               )
 
@@ -167,15 +181,9 @@ def run_training(PATH_TRAINING_CONFIG):
     y_pred = tf.argmax(y_pred, axis=1)
     print(classification_report(y_test, y_pred))
 
-
     # Save Model to tflite?
 
-
     # Load the best model
-
-
-
-
 
 
 def main():
@@ -195,6 +203,7 @@ def main():
 
     # Call the `run_training()` function with the `PATH_TRAINING_CONFIG` argument
     run_training(PATH_TRAINING_CONFIG=PATH_TRAINING_CONFIG)
+
 
 if __name__ == '__main__':
     main()
