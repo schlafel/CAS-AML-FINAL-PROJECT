@@ -62,7 +62,8 @@ if __name__ == '__main__':
     # ------------ 1. Load data ------------
     asl_dataset = data_utils.ASL_DATASET(augment=True, )
 
-    train_ds, val_ds, test_ds = data_utils.create_data_loaders(asl_dataset)
+    train_ds, val_ds, test_ds = data_utils.create_data_loaders(asl_dataset,
+                                                               batch_size=BATCH_SIZE)
 
     # dM.setup()
     # dL = dM.train_dataloader()
@@ -70,12 +71,12 @@ if __name__ == '__main__':
     batch = next(iter(train_ds))["landmarks"]
     # ------------ 2. Create Model PL------------
     model = TransformerPredictor(
-        d_model=INPUT_SIZE,
-        n_head=4,
+        d_model=192,
+        n_head=8,
         dim_feedforward=512,
         dropout=0.25,
         layer_norm_eps=1e-5,
-        norm_first=True,
+        norm_first=False,
         batch_first=True,
         num_layers=3,
         num_classes=250
@@ -105,7 +106,7 @@ if __name__ == '__main__':
         logger=tb_logger,
         callbacks=[DeviceStatsMonitor(), checkpoint_callback, MyProgressBar()],
         max_epochs=100,
-        limit_train_batches=10,
+       # limit_train_batches=10,
         # limit_val_batches=0,
         num_sanity_val_steps=0,
         profiler=None,  # select from None

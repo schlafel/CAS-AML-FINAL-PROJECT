@@ -334,22 +334,22 @@ class TransformerSequenceClassifier(nn.Module):
                  dropout=0.1,
                  layer_norm_eps = 1e-5,
                  norm_first = True,
-                 batch_first = True,
+                 batch_first = False,
                  num_layers=2,
                  num_classes = 250,
     ):
         super().__init__()
-
+        self.batch_first = batch_first
         # Transformer layers
         self.transformer = nn.TransformerEncoder(
-            nn.TransformerEncoderLayer(d_model,
-                                       n_head,
+            nn.TransformerEncoderLayer(d_model=d_model,
+                                       nhead = n_head,
                                        dim_feedforward=dim_feedforward,
                                        dropout = dropout,
                                        layer_norm_eps=layer_norm_eps,
                                        norm_first=norm_first,
                                        batch_first=batch_first),
-            norm = 1e-6,
+            #norm = 1e-6,
             num_layers=num_layers)
 
         # Output layer
@@ -358,13 +358,14 @@ class TransformerSequenceClassifier(nn.Module):
     def forward(self, inputs):
         # inputs = inputs.reshape([inputs.shape[0],inputs.shape[1],inputs.shape[2]*inputs.shape[3]])
         # Permute the input sequence to match the expected format of the Transformer
+
         #inputs = inputs.permute(1, 0, 2)
 
         # Pass the input sequence through the Transformer layers
         transformed = self.transformer(inputs.to(torch.float32))
 
         # Take the mean of the transformed sequence over the time dimension
-        pooled = torch.mean(transformed, dim=0)
+        pooled = torch.mean(transformed, dim=1)
 
         # Pass the pooled sequence through the output layer
         output = self.output_layer(pooled)
