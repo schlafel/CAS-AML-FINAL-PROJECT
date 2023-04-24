@@ -686,9 +686,9 @@ def create_data_loaders(asl_dataset, train_size=TRAIN_SIZE, valid_size=VALID_SIZ
     test_dataset = ASL_DATASET(metadata_df=test_df)
 
     # Create data loaders for each split
-    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
-    valid_loader = DataLoader(valid_dataset, batch_size=BATCH_SIZE, shuffle=False)
-    test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
     return train_loader, valid_loader, test_loader
 

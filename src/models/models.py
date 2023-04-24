@@ -8,6 +8,7 @@ from torchmetrics.classification import accuracy
 from config import *
 import math
 
+
 class LSTM_BASELINE_Model(nn.Module):
     def __init__(self, n_features=N_LANDMARKS, n_classes=N_CLASSES, n_hidden=256, num_layers=3, dropout=0.3):
         super().__init__()
@@ -25,7 +26,7 @@ class LSTM_BASELINE_Model(nn.Module):
             dropout=dropout)
 
         self.fc = nn.Linear(n_hidden, n_classes)
-        
+
     def __repr__(self):
         return "LSTM_BASELINE_Model"
 
@@ -48,8 +49,6 @@ class LSTM_BASELINE_Model(nn.Module):
         return out
 
 
-
-
 class ImprovedLSTMModel(nn.Module):
     def __init__(self, n_features=N_LANDMARKS, n_classes=N_CLASSES, n_hidden=512, num_layers=3, dropout=0.5):
         super().__init__()
@@ -69,7 +68,7 @@ class ImprovedLSTMModel(nn.Module):
         self.fc1 = nn.Linear(n_hidden, n_hidden)
         self.dropout = nn.Dropout(dropout)
         self.fc2 = nn.Linear(n_hidden, n_classes)
-        
+
     def __repr__(self):
         return "ImprovedLSTMModel"
 
@@ -93,7 +92,7 @@ class ImprovedLSTMModel(nn.Module):
         out = self.fc2(out)
 
         return out
-    
+
 
 class PositionalEncoding(nn.Module):
     def __init__(self, d_model, dropout=0.1, max_len=150):
@@ -110,20 +109,22 @@ class PositionalEncoding(nn.Module):
 
     def forward(self, x):
         x = x + self.pe[:x.size(0), :]
-        return self.dropout(x)    
+        return self.dropout(x)
+
 
 class ASLTransformerModel(nn.Module):
-    def __init__(self, n_features=N_LANDMARKS*2, n_classes=N_CLASSES, d_model=512, nhead=8, num_layers=4, dropout=0.3):
+    def __init__(self, n_features=N_LANDMARKS * 2, n_classes=N_CLASSES, d_model=512, nhead=8, num_layers=4,
+                 dropout=0.3):
         super(ASLTransformerModel, self).__init__()
 
         self.embedding = nn.Linear(n_features, d_model)
         self.pos_encoder = PositionalEncoding(d_model, dropout)
-        
+
         encoder_layers = TransformerEncoderLayer(d_model, nhead, d_model * 2, dropout)
         self.transformer_encoder = TransformerEncoder(encoder_layers, num_layers)
-        
+
         self.decoder = nn.Linear(d_model, n_classes)
-        
+
     def __repr__(self):
         return "ASLTransformerModel"
 
@@ -136,12 +137,12 @@ class ASLTransformerModel(nn.Module):
 
         x = nn.utils.rnn.pack_padded_sequence(x, seq_lengths.cpu(), batch_first=True, enforce_sorted=False)
         x, _ = nn.utils.rnn.pad_packed_sequence(x, batch_first=True)
-        
+
         x = self.transformer_encoder(x)
         x = self.decoder(x[:, -1, :])
         return x
-    
-    
+
+
 class LSTM_Predictor(pl.LightningModule):
     def __init__(self,
                  n_features: int = 188,
@@ -179,7 +180,7 @@ class LSTM_Predictor(pl.LightningModule):
         # forward pass through the model
         out = self(landmarks)
 
-        #calculate loss
+        # calculate loss
         loss = 0
         if labels is not None:
             loss = self.criterion(out, labels.view(-1))  # need to "flatten" the labels
@@ -187,26 +188,28 @@ class LSTM_Predictor(pl.LightningModule):
         y_hat = torch.argmax(out, dim=1)
         step_accuracy = self.accuracy(y_hat, labels.view(-1))
 
-        self.validation_step_outputs.append(dict({"train_accuracy":step_accuracy,
-                                                  "train_loss":loss}))
-
+        self.train_step_outputs.append(dict({"train_accuracy": step_accuracy,
+                                             "train_loss": loss}))
 
         self.log("train_loss", loss, prog_bar=True, logger=True)
         self.log("train_accuracy", step_accuracy,
                  prog_bar=True,
                  logger=True)
         return {"loss": loss, "train_accuracy": step_accuracy}
-    def on_train_epoch_end(self) -> None:
-        #get average training accuracy
-        avg_loss = torch.stack([x['train_loss'] for x in self.training_step_outputs]).mean()
 
-        train_acc = torch.stack([x['train_accuracy'] for x in self.training_step_outputs]).mean()
+    def on_train_epoch_end(self) -> None:
+        # get average training accuracy
+        avg_loss = torch.stack([x['train_loss'] for x in self.train_step_outputs]).mean()
+
+        train_acc = torch.stack([x['train_accuracy'] for x in self.train_step_outputs]).mean()
+        print(" ")
         print(f"EPOCH {self.current_epoch}: Train accuracy: {train_acc}")
         self.train_step_outputs.clear()
+        print(100*"*")
+
     def validation_step(self, batch, batch_idx):
 
-        landmarks = batch["landmarks"]
-        labels = batch["target"]
+        landmarks, labels = batch["landmarks"], batch["target"]
 
         # forward pass through the model
         out = self(landmarks)
@@ -219,15 +222,20 @@ class LSTM_Predictor(pl.LightningModule):
         y_hat = torch.argmax(out, dim=1)
         step_accuracy = self.accuracy(y_hat, labels.view(-1))
 
-        self.validation_step_outputs.append(dict({"val_accuracy":step_accuracy,
-                                                  "val_loss":loss}))
+        self.validation_step_outputs.append(
+            dict({
+                "val_accuracy": step_accuracy,
+                "val_loss": loss,
+            }))
 
-        self.log_dict(dict({"val_loss": loss,
-                            "val_accuracy":step_accuracy}),
-                      prog_bar=False,
-                      logger=True,
-                      on_epoch=True)
-        #self.log("val_accuracy", step_accuracy, prog_bar=True, logger=True,on_epoch=True)
+        self.log_dict(
+            dict({
+                "val_loss": loss,
+                "val_accuracy": step_accuracy,
+            }),
+            prog_bar=False,
+            logger=True,
+            on_epoch=True)
         return y_hat
 
     def on_validation_end(self):
@@ -236,16 +244,10 @@ class LSTM_Predictor(pl.LightningModule):
 
         val_acc = torch.stack([x['val_accuracy'] for x in self.validation_step_outputs]).mean()
 
-        tensorboard_logs = {'loss/validation': avg_loss,
-                            'accuracy/validation': val_acc,
-                            'step': self.current_epoch,
-                            # 'learning rate': self.lr_schedulers().get_last_lr()[0],
-                            }
-        # self.log_dict(tensorboard_logs,prog_bar=False)
         self.print(f"EPOCH {self.current_epoch}, Validation Accuracy: {val_acc}")
         self.validation_step_outputs.clear()  # free memory
 
-    def test_step(self,batch,batch_idx) :
+    def test_step(self, batch, batch_idx):
         landmarks = batch["landmarks"]
         labels = batch["target"]
 
@@ -260,13 +262,13 @@ class LSTM_Predictor(pl.LightningModule):
         y_hat = torch.argmax(out, dim=1)
         step_accuracy = self.accuracy(y_hat, labels.view(-1))
 
-        self.test_step_outputs.append(dict({"test_accuracy":step_accuracy,
-                                                  "test_loss":loss,
-                                            "preds":y_hat,
-                                            "target":labels.view(-1)}))
+        self.test_step_outputs.append(dict({"test_accuracy": step_accuracy,
+                                            "test_loss": loss,
+                                            "preds": y_hat,
+                                            "target": labels.view(-1)}))
 
         self.log_dict(dict({"test_loss": loss,
-                            "test_accuracy":step_accuracy}),
+                            "test_accuracy": step_accuracy}),
                       logger=True,
                       on_epoch=True)
         return y_hat
@@ -276,51 +278,35 @@ class LSTM_Predictor(pl.LightningModule):
 
         val_acc = torch.stack([x['test_accuracy'] for x in self.test_step_outputs]).mean()
 
-        tensorboard_logs = {'loss/test': avg_loss,
-                            'accuracy/test': val_acc,
-                            'step': self.current_epoch,
-                            # 'learning rate': self.lr_schedulers().get_last_lr()[0],
-                            }
-        # self.log_dict(tensorboard_logs,prog_bar=False)
         self.print(f"EPOCH {self.current_epoch}, Accuracy: {val_acc}")
         self.test_step_outputs.clear()  # free memory
-
-
-
-
 
     def configure_optimizers(self, ):
         return torch.optim.Adam(self.parameters(), lr=LEARNING_RATE)
 
 
-    def on_training_epoch_end(self,):
-
-        avg_loss = torch.stack([x['train_loss'] for x in outputs]).mean()
-
-        train_acc = torch.stack([x['train_accuracy'] for x in outputs]).mean()
-
-        tensorboard_logs = {'loss/train': avg_loss,
-                            'accuracy/train': train_acc,
-                            'step': self.current_epoch,
-                            'learning rate': self.lr_schedulers().get_last_lr()[0]}
-        self.log_dict(tensorboard_logs,prog_bar=True)
-
-
-
-
-
-
-
-
 
 class TransformerPredictor(LSTM_Predictor):
-    def __init__(self,seq_length:int =150, hidden_size:int=256,num_classes:int = 250,num_heads:int = 8,dropout = .1):
+    def __init__(self,
+                 d_model=256,
+                 n_head=8,
+                 dim_feedforward=512,
+                 dropout=0.1,
+                 layer_norm_eps=1e-5,
+                 norm_first=True,
+                 batch_first=True,
+                 num_layers=2,
+                 num_classes=250):
         super().__init__()
-        self.model = TransformerSequenceClassifier(input_dim =seq_length,
-                                                   num_heads = num_heads,
-                                                   hidden_size = hidden_size,
-                                                   num_classes = num_classes,
-                                                   dropout=dropout)
+        self.model = TransformerSequenceClassifier(d_model=d_model,
+                                                   n_head=n_head,
+                                                   dim_feedforward=dim_feedforward,
+                                                   dropout=dropout,
+                                                   layer_norm_eps=layer_norm_eps,
+                                                   norm_first=norm_first,
+                                                   batch_first=batch_first,
+                                                   num_layers=num_layers,
+                                                   num_classes=num_classes)
         # Define criterion
         self.criterion = nn.CrossEntropyLoss()
 
@@ -329,44 +315,50 @@ class TransformerPredictor(LSTM_Predictor):
             num_classes=num_classes
         )
 
-    def forward(self,x):
-
+    def forward(self, x):
         # x_padded = torch.nn.functional.pad(x, [0, 68], mode='constant', value=0, )
-        x = x.reshape(x.shape[0],x.shape[1],x.shape[2]*x.shape[3]) #Flatten the inputs
+        x = x.reshape(x.shape[0], x.shape[1], x.shape[2] * x.shape[3])  # Flatten the inputs
         y_hat = self.model(x)
         return y_hat
-
 
     def configure_optimizers(self, ):
         return torch.optim.Adam(self.parameters(), lr=LEARNING_RATE)
 
 
-
-
-
-
-
 # Added Transformer Model
 class TransformerSequenceClassifier(nn.Module):
-    def __init__(self, input_dim , num_classes,
+    def __init__(self,
+                 d_model=256,
+                 n_head=8,
+                 dim_feedforward = 512,
+                 dropout=0.1,
+                 layer_norm_eps = 1e-5,
+                 norm_first = True,
+                 batch_first = True,
                  num_layers=2,
-                 hidden_size=256,
-                 num_heads=8,
-                 dropout=0.1):
+                 num_classes = 250,
+    ):
         super().__init__()
 
         # Transformer layers
         self.transformer = nn.TransformerEncoder(
-            nn.TransformerEncoderLayer(hidden_size, num_heads, hidden_size * 4, dropout,batch_first=True),
-            num_layers)
+            nn.TransformerEncoderLayer(d_model,
+                                       n_head,
+                                       dim_feedforward=dim_feedforward,
+                                       dropout = dropout,
+                                       layer_norm_eps=layer_norm_eps,
+                                       norm_first=norm_first,
+                                       batch_first=batch_first),
+            norm = 1e-6,
+            num_layers=num_layers)
 
         # Output layer
-        self.output_layer = nn.Linear(hidden_size, num_classes)
+        self.output_layer = nn.Linear(d_model, num_classes)
 
     def forward(self, inputs):
         # inputs = inputs.reshape([inputs.shape[0],inputs.shape[1],inputs.shape[2]*inputs.shape[3]])
         # Permute the input sequence to match the expected format of the Transformer
-        inputs = inputs.permute(1, 0, 2)
+        #inputs = inputs.permute(1, 0, 2)
 
         # Pass the input sequence through the Transformer layers
         transformed = self.transformer(inputs.to(torch.float32))
@@ -378,4 +370,3 @@ class TransformerSequenceClassifier(nn.Module):
         output = self.output_layer(pooled)
 
         return output
-

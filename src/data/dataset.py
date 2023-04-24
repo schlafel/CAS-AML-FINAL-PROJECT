@@ -127,8 +127,10 @@ class ASL_DATASET:
         landmark_file = self.file_paths[idx]
 
         # Read in the processed file
-        landmarks = np.load(landmark_file)
-
+        sample = np.load(landmark_file)
+        landmarks = sample["landmarks"]
+        sample.close()
+        #dmarks = sample["landmarks"]
         # Get the processed landmarks and target for the data
         target = self.target[idx]
         size = self.size[idx]

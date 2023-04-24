@@ -9,10 +9,11 @@ import numpy as np
 import torch.nn.functional as F
 from tqdm import tqdm
 import pytorch_lightning as pl
+import sys
 # from sklearn import *
 from torchmetrics.classification import accuracy
 
-from pytorch_lightning.callbacks import ModelCheckpoint,DeviceStatsMonitor
+from pytorch_lightning.callbacks import ModelCheckpoint, DeviceStatsMonitor, TQDMProgressBar
 from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.tuner import Tuner
 from src.config import *
@@ -20,6 +21,27 @@ from src.data import data_utils
 
 from data_models import ASL_DATSET, ASLDataModule, ASLDataModule_Preprocessed
 from src.models.models import LSTM_BASELINE_Model, LSTM_Predictor, TransformerPredictor
+
+
+class MyProgressBar(TQDMProgressBar):
+    def init_validation_tqdm(self):
+        bar = super().init_validation_tqdm()
+        if not sys.stdout.isatty():
+            bar.disable = True
+        return bar
+
+    def init_predict_tqdm(self):
+        bar = super().init_predict_tqdm()
+        if not sys.stdout.isatty():
+            bar.disable = True
+        return bar
+
+    def init_test_tqdm(self):
+        bar = super().init_test_tqdm()
+        if not sys.stdout.isatty():
+            bar.disable = True
+        return bar
+
 
 if __name__ == '__main__':
     """
@@ -33,12 +55,12 @@ if __name__ == '__main__':
     """
 
     # MAX_SEQUENCES = 150
-    BATCH_SIZE = 64  #Not optimal as not a perfect power of 2, but maximum that fits in my GPU
+    BATCH_SIZE = 256  # Not optimal as not a perfect power of 2, but maximum that fits in my GPU
     num_workers = os.cpu_count() // 2  # or 0
-    mod_name = "FIRST_TRANSFORMER_MODEL_2"
+    mod_name = "FIRST_TRANSFORMER_MODEL"
 
     # ------------ 1. Load data ------------
-    asl_dataset = data_utils.ASL_DATASET(augment = True, )
+    asl_dataset = data_utils.ASL_DATASET(augment=True, )
 
     train_ds, val_ds, test_ds = data_utils.create_data_loaders(asl_dataset)
 
@@ -47,14 +69,20 @@ if __name__ == '__main__':
     print(next(iter(train_ds))["landmarks"].shape)
     batch = next(iter(train_ds))["landmarks"]
     # ------------ 2. Create Model PL------------
-    model = TransformerPredictor(seq_length=INPUT_SIZE,
-                                 hidden_size=192,
-                                 num_heads=4,
-                                 dropout = .2
-                                 )
-
-    print(model)
+    model = TransformerPredictor(
+        d_model=INPUT_SIZE,
+        n_head=4,
+        dim_feedforward=512,
+        dropout=0.25,
+        layer_norm_eps=1e-5,
+        norm_first=True,
+        batch_first=True,
+        num_layers=3,
+        num_classes=250
+    )
     model(batch)
+    print(model)
+
     # ------------ 3. Create Model Callbacks------------
     # Model checkpoints
     checkpoint_callback = ModelCheckpoint(
@@ -66,7 +94,7 @@ if __name__ == '__main__':
     )
     # Tensorboard logger
     tb_logger = TensorBoardLogger(
-        save_dir=os.path.join(ROOT_PATH, "checkpoints","lightning_logs"),
+        save_dir=os.path.join(ROOT_PATH, "lightning_logs"),
         name=mod_name,
         # version=mod_name
     )
@@ -75,12 +103,12 @@ if __name__ == '__main__':
         enable_progress_bar=True,
         accelerator="gpu",
         logger=tb_logger,
-        callbacks=[DeviceStatsMonitor(),checkpoint_callback],
+        callbacks=[DeviceStatsMonitor(), checkpoint_callback, MyProgressBar()],
         max_epochs=100,
-        #limit_train_batches=10,
+        limit_train_batches=10,
         # limit_val_batches=0,
         num_sanity_val_steps=0,
-        profiler=None,#select from None
+        profiler=None,  # select from None
     )
 
     # ------------ 4. Tune Model ------------
@@ -90,8 +118,7 @@ if __name__ == '__main__':
     #     datamodule=dM,
     #     init_val = 256
     # )
-    #1024 is optimal...
-
+    # 1024 is optimal...
 
     # ------------ 5. Train Model ------------
     trainer.fit(
@@ -99,9 +126,7 @@ if __name__ == '__main__':
         train_dataloaders=train_ds,
         val_dataloaders=val_ds,
 
-
     )
-
 
     # ----------- 6. Test Model ------------
 
