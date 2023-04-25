@@ -13,7 +13,7 @@ import sys
 # from sklearn import *
 from torchmetrics.classification import accuracy
 
-from pytorch_lightning.callbacks import ModelCheckpoint, DeviceStatsMonitor, TQDMProgressBar
+from pytorch_lightning.callbacks import ModelCheckpoint, DeviceStatsMonitor, TQDMProgressBar,EarlyStopping
 from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.tuner import Tuner
 from src.config import *
@@ -100,11 +100,23 @@ if __name__ == '__main__':
         # version=mod_name
     )
 
+    early_stop_callback = EarlyStopping(
+        monitor='val_accuracy',
+        min_delta=0.00,
+        patience=4,
+        verbose=False,
+        mode='max'
+    )
+
     trainer = pl.Trainer(
         enable_progress_bar=True,
         accelerator="gpu",
         logger=tb_logger,
-        callbacks=[DeviceStatsMonitor(), checkpoint_callback, MyProgressBar()],
+        callbacks=[
+            DeviceStatsMonitor(),
+               checkpoint_callback,
+               MyProgressBar(),
+        ],
         max_epochs=100,
        # limit_train_batches=10,
         # limit_val_batches=0,
