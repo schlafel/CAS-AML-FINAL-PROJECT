@@ -1,7 +1,7 @@
 import sys
 
 sys.path.insert(0, '..')
-from src.config import *
+from config import *
 
 import os
 import json
@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 
 from tqdm import tqdm
-from src.data.dataset import ASL_DATASET, ASL_DATASET_TF
+from data.dataset import ASL_DATASET, ASL_DATASET_TF
 
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader

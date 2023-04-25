@@ -29,3 +29,5 @@ dependencies:
     - kaggle
     - mediapipe
     - Sphinx
+    - jsonargparse[signatures]
+    - omegaconf

@@ -5,7 +5,10 @@ from torch.nn import TransformerEncoder, TransformerEncoderLayer
 
 import pytorch_lightning as pl
 from torchmetrics.classification import accuracy
+import sys
+sys.path.insert(0,"./..")
 from config import *
+
 import math
 
 
