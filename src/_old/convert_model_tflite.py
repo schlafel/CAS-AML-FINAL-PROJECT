@@ -155,7 +155,7 @@ def main(path_model,verbose = False ,total = 1000):
     # Convert Model
     tflite_model = keras_model_converter.convert()
     # Write Model
-    tflite_model_file_path = os.path.join(ROOT_PATH, path_model, "./../..", "LSTM_MODEL.tflite")
+    tflite_model_file_path = os.path.join(ROOT_PATH, path_model, "../..", "LSTM_MODEL.tflite")
     with open(tflite_model_file_path, 'wb') as f:
         f.write(tflite_model)
 

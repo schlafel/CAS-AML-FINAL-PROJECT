@@ -18,8 +18,8 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.tuner import Tuner
 from src.config import *
 from src.data import data_utils
+from src.data.dataset import ASL_DATASET
 
-from data_models import ASL_DATSET, ASLDataModule, ASLDataModule_Preprocessed
 from src.models.models import LSTM_BASELINE_Model, LSTM_Predictor, TransformerPredictor
 
 
@@ -60,7 +60,8 @@ if __name__ == '__main__':
     mod_name = "FIRST_TRANSFORMER_MODEL"
 
     # ------------ 1. Load data ------------
-    asl_dataset = data_utils.ASL_DATASET(augment=True, )
+    asl_dataset = ASL_DATASET(augment=True,
+                              augmentation_threshold=0.3)
 
     train_ds, val_ds, test_ds = data_utils.create_data_loaders(asl_dataset,
                                                                batch_size=BATCH_SIZE)

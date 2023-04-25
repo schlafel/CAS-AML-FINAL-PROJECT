@@ -1,7 +1,6 @@
 from tensorflow.lite.python.interpreter import Interpreter
 from src.data.data_utils import load_relevant_data_subset
-from src.models.convert_model_tflite import load_full_train_datafile
-import os
+from src._old.convert_model_tflite import load_full_train_datafile
 from src.config import *
 from tqdm import tqdm
 def get_tfliteModel(path_model):

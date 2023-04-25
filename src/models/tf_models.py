@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras.models import Model
 import tensorflow.keras.layers as layers
-from src.models.utils import scaled_dot_product
+from src._old.utils import scaled_dot_product
 from config import *
 
 
