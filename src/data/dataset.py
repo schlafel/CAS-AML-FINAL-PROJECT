@@ -21,7 +21,10 @@ class ASL_DATASET:
     """
 
     # Constructor method
-    def __init__(self, metadata_df=None, transform=None, max_seq_length=INPUT_SIZE, augment=False, augmentation_threshold = .1):
+    def __init__(self, metadata_df=None, transform=None,
+                 max_seq_length=INPUT_SIZE,
+                 augment=False,
+                 augmentation_threshold = .1):
         """
         Initialize the dataset.
 

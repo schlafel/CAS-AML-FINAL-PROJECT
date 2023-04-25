@@ -317,6 +317,7 @@ class TransformerPredictor(LSTM_Predictor):
             task="multiclass",
             num_classes=num_classes
         )
+        self.save_hyperparameters()
 
     def forward(self, x):
         # x_padded = torch.nn.functional.pad(x, [0, 68], mode='constant', value=0, )

@@ -30,8 +30,14 @@ def cli_main():
                            # logger = TensorBoardLogger,
                        ),
 
-                       parser_kwargs={"parser_mode": "omegaconf"}
+                       parser_kwargs={"parser_mode": "omegaconf"},
+                       save_config_kwargs={"overwrite": True},
+                       # run = True
                        )
+    
+    # cli.trainer.fit(cli.model)
+
+    # cli.trainer.test(ckpt_path = "best")
     # note: don't call fit!!
 
 
