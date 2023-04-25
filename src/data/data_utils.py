@@ -9,17 +9,17 @@ import pandas as pd
 import numpy as np
 
 from tqdm import tqdm
-from src.data.dataset import ASL_DATASET,ASL_DATASET_TF
+from src.data.dataset import ASL_DATASET, ASL_DATASET_TF
 
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
-
+import pytorch_lightning as pl
 import warnings
 
 warnings.filterwarnings("ignore")
 
 
-def load_relevant_data_subset(pq_path,cols_to_use = COLUMNS_TO_USE):
+def load_relevant_data_subset(pq_path, cols_to_use=COLUMNS_TO_USE):
     data_columns = cols_to_use
     data = pd.read_parquet(pq_path, columns=data_columns)
     n_frames = int(len(data) / ROWS_PER_FRAME)
@@ -145,10 +145,10 @@ def preprocess_raw_data(sample=100000):
 
         # Save the processed data to disk as numpy arrays
         np.savez(os.path.join(landmarks_dir_path, processed_files[idx]),
-                 landmarks = sample['landmarks'],
-                 non_empty_idx = sample['non_empty_idx'])
+                 landmarks=sample['landmarks'],
+                 non_empty_idx=sample['non_empty_idx'])
 
-        lm_list.append(np.where(sample['landmarks']==0,np.nan,sample['landmarks']))
+        lm_list.append(np.where(sample['landmarks'] == 0, np.nan, sample['landmarks']))
         size.append(sample['size'])
         orig_size.append(sample['orig_size'])
         # usable_size.append(sample['usable_size'])
@@ -157,11 +157,10 @@ def preprocess_raw_data(sample=100000):
     df_train["size"] = size
     df_train["orig_size"] = orig_size
     df_train["target"] = targets
-    #df_train["usable_size"] = usable_size
+    # df_train["usable_size"] = usable_size
 
     train_csv_output_path = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, TRAIN_CSV_FILE)
     df_train.to_csv(train_csv_output_path, sep=',', index=False)
-
 
     # Calculate the statistics
     lm_array = np.concatenate(lm_list)
@@ -169,7 +168,6 @@ def preprocess_raw_data(sample=100000):
     lm_std = np.nanstd(lm_array, axis=0)
     np.save(os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, "mean.npy"), lm_means)
     np.save(os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, "std.npy"), lm_std)
-
 
     # Create the marker file
     with open(marker_file_path, 'w') as f:
@@ -213,12 +211,12 @@ def preprocess_data_item(raw_landmark_path, targets_sign):
     # Read in the parquet file and process the data
     landmarks = load_relevant_data_subset(raw_landmark_path)
     orig_size = landmarks.shape[0]
-    #landmarks, size, orig_size, usable_size = preprocess_data_to_same_size(landmarks)
-    landmarks,non_empty_idx, size = preprocess_data(landmarks=landmarks)
+    # landmarks, size, orig_size, usable_size = preprocess_data_to_same_size(landmarks)
+    landmarks, non_empty_idx, size = preprocess_data(landmarks=landmarks)
     # Create a dictionary with the processed data
     return {'landmarks': landmarks, 'target': targets_sign, 'size': size,
             'orig_size': orig_size,
-            'non_empty_idx':non_empty_idx}
+            'non_empty_idx': non_empty_idx}
 
 
 def preprocess_data_to_same_size(landmarks):
@@ -316,11 +314,11 @@ def preprocess_data(landmarks):
 
         size = INPUT_SIZE
 
-        non_empty_frames_idxs = np.linspace(0,len(landmarks),INPUT_SIZE)
+        non_empty_frames_idxs = np.linspace(0, len(landmarks), INPUT_SIZE)
 
     landmark_data = np.where(np.isnan(landmark_data), 0.0, landmark_data)
 
-    return landmark_data,  non_empty_frames_idxs,size
+    return landmark_data, non_empty_frames_idxs, size
 
 
 def calculate_landmark_length_stats():
@@ -600,7 +598,6 @@ def remove_outlier_or_missing_data(landmark_len_dict):
         average_len = landmark_len_dict[sign]['mean']
         std_len = landmark_len_dict[sign]['std']
 
-
         landmarks_len = len(landmarks)
 
         # Extract left-hand, right-hand landmarks
@@ -638,6 +635,41 @@ def remove_outlier_or_missing_data(landmark_len_dict):
     # Create the marker file
     with open(marker_file_path, 'w') as f:
         f.write('')
+
+
+class ASL_DATAMODULE(pl.LightningDataModule):
+    def __init__(self,
+                 metadata_df=None,
+                 max_seq_length=MAX_SEQUENCES,
+                 batch_size: int = 32,
+                 augment=False,
+                 augmentation_threshold=.1):
+        super().__init__()
+
+        self.metadata_df = metadata_df
+        self.max_seq_length = max_seq_length
+        self.batch_size = batch_size
+        self.augment = augment
+        self.augmentation_threshold = augmentation_threshold
+
+    def setup(self, stage: str):
+        self.ASL_Dataset = ASL_DATASET(
+            metadata_df=self.metadata_df,
+            max_seq_length=self.max_seq_length,
+            transform=None,
+            augment=self.augment,
+            augmentation_threshold=self.augmentation_threshold)
+        self.train_dL, self.val_dL, self.test_dL = create_data_loaders(self.ASL_Dataset,
+                                                                       batch_size=self.batch_size)
+
+    def train_dataloader(self):
+        return self.train_dL
+
+    def val_dataloader(self):
+        return self.val_dL
+
+    def test_dataloader(self):
+        return self.test_dL
 
 
 def create_data_loaders(asl_dataset, train_size=TRAIN_SIZE, valid_size=VALID_SIZE, test_size=TEST_SIZE,
@@ -692,9 +724,10 @@ def create_data_loaders(asl_dataset, train_size=TRAIN_SIZE, valid_size=VALID_SIZ
 
     return train_loader, valid_loader, test_loader
 
+
 def create_data_loaders_TF(asl_dataset, train_size=TRAIN_SIZE, valid_size=VALID_SIZE, test_size=TEST_SIZE,
-                        batch_size=BATCH_SIZE, random_state=SEED,
-                           augment_train = False):
+                           batch_size=BATCH_SIZE, random_state=SEED,
+                           augment_train=False):
     """
     Split the ASL dataset into training, validation, and testing sets and create data loaders for each set.
 
@@ -736,9 +769,12 @@ def create_data_loaders_TF(asl_dataset, train_size=TRAIN_SIZE, valid_size=VALID_
                                           random_state=random_state, stratify=train_df['target'])
 
     # Create dataset instances for each split
-    train_dataset = ASL_DATASET_TF(metadata_df=train_df).create_dataset(batch_size=batch_size, shuffle=True,augment = augment_train)
-    valid_dataset = ASL_DATASET_TF(metadata_df=valid_df).create_dataset(batch_size=batch_size, shuffle=False,augment = False)
-    test_dataset = ASL_DATASET_TF(metadata_df=test_df).create_dataset(batch_size=batch_size, shuffle=False,augment = False)
+    train_dataset = ASL_DATASET_TF(metadata_df=train_df).create_dataset(batch_size=batch_size, shuffle=True,
+                                                                        augment=augment_train)
+    valid_dataset = ASL_DATASET_TF(metadata_df=valid_df).create_dataset(batch_size=batch_size, shuffle=False,
+                                                                        augment=False)
+    test_dataset = ASL_DATASET_TF(metadata_df=test_df).create_dataset(batch_size=batch_size, shuffle=False,
+                                                                      augment=False)
 
     return train_dataset, valid_dataset, test_dataset
 
