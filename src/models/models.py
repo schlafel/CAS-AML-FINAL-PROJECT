@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import TransformerEncoder, TransformerEncoderLayer
-
+from torch.optim.lr_scheduler import ExponentialLR
 import pytorch_lightning as pl
 from torchmetrics.classification import accuracy
 import sys
@@ -297,7 +297,8 @@ class TransformerPredictor(LSTM_Predictor):
                  norm_first=True,
                  batch_first=True,
                  num_layers=2,
-                 num_classes=250):
+                 num_classes=250,
+                 learning_rate = LEARNING_RATE):
         super().__init__()
         self.model = TransformerSequenceClassifier(d_model=d_model,
                                                    n_head=n_head,
@@ -310,6 +311,7 @@ class TransformerPredictor(LSTM_Predictor):
                                                    num_classes=num_classes)
         # Define criterion
         self.criterion = nn.CrossEntropyLoss()
+        self.learning_rate = learning_rate
 
         self.accuracy = accuracy.Accuracy(
             task="multiclass",
@@ -324,7 +326,9 @@ class TransformerPredictor(LSTM_Predictor):
         return y_hat
 
     def configure_optimizers(self, ):
-        return torch.optim.Adam(self.parameters(), lr=LEARNING_RATE)
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+        scheduler = ExponentialLR(optimizer, gamma=0.9)
+        return [optimizer], [scheduler]
 
 
 # Added Transformer Model
