@@ -69,6 +69,9 @@ if __name__ == '__main__':
                                                                batch_size=BATCH_SIZE,
                                                                dl_framework=DL_FRAMEWORK)
 
+
+    print(f'Got the lengths for Train-Dataset: {len(train_ds)}, {len(val_ds)}, {len(test_ds)}')
+
     # dM.setup()
     # dL = dM.train_dataloader()
     print(next(iter(train_ds))[0].shape)

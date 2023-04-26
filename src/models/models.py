@@ -177,8 +177,7 @@ class LSTM_Predictor(pl.LightningModule):
         return y_hat
 
     def training_step(self, batch, batch_idx):
-        landmarks = batch["landmarks"]
-        labels = batch["target"]
+        landmarks,labels = batch
 
         # forward pass through the model
         out = self(landmarks)
@@ -212,7 +211,7 @@ class LSTM_Predictor(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
 
-        landmarks, labels = batch["landmarks"], batch["target"]
+        landmarks,labels = batch
 
         # forward pass through the model
         out = self(landmarks)
@@ -251,8 +250,7 @@ class LSTM_Predictor(pl.LightningModule):
         self.validation_step_outputs.clear()  # free memory
 
     def test_step(self, batch, batch_idx):
-        landmarks = batch["landmarks"]
-        labels = batch["target"]
+        landmarks,labels = batch
 
         # forward pass through the model
         out = self(landmarks)
