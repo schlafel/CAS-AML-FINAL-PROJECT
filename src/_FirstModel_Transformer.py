@@ -67,7 +67,8 @@ if __name__ == '__main__':
     # train_ds,val_ds,test_ds = get_dataloader(asl_dataset,shuffle=True,dl_framework="PYTORCH")
     train_ds, val_ds, test_ds = data_utils.create_data_loaders(asl_dataset,
                                                                batch_size=BATCH_SIZE,
-                                                               dl_framework=DL_FRAMEWORK)
+                                                               dl_framework=DL_FRAMEWORK,
+                                                               num_workers=os.cpu_count())
 
 
     print(f'Got the lengths for Train-Dataset: {len(train_ds)}, {len(val_ds)}, {len(test_ds)}')
