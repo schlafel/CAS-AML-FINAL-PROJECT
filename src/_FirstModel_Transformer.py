@@ -57,7 +57,7 @@ if __name__ == '__main__':
 
     # MAX_SEQUENCES = 150
     BATCH_SIZE = 256  # Not optimal as not a perfect power of 2, but maximum that fits in my GPU
-    num_workers = os.cpu_count() // 2  # or 0
+    num_workers = 4#os.cpu_count() // 2  # or 0
     mod_name = "FIRST_TRANSFORMER_MODEL_2"
     DL_FRAMEWORK = "PYTORCH"
 
@@ -68,7 +68,7 @@ if __name__ == '__main__':
     train_ds, val_ds, test_ds = data_utils.create_data_loaders(asl_dataset,
                                                                batch_size=BATCH_SIZE,
                                                                dl_framework=DL_FRAMEWORK,
-                                                               num_workers=os.cpu_count())
+                                                               num_workers=num_workers)
 
 
     print(f'Got the lengths for Train-Dataset: {len(train_ds)}, {len(val_ds)}, {len(test_ds)}')
@@ -110,9 +110,9 @@ if __name__ == '__main__':
 
     early_stop_callback = EarlyStopping(
         monitor='val_accuracy',
-        min_delta=0.00,
-        patience=4,
-        verbose=False,
+        min_delta=0.005,
+        patience=6,
+        verbose=True,
         mode='max'
     )
 
@@ -122,6 +122,7 @@ if __name__ == '__main__':
         logger=tb_logger,
         callbacks=[
             DeviceStatsMonitor(),
+            early_stop_callback,
                checkpoint_callback,
                MyProgressBar(),
         ],
