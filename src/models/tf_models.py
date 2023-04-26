@@ -28,7 +28,6 @@ class FeedForward(tf.keras.layers.Layer):
         x = self.layer_norm(x)
         return x
 
-
 @tf.function
 def positional_encoding(length, depth):
     depth = depth / 2
@@ -45,7 +44,6 @@ def positional_encoding(length, depth):
 
     return tf.cast(pos_encoding, dtype=tf.float32)
 
-
 class PositionalEncoding(tf.keras.layers.Layer):
     def __init__(self, seq_length, d_model):
         super().__init__()
@@ -59,7 +57,6 @@ class PositionalEncoding(tf.keras.layers.Layer):
         x *= tf.math.sqrt(tf.cast(self.d_model, tf.float32))
         x = x + self.pos_encoding[tf.newaxis, :length, :]
         return x
-
 
 class SelfAttentionBlock(tf.keras.layers.Layer):
     def __init__(self,
@@ -86,7 +83,6 @@ class SelfAttentionBlock(tf.keras.layers.Layer):
         x = self.layernorm(x)
         return x
 
-
 class EncoderLayer(tf.keras.layers.Layer):
     def __init__(self,
                  d_model: int = 256,
@@ -104,7 +100,6 @@ class EncoderLayer(tf.keras.layers.Layer):
         x = self.ff_block(x)
         return x
 
-
 class Encoder(tf.keras.layers.Layer):
     def __init__(self, n_encoder_blocks: int = 1,
                  d_model: int = 256,
@@ -121,7 +116,6 @@ class Encoder(tf.keras.layers.Layer):
         for enc in self.enc:
             x = enc(x, training=training)
         return x
-
 
 class TransformerClassifierModel(Model):
     def __init__(self,
@@ -162,7 +156,6 @@ class TransformerClassifierModel(Model):
             **kwargs
         )
 
-
 class LSTM_BASELINE_TF(Model):
     def __init__(self,
                  input_shape=(150, 184, 2),
@@ -179,10 +172,10 @@ class LSTM_BASELINE_TF(Model):
 
         if means is not None:
             self.means = tf.convert_to_tensor(means)
-            self.stds = tf.convert_to_tensor(stds)
+            self.stds  = tf.convert_to_tensor(stds)
         else:
             self.means = tf.zeros((input_shape[1:]))
-            self.stds = tf.ones((input_shape[1:]))
+            self.stds  = tf.ones ((input_shape[1:]))
 
         # self.reshp_1 = tf.keras.layers.Reshape((input_shape[0],input_shape[1]*input_shape[2]),
         #                                   input_shape=input_shape,

@@ -31,18 +31,18 @@ def run_training(PATH_TRAINING_CONFIG):
 
     # Import the module and class specified in the YAML file
     module_path = config_model['model']['src']
-    class_name = config_model['model']['model_name']
-    module = importlib.import_module(module_path)
+    class_name  = config_model['model']['model_name']
+    module      = importlib.import_module(module_path)
     model_class = getattr(module, class_name)
 
     input_shape = tuple(config_model["model"]["params"]["input_shape"])
 
     means = np.load(os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, "mean.npy"))
-    stds = np.load(os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, "std.npy"))
+    stds  = np.load(os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, "std.npy"))
 
     model = model_class(**config_model['model']["params"],
                         means=means,
-                        stds=stds)
+                        stds =stds)
 
     # Set up the learning rate scheduler
     lr_scheduler = tf.keras.optimizers.schedules.ExponentialDecay(

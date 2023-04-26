@@ -21,7 +21,7 @@ DATA_DIR = 'data/'
 #: Raw Data files Directory path
 RAW_DATA_DIR = 'data/raw/'
 #: Processed Data files Directory path
-PROCESSED_DATA_DIR = 'data/processed_faceless/'
+PROCESSED_DATA_DIR = 'data/processed/'
 #: Model files Directory path
 MODEL_DIR = 'models/'
 #: Checkpoint files Directory path
@@ -74,20 +74,16 @@ LEFT_HAND_FEATURE_START = 468
 RIGHT_HAND_FEATURE_START = 522
 
 #: Landmarks for Lips
-LIPS_LANDMARKS = np.array([
+
+FACE_LANDMARKS = np.array([
     61, 185, 40, 39, 37, 0, 267, 269, 270, 409,
     291, 146, 91, 181, 84, 17, 314, 405, 321, 375,
     78, 191, 80, 81, 82, 13, 312, 311, 310, 415,
     95, 88, 178, 87, 14, 317, 402, 318, 324, 308,
 ])
-
-FACE_LANDMARKS = np.array(
-    [7, 10, 21, 33, 46, 52, 53, 54, 55, 58, 63, 65, 66, 67, 70, 93, 103, 105, 107, 109, 127, 132, 133, 136, 144, 145,
-     148, 149, 150, 152, 153, 154, 155, 157, 158, 159, 160, 161, 162, 163, 172, 173, 176, 234, 246, 249, 251, 263, 276,
-     282, 283, 284, 285, 288, 293, 295, 296, 297, 300, 323, 332, 334, 336, 338, 356, 361, 362, 365, 373, 374, 377, 378,
-     379, 380, 381, 382, 384, 385, 386, 387, 388, 389, 390, 397, 398, 400, 454, 466])
+     
 #: Landmarks for face
-USEFUL_FACE_LANDMARKS = np.array(LIPS_LANDMARKS.tolist()) #+ FACE_LANDMARKS.tolist())
+USEFUL_FACE_LANDMARKS = np.array(FACE_LANDMARKS.tolist())
 #: Landmarks for pose
 USEFUL_POSE_LANDMARKS = np.arange(500, 514)
 #: Landmarks for left hand
@@ -109,7 +105,6 @@ N_DIMS = len(COLUMNS_TO_USE)
 
 # List with landmarks to use
 FACE_INDICES = np.argwhere(np.isin(USEFUL_ALL_LANDMARKS, USEFUL_FACE_LANDMARKS)).squeeze()
-LIPS_INDICES = np.argwhere(np.isin(USEFUL_ALL_LANDMARKS, LIPS_LANDMARKS)).squeeze()
 POSE_INDICES = np.argwhere(np.isin(USEFUL_ALL_LANDMARKS, USEFUL_POSE_LANDMARKS)).squeeze()
 HAND_INDICES = np.argwhere(np.isin(USEFUL_ALL_LANDMARKS, USEFUL_HAND_LANDMARKS)).squeeze()
 LEFT_HAND_INDICES = np.argwhere(np.isin(USEFUL_ALL_LANDMARKS, USEFUL_LEFT_HAND_LANDMARKS)).squeeze()
@@ -120,3 +115,4 @@ SKIP_CONSECUTIVE_ZEROS = 4
 INPUT_SIZE = 32
 MAX_SEQUENCES = 32
 MIN_SEQUEENCES = INPUT_SIZE / 4
+DL_FRAMEWORK='TENSORFLOW'

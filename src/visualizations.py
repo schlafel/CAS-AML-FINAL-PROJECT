@@ -11,7 +11,7 @@ import random
 
 random.seed(SEED)
 
-from src.data.dataset import label_dict_inference
+from data.dataset import label_dict_inference
 
 
 def visualize_target_sign(dataset, target_sign, n_samples=6):
@@ -42,8 +42,8 @@ def visualize_target_sign(dataset, target_sign, n_samples=6):
 
     print('Generating ', end='')
     target_indices = []
-    for i, sample in enumerate(dataset):
-        if sample['target'] == target_sign:
+    for i, ( _ , target) in enumerate(dataset):
+        if target == target_sign:
             target_indices.append(i)
             print('.', end='')
             if len(target_indices) >= n_samples:
@@ -58,7 +58,7 @@ def visualize_target_sign(dataset, target_sign, n_samples=6):
     fig, ax = plt.subplots(1, figsize=(8 * len(samples) / 2, 10))
 
     #size = 0
-    target = int(samples[0]['target'])
+    _, target = samples[0]
 
     #for i, sample in enumerate(samples):
     #    if sample['size'] > size:
@@ -71,9 +71,8 @@ def visualize_target_sign(dataset, target_sign, n_samples=6):
         ax.cla()
         print('.', end='')
 
-        for sample_idx, sample in enumerate(samples):
+        for sample_idx, (frames, target) in enumerate(samples):
 
-            frames = sample['landmarks']
             landmark_lists = frames[:size]
 
             landmark_offset = 192 * sample_idx
