@@ -59,18 +59,20 @@ if __name__ == '__main__':
     BATCH_SIZE = 256  # Not optimal as not a perfect power of 2, but maximum that fits in my GPU
     num_workers = os.cpu_count() // 2  # or 0
     mod_name = "FIRST_TRANSFORMER_MODEL_2"
+    DL_FRAMEWORK = "PYTORCH"
 
     # ------------ 1. Load data ------------
     asl_dataset = ASL_DATASET(augment=True,
                               augmentation_threshold=0.3)
-    train_ds,val_ds,test_ds = get_dataloader(asl_dataset,shuffle=True,dl_framework="PYTORCH")
-    # train_ds, val_ds, test_ds = data_utils.create_data_loaders(asl_dataset,
-    #                                                            batch_size=BATCH_SIZE)
+    # train_ds,val_ds,test_ds = get_dataloader(asl_dataset,shuffle=True,dl_framework="PYTORCH")
+    train_ds, val_ds, test_ds = data_utils.create_data_loaders(asl_dataset,
+                                                               batch_size=BATCH_SIZE,
+                                                               dl_framework=DL_FRAMEWORK)
 
     # dM.setup()
     # dL = dM.train_dataloader()
-    print(next(iter(train_ds))["landmarks"].shape)
-    batch = next(iter(train_ds))["landmarks"]
+    print(next(iter(train_ds))[0].shape)
+    batch = next(iter(train_ds))[0]
     # ------------ 2. Create Model PL------------
     model = TransformerPredictor(
         d_model=192,

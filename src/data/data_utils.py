@@ -627,7 +627,7 @@ def remove_outlier_or_missing_data(landmark_len_dict):
 
 
 def create_data_loaders(asl_dataset, train_size=TRAIN_SIZE, valid_size=VALID_SIZE, test_size=TEST_SIZE,
-                        batch_size=BATCH_SIZE, random_state=SEED):
+                        batch_size=BATCH_SIZE, random_state=SEED, dl_framework = DL_FRAMEWORK):
     """
     Split the ASL dataset into training, validation, and testing sets and create data loaders for each set.
 
@@ -672,9 +672,9 @@ def create_data_loaders(asl_dataset, train_size=TRAIN_SIZE, valid_size=VALID_SIZ
     test_dataset  = ASL_DATASET(metadata_df=test_df)
 
     # Create data loaders for each split
-    train_loader = get_dataloader(train_dataset, batch_size=BATCH_SIZE, shuffle=True )
-    valid_loader = get_dataloader(valid_dataset, batch_size=BATCH_SIZE, shuffle=False)
-    test_loader  = get_dataloader(test_dataset , batch_size=BATCH_SIZE, shuffle=False)
+    train_loader = get_dataloader(train_dataset, batch_size=BATCH_SIZE, shuffle=True ,dl_framework = dl_framework)
+    valid_loader = get_dataloader(valid_dataset, batch_size=BATCH_SIZE, shuffle=False,dl_framework = dl_framework)
+    test_loader  = get_dataloader(test_dataset , batch_size=BATCH_SIZE, shuffle=False,dl_framework = dl_framework)
 
     return train_loader, valid_loader, test_loader
 
