@@ -19,6 +19,7 @@ from pytorch_lightning.tuner import Tuner
 from src.config import *
 from src.data import data_utils
 from src.data.dataset import ASL_DATASET
+from src.dl_utils import get_dataloader
 
 from src.models.models import LSTM_BASELINE_Model, LSTM_Predictor, TransformerPredictor
 
@@ -57,14 +58,14 @@ if __name__ == '__main__':
     # MAX_SEQUENCES = 150
     BATCH_SIZE = 256  # Not optimal as not a perfect power of 2, but maximum that fits in my GPU
     num_workers = os.cpu_count() // 2  # or 0
-    mod_name = "FIRST_TRANSFORMER_MODEL"
+    mod_name = "FIRST_TRANSFORMER_MODEL_2"
 
     # ------------ 1. Load data ------------
     asl_dataset = ASL_DATASET(augment=True,
                               augmentation_threshold=0.3)
-
-    train_ds, val_ds, test_ds = data_utils.create_data_loaders(asl_dataset,
-                                                               batch_size=BATCH_SIZE)
+    train_ds,val_ds,test_ds = get_dataloader(asl_dataset,shuffle=True,dl_framework="PYTORCH")
+    # train_ds, val_ds, test_ds = data_utils.create_data_loaders(asl_dataset,
+    #                                                            batch_size=BATCH_SIZE)
 
     # dM.setup()
     # dL = dM.train_dataloader()

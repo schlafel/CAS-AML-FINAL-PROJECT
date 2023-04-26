@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 
 def get_dataloader(dataset, batch_size=BATCH_SIZE, shuffle=True, dl_framework=DL_FRAMEWORK):
 	
-	  if DL_FRAMEWORK=='PYTORCH':
+	  if DL_FRAMEWORK=='TENSORFLOW':
 	      return to_TF_DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
 	  else:
 	      return to_PT_DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
