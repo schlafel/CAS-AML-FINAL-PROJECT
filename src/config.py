@@ -7,7 +7,7 @@ import torch
 import numpy as np
 
 #: Set the device for training
-DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
+DEVICE = 'cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu'
 
 # Paths
 #: Root directory

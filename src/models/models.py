@@ -10,25 +10,32 @@ sys.path.insert(0,"./..")
 from config import *
 
 import math
-
+from typing import Dict
 
 class LSTM_BASELINE_Model(nn.Module):
-    def __init__(self, n_features=N_LANDMARKS, n_classes=N_CLASSES, n_hidden=256, num_layers=3, dropout=0.3):
+    def __init__(self, 
+                 n_features = N_LANDMARKS, 
+                 n_classes  = N_CLASSES, 
+                 n_hidden   = 512, 
+                 n_layers   = 5, 
+                 dropout    = 0.5):
         super().__init__()
 
         self.hidden_size = n_hidden
-        self.num_layers = num_layers
+        self.num_layers  = n_layers
 
         input_size = n_features * 2  # 2 is for x and y coordinates
 
         self.lstm = nn.LSTM(
-            input_size=input_size,
-            hidden_size=n_hidden,
-            num_layers=num_layers,
-            batch_first=True,
-            dropout=dropout)
+            input_size  = input_size,
+            hidden_size = n_hidden,
+            num_layers  = n_layers,
+            batch_first = True,
+            dropout     = dropout)
 
         self.fc = nn.Linear(n_hidden, n_classes)
+        self.layer_norm = nn.LayerNorm(n_classes)
+        self.relu = nn.ReLU()
 
     def __repr__(self):
         return "LSTM_BASELINE_Model"
@@ -44,128 +51,34 @@ class LSTM_BASELINE_Model(nn.Module):
         c0 = torch.zeros(self.num_layers, x.batch_sizes[0], self.hidden_size).to(DEVICE).float()
 
         out, _ = self.lstm(x, (h0, c0))
-
         out, _ = nn.utils.rnn.pad_packed_sequence(out, batch_first=True)
-
         out = self.fc(out[:, -1, :])
-
+        
+        out = self.layer_norm(out)
+        out = self.relu(out)
         return out
-
-
-class ImprovedLSTMModel(nn.Module):
-    def __init__(self, n_features=N_LANDMARKS, n_classes=N_CLASSES, n_hidden=512, num_layers=3, dropout=0.5):
-        super().__init__()
-
-        self.hidden_size = n_hidden
-        self.num_layers = num_layers
-
-        input_size = n_features * 2  # 2 is for x and y coordinates
-
-        self.lstm = nn.LSTM(
-            input_size=input_size,
-            hidden_size=n_hidden,
-            num_layers=num_layers,
-            batch_first=True,
-            dropout=dropout)
-
-        self.fc1 = nn.Linear(n_hidden, n_hidden)
-        self.dropout = nn.Dropout(dropout)
-        self.fc2 = nn.Linear(n_hidden, n_classes)
-
-    def __repr__(self):
-        return "ImprovedLSTMModel"
-
-    def forward(self, x, seq_lengths):
-        batch_size, seq_len, landmarks, coords = x.size()
-        x = x.view(batch_size, seq_len, -1).float()
-
-        x = nn.utils.rnn.pack_padded_sequence(x, seq_lengths.cpu(), batch_first=True, enforce_sorted=False)
-
-        # Set the initial hidden and cell states
-        h0 = torch.zeros(self.num_layers, x.batch_sizes[0], self.hidden_size).to(DEVICE).float()
-        c0 = torch.zeros(self.num_layers, x.batch_sizes[0], self.hidden_size).to(DEVICE).float()
-
-        out, _ = self.lstm(x, (h0, c0))
-
-        out, _ = nn.utils.rnn.pad_packed_sequence(out, batch_first=True)
-
-        # Apply dropout and fully connected layers
-        out = F.relu(self.fc1(out[:, -1, :]))
-        out = self.dropout(out)
-        out = self.fc2(out)
-
-        return out
-
-
-class PositionalEncoding(nn.Module):
-    def __init__(self, d_model, dropout=0.1, max_len=150):
-        super(PositionalEncoding, self).__init__()
-        self.dropout = nn.Dropout(p=dropout)
-
-        pe = torch.zeros(max_len, d_model)
-        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
-        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
-        pe[:, 0::2] = torch.sin(position * div_term)
-        pe[:, 1::2] = torch.cos(position * div_term)
-        pe = pe.unsqueeze(0).transpose(0, 1)
-        self.register_buffer('pe', pe)
-
-    def forward(self, x):
-        x = x + self.pe[:x.size(0), :]
-        return self.dropout(x)
-
-
-class ASLTransformerModel(nn.Module):
-    def __init__(self, n_features=N_LANDMARKS * 2, n_classes=N_CLASSES, d_model=512, nhead=8, num_layers=4,
-                 dropout=0.3):
-        super(ASLTransformerModel, self).__init__()
-
-        self.embedding = nn.Linear(n_features, d_model)
-        self.pos_encoder = PositionalEncoding(d_model, dropout)
-
-        encoder_layers = TransformerEncoderLayer(d_model, nhead, d_model * 2, dropout)
-        self.transformer_encoder = TransformerEncoder(encoder_layers, num_layers)
-
-        self.decoder = nn.Linear(d_model, n_classes)
-
-    def __repr__(self):
-        return "ASLTransformerModel"
-
-    def forward(self, x, seq_lengths):
-        batch_size, seq_len, landmarks, coords = x.size()
-        x = x.view(batch_size, seq_len, -1).float()
-
-        x = self.embedding(x) * math.sqrt(x.size(-1))
-        x = self.pos_encoder(x)
-
-        x = nn.utils.rnn.pack_padded_sequence(x, seq_lengths.cpu(), batch_first=True, enforce_sorted=False)
-        x, _ = nn.utils.rnn.pad_packed_sequence(x, batch_first=True)
-
-        x = self.transformer_encoder(x)
-        x = self.decoder(x[:, -1, :])
-        return x
 
 
 class LSTM_Predictor(pl.LightningModule):
-    def __init__(self,
-                 n_features: int = 188,
-                 n_classes: int = N_CLASSES,
-                 num_layers: int = 3,
-                 dropout: float = 0.3):
+    def __init__(self, 
+                 n_features: int = N_LANDMARKS,
+                 n_classes:  int = N_CLASSES,
+                 n_layers:   int = 5,
+                 dropout: float = 0.5):
         super().__init__()
 
         self.model = LSTM_BASELINE_Model(
-            n_features=n_features,
-            n_classes=n_classes,
-            num_layers=num_layers,
-            dropout=dropout
+            n_features = n_features,
+            n_classes  = n_classes,
+            n_layers   = n_layers,
+            dropout    = dropout
         )
         # Define criterion
         self.criterion = nn.CrossEntropyLoss()
 
         self.accuracy = accuracy.Accuracy(
-            task="multiclass",
-            num_classes=n_classes
+            task = "multiclass",
+            num_classes = n_classes
         )
 
         self.train_step_outputs = []
@@ -285,78 +198,38 @@ class LSTM_Predictor(pl.LightningModule):
     def configure_optimizers(self, ):
         return torch.optim.Adam(self.parameters(), lr=LEARNING_RATE)
 
-
-
-class TransformerPredictor(LSTM_Predictor):
-    def __init__(self,
-                 d_model=256,
-                 n_head=8,
-                 dim_feedforward=512,
-                 dropout=0.1,
-                 layer_norm_eps=1e-5,
-                 norm_first=True,
-                 batch_first=True,
-                 num_layers=2,
-                 num_classes=250,
-                 learning_rate = LEARNING_RATE):
-        super().__init__()
-        self.model = TransformerSequenceClassifier(d_model=d_model,
-                                                   n_head=n_head,
-                                                   dim_feedforward=dim_feedforward,
-                                                   dropout=dropout,
-                                                   layer_norm_eps=layer_norm_eps,
-                                                   norm_first=norm_first,
-                                                   batch_first=batch_first,
-                                                   num_layers=num_layers,
-                                                   num_classes=num_classes)
-        # Define criterion
-        self.criterion = nn.CrossEntropyLoss()
-        self.learning_rate = learning_rate
-
-        self.accuracy = accuracy.Accuracy(
-            task="multiclass",
-            num_classes=num_classes
-        )
-        self.save_hyperparameters()
-
-    def forward(self, x):
-        # x_padded = torch.nn.functional.pad(x, [0, 68], mode='constant', value=0, )
-        x = x.reshape(x.shape[0], x.shape[1], x.shape[2] * x.shape[3])  # Flatten the inputs
-        y_hat = self.model(x)
-        return y_hat
-
-    def configure_optimizers(self, ):
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
-        scheduler = ExponentialLR(optimizer, gamma=0.9)
-        return [optimizer], [scheduler]
-
-
 # Added Transformer Model
 class TransformerSequenceClassifier(nn.Module):
     def __init__(self,
-                 d_model=256,
-                 n_head=8,
+                 d_model = 256,
+                 n_head  = 8,
                  dim_feedforward = 512,
-                 dropout=0.1,
+                 dropout =0.1,
                  layer_norm_eps = 1e-5,
-                 norm_first = True,
+                 norm_first  = True,
                  batch_first = False,
-                 num_layers=2,
-                 num_classes = 250,
+                 num_layers  = 2,
+                 num_classes = N_CLASSES,
     ):
         super().__init__()
+        
         self.batch_first = batch_first
+        
         # Transformer layers
         self.transformer = nn.TransformerEncoder(
-            nn.TransformerEncoderLayer(d_model=d_model,
-                                       nhead = n_head,
-                                       dim_feedforward=dim_feedforward,
-                                       dropout = dropout,
-                                       layer_norm_eps=layer_norm_eps,
-                                       norm_first=norm_first,
-                                       batch_first=batch_first),
-            #norm = 1e-6,
-            num_layers=num_layers)
+            nn.TransformerEncoderLayer(d_model         = d_model,
+                                       nhead           = n_head,
+                                       dim_feedforward = dim_feedforward,
+                                       dropout         = dropout,
+                                       layer_norm_eps  = layer_norm_eps,
+                                       norm_first      = norm_first,
+                                       batch_first     = batch_first,
+                                       activation      = 'gelu',
+                                      ),
+            #norm = 1e-6, 
+            num_layers      = num_layers,
+            norm=nn.LayerNorm(d_model)                                       
+        )
 
         # Output layer
         self.output_layer = nn.Linear(d_model, num_classes)
@@ -377,3 +250,143 @@ class TransformerSequenceClassifier(nn.Module):
         output = self.output_layer(pooled)
 
         return output
+
+class TransformerPredictor(LSTM_Predictor):
+    def __init__(self,
+                 d_model        = 256,
+                 n_head         = 8,
+                 dim_feedforward= 512,
+                 dropout        = 0.1,
+                 layer_norm_eps = 1e-5,
+                 norm_first     = True,
+                 batch_first    = True,
+                 num_layers     = 2,
+                 num_classes    = N_CLASSES,
+                 learning_rate  = LEARNING_RATE):
+        
+        super().__init__()
+        
+        self.model = TransformerSequenceClassifier(
+                        d_model=d_model,
+                        n_head=n_head,
+                        dim_feedforward=dim_feedforward,
+                        dropout=dropout,
+                        layer_norm_eps=layer_norm_eps,
+                        norm_first=norm_first,
+                        batch_first=batch_first,
+                        num_layers=num_layers,
+                        num_classes=num_classes)
+        
+        # Define criterion
+        self.criterion = nn.CrossEntropyLoss()
+        self.learning_rate = learning_rate
+
+        self.accuracy = accuracy.Accuracy(
+            task="multiclass",
+            num_classes=num_classes
+        )
+        self.save_hyperparameters()
+
+    def forward(self, x):
+        # x_padded = torch.nn.functional.pad(x, [0, 68], mode='constant', value=0, )
+        x = x.reshape(x.shape[0], x.shape[1], x.shape[2] * x.shape[3])  # Flatten the inputs
+        y_hat = self.model(x)
+        return y_hat
+
+    def configure_optimizers(self, ):
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+        scheduler = ExponentialLR(optimizer, gamma=0.9)
+        return [optimizer], [scheduler]
+    
+
+class ImprovedLSTMModel(nn.Module):
+    def __init__(self, n_features=N_LANDMARKS, n_classes=N_CLASSES, n_hidden=512, num_layers=3, dropout=0.5):
+        super().__init__()
+
+        self.hidden_size = n_hidden
+        self.num_layers = num_layers
+
+        input_size = n_features * 2  # 2 is for x and y coordinates
+
+        self.lstm = nn.LSTM(
+            input_size=input_size,
+            hidden_size=n_hidden,
+            num_layers=num_layers,
+            batch_first=True,
+            dropout=dropout)
+
+        self.fc1 = nn.Linear(n_hidden, n_hidden)
+        self.dropout = nn.Dropout(dropout)
+        self.fc2 = nn.Linear(n_hidden, n_classes)
+
+    def __repr__(self):
+        return "ImprovedLSTMModel"
+
+    def forward(self, x, seq_lengths):
+        batch_size, seq_len, landmarks, coords = x.size()
+        x = x.view(batch_size, seq_len, -1).float()
+
+        x = nn.utils.rnn.pack_padded_sequence(x, seq_lengths.cpu(), batch_first=True, enforce_sorted=False)
+
+        # Set the initial hidden and cell states
+        h0 = torch.zeros(self.num_layers, x.batch_sizes[0], self.hidden_size).to(DEVICE).float()
+        c0 = torch.zeros(self.num_layers, x.batch_sizes[0], self.hidden_size).to(DEVICE).float()
+
+        out, _ = self.lstm(x, (h0, c0))
+
+        out, _ = nn.utils.rnn.pad_packed_sequence(out, batch_first=True)
+
+        # Apply dropout and fully connected layers
+        out = F.relu(self.fc1(out[:, -1, :]))
+        out = self.dropout(out)
+        out = self.fc2(out)
+
+        return out
+
+
+class PositionalEncoding(nn.Module):
+    def __init__(self, d_model, dropout=0.1, max_len=150):
+        super(PositionalEncoding, self).__init__()
+        self.dropout = nn.Dropout(p=dropout)
+
+        pe = torch.zeros(max_len, d_model)
+        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+        pe = pe.unsqueeze(0).transpose(0, 1)
+        self.register_buffer('pe', pe)
+
+    def forward(self, x):
+        x = x + self.pe[:x.size(0), :]
+        return self.dropout(x)
+
+class ASLTransformerModel(nn.Module):
+    def __init__(self, n_features=N_LANDMARKS * 2, n_classes=N_CLASSES, d_model=512, nhead=8, num_layers=4,
+                 dropout=0.3):
+        super(ASLTransformerModel, self).__init__()
+
+        self.embedding = nn.Linear(n_features, d_model)
+        self.pos_encoder = PositionalEncoding(d_model, dropout)
+
+        encoder_layers = TransformerEncoderLayer(d_model, nhead, d_model * 2, dropout)
+        self.transformer_encoder = TransformerEncoder(encoder_layers, num_layers)
+
+        self.decoder = nn.Linear(d_model, n_classes)
+
+    def __repr__(self):
+        return "ASLTransformerModel"
+
+    def forward(self, x, seq_lengths):
+        batch_size, seq_len, landmarks, coords = x.size()
+        x = x.view(batch_size, seq_len, -1).float()
+
+        x = self.embedding(x) * math.sqrt(x.size(-1))
+        x = self.pos_encoder(x)
+
+        x = nn.utils.rnn.pack_padded_sequence(x, seq_lengths.cpu(), batch_first=True, enforce_sorted=False)
+        x, _ = nn.utils.rnn.pad_packed_sequence(x, batch_first=True)
+
+        x = self.transformer_encoder(x)
+        x = self.decoder(x[:, -1, :])
+        return x

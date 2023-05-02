@@ -129,12 +129,12 @@ class ASL_DATASET:
         landmark_file = self.file_paths[idx]
 
         # Read in the processed file
-        landmarks = np.load(landmark_file)
+        landmarks = np.load(landmark_file).astype('float32')
 
         # Get the processed landmarks and target for the data
         target = self.target[idx]
         size = self.size[idx]
-				
+
         if self.transform:
             landmarks = self.transform(landmarks)
 
@@ -155,7 +155,7 @@ class ASL_DATASET:
         pad_len = max(0, self.max_seq_length - len(landmarks))
 
         padding = np.zeros((pad_len, landmarks.shape[1], landmarks.shape[2]))
-        landmarks = np.vstack([landmarks, padding])
+        landmarks = np.vstack([landmarks, padding]).astype('float32')
 
         sample = (landmarks, target)
 
