@@ -13,65 +13,19 @@ random.seed(SEED)
 
 from data.dataset import label_dict_inference
 
-
-def visualize_target_sign(dataset, target_sign, n_samples=6):
-    """
-    Visualize `n_samples` instances of a given target sign from the dataset.
-
-    This function generates a visual representation of the landmarks for each sample
-    belonging to the specified `target_sign`.
-
-    Args:
-        dataset (ASL_Dataset): The ASL dataset to load data from.
-        target_sign (int): The target sign to visualize.
-        n_samples (int, optional): The number of samples to visualize. Defaults to 6.
-
-    Returns:
-        matplotlib.animation.FuncAnimation: A matplotlib animation object displaying the landmarks for each frame.
-        
-    :param dataset: The ASL dataset to load data from.
-    :type dataset: ASL_Dataset
-    :param target_sign: The target sign to visualize.
-    :type target_sign: int
-    :param n_samples: The number of samples to visualize, defaults to 6.
-    :type n_samples: int, optional
+def visualize_target_samples(landmarks_list, target_sign=None):
     
-    :return: A matplotlib animation object displaying the landmarks for each frame.
-    :rtype: matplotlib.animation.FuncAnimation
-    """
-
-    print('Generating ', end='')
-    target_indices = []
-    for i, ( _ , target) in enumerate(dataset):
-        if target == target_sign:
-            target_indices.append(i)
-            print('.', end='')
-            if len(target_indices) >= n_samples:
-                break
-
-    # Randomly choose n_samples samples from the target_indices
-    selected_indices = random.sample(target_indices, min(n_samples, len(target_indices)))
-
-    # Retrieve the samples from the dataset
-    samples = [dataset[i] for i in selected_indices]
-
-    fig, ax = plt.subplots(1, figsize=(8 * len(samples) / 2, 10))
-
-    #size = 0
-    _, target = samples[0]
-
-    #for i, sample in enumerate(samples):
-    #    if sample['size'] > size:
-    #        size = int(sample['size'])
-
     size = INPUT_SIZE
     offset = 20
-
+    
+    fig, ax = plt.subplots(1, figsize=(8 * len(landmarks_list) / 2, 10))    
+    
     def update(frame):
+        
         ax.cla()
         print('.', end='')
 
-        for sample_idx, (frames, target) in enumerate(samples):
+        for sample_idx, frames in enumerate(landmarks_list):
 
             landmark_lists = frames[:size]
 
@@ -123,15 +77,68 @@ def visualize_target_sign(dataset, target_sign, n_samples=6):
                     ax.plot([rh_x[i[0]], rh_x[i[1]]],[rh_y[i[0]], rh_y[i[1]]],color='k', lw=0.5)
                         
         ax.set_ylim(-1.5,0.0)
-        ax.set_xlim(-1.5, (len(samples)-1)*2 + 0.5)
+        ax.set_xlim(-1.5, (len(landmarks_list)-1)*2 + 0.5)
         
-        ax.set_title(label_dict_inference[target])
+        if target_sign:
+            ax.set_title(label_dict_inference[target_sign])
 
     animation = FuncAnimation(fig, update, frames=size, interval=50)
     print(f'\n Frame : {size}: ', end='')
+
+    return animation    
+
+def visualize_target_sign(dataset, target_sign, n_samples=6):
+    """
+    Visualize `n_samples` instances of a given target sign from the dataset.
+
+    This function generates a visual representation of the landmarks for each sample
+    belonging to the specified `target_sign`.
+
+    Args:
+        dataset (ASL_Dataset): The ASL dataset to load data from.
+        target_sign (int): The target sign to visualize.
+        n_samples (int, optional): The number of samples to visualize. Defaults to 6.
+
+    Returns:
+        matplotlib.animation.FuncAnimation: A matplotlib animation object displaying the landmarks for each frame.
+        
+    :param dataset: The ASL dataset to load data from.
+    :type dataset: ASL_Dataset
+    :param target_sign: The target sign to visualize.
+    :type target_sign: int
+    :param n_samples: The number of samples to visualize, defaults to 6.
+    :type n_samples: int, optional
     
-    return animation
-    
+    :return: A matplotlib animation object displaying the landmarks for each frame.
+    :rtype: matplotlib.animation.FuncAnimation
+    """
+
+    print('Generating ', end='')
+    target_indices = []
+    for i, ( _ , target) in enumerate(dataset):
+        if target == target_sign:
+            target_indices.append(i)
+            print('.', end='')
+            if len(target_indices) >= n_samples:
+                break
+
+    # Randomly choose n_samples samples from the target_indices
+    selected_indices = random.sample(target_indices, min(n_samples, len(target_indices)))
+
+    # Retrieve the samples from the dataset
+    samples = [dataset[i] for i in selected_indices]
+
+    #size = 0
+    _, target = samples[0]
+
+    #for i, sample in enumerate(samples):
+    #    if sample['size'] > size:
+    #        size = int(sample['size'])
+
+    landmarks_list = [sample[0] for sample in samples]
+
+    return visualize_target_samples(landmarks_list, target_sign=target)
+        
 def visualize_data_distribution(dataset):
     """
     Visualize the distribution of data in terms of the number of samples and average sequence length per class.
