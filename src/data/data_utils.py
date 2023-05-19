@@ -230,7 +230,10 @@ def preprocess_data_to_same_size(landmarks):
 
     num_frames = landmark_data.shape[0]
 
-    if num_frames < INPUT_SIZE:
+    if num_frames == 0:
+        landmark_data = np.zeros((INPUT_SIZE, landmark_data.shape[1], landmark_data.shape[2]))
+
+    elif num_frames < INPUT_SIZE:
         new_frame_indices = np.linspace(0, num_frames - 1, INPUT_SIZE)
         upsampled_landmark_data = np.empty((INPUT_SIZE, landmark_data.shape[1], landmark_data.shape[2]))
         for lm_idx in range(landmark_data.shape[1]):
