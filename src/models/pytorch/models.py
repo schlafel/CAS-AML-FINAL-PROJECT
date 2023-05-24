@@ -1,37 +1,45 @@
 import sys
 sys.path.insert(0,"./..")
 
-from config import *
+from config import DEVICE, N_CLASSES
 
 import pytorch_lightning as pl
-from torchmetrics.classification import accuracy
+
 import torch
 import torch.nn as nn
+from sklearn.metrics import accuracy_score
+from torchmetrics.classification import accuracy
 
-class BaseModel(pl.LightningModule):
-    def __init__(self, learning_rate, n_classes=N_CLASSES):
+
+class BaseModel(nn.Module):
+    def __init__(self,learning_rate,n_classes=N_CLASSES):
         super().__init__()
-        self.learning_rate = learning_rate
-        self.criterion     = nn.CrossEntropyLoss()
-        self.accuracy      = accuracy.Accuracy(
-            task = "multiclass",
-            num_classes = n_classes
+        self.criterion = nn.CrossEntropyLoss()
+        self.accuracy = accuracy.Accuracy(
+            task="multiclass",
+            num_classes=n_classes
         )
+        self.metrics = {"train": [], "val": [], "test": []}
 
-        self.train_step_outputs = []
-        self.validation_step_outputs = []
-        self.test_step_outputs = []
+        self.learning_rate = learning_rate
+        self.optimizer = None
+        self.scheduler = None
+
+    def log(self, phase, metric, value):
+        #self.metrics[phase].append((metric, value))
+        pass
+
+    def calculate_accuracy(self, y_hat, y):
+        preds = torch.argmax(y_hat, dim=1)
+        targets = y.view(-1)
+        acc = self.accuracy(preds, targets)
+        return acc.cpu()
 
     def forward(self, x):
         raise NotImplementedError()
 
-    def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
-        scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
-        return [optimizer], [scheduler]
-
-    def training_step(self, batch, batch_idx):
-        landmarks,labels = batch
+    def training_step(self, batch):
+        landmarks, labels = batch[0].to(DEVICE), batch[1].to(DEVICE)
 
         # forward pass through the model
         out = self(landmarks)
@@ -40,101 +48,76 @@ class BaseModel(pl.LightningModule):
         loss = 0
         if labels is not None:
             loss = self.criterion(out, labels.view(-1))  # need to "flatten" the labels
+        loss.backward()
+        
+        step_accuracy = self.calculate_accuracy(out, labels)
 
-        y_hat = torch.argmax(out, dim=1)
-        step_accuracy = self.accuracy(y_hat, labels.view(-1))
+        self.log("train", "loss", loss.cpu())
+        self.log("train", "accuracy", step_accuracy)
 
-        self.train_step_outputs.append(dict({"train_accuracy": step_accuracy,
-                                             "train_loss": loss}))
+        del landmarks, labels
 
-        self.log("train_loss", loss, prog_bar=True, logger=True)
-        self.log("train_accuracy", step_accuracy,
-                 prog_bar=True,
-                 logger=True)
-        return {"loss": loss, "train_accuracy": step_accuracy}
+        return loss, step_accuracy
 
-    def on_train_epoch_end(self) -> None:
-        # get average training accuracy
-        avg_loss = torch.stack([x['train_loss'] for x in self.train_step_outputs]).mean()
+    def validation_step(self, batch):
 
-        train_acc = torch.stack([x['train_accuracy'] for x in self.train_step_outputs]).mean()
-        print(" ")
-        print(f"EPOCH {self.current_epoch}: Train accuracy: {train_acc}")
-        self.train_step_outputs.clear()
-        print(100*"*")
+        with torch.no_grad():
+            landmarks, labels = batch[0].to(DEVICE), batch[1].to(DEVICE)
 
-    def validation_step(self, batch, batch_idx):
+            # forward pass through the model
+            out = self(landmarks)
 
-        landmarks,labels = batch
+            # calculate loss
+            loss = 0
+            if labels is not None:
+                loss = self.criterion(out, labels.view(-1))
 
-        # forward pass through the model
-        out = self(landmarks)
+            step_accuracy = self.calculate_accuracy(out, labels)
 
-        # calculate loss
-        loss = 0
-        if labels is not None:
-            loss = self.criterion(out, labels.view(-1))  # need to "flatten" the labels
+            del landmarks, labels
 
-        y_hat = torch.argmax(out, dim=1)
-        step_accuracy = self.accuracy(y_hat, labels.view(-1))
+            self.log("val", "loss", loss.cpu())
+            self.log("val", "accuracy", step_accuracy)
 
-        self.validation_step_outputs.append(
-            dict({
-                "val_accuracy": step_accuracy,
-                "val_loss": loss,
-            }))
+        return loss, step_accuracy
 
-        self.log_dict(
-            dict({
-                "val_loss": loss,
-                "val_accuracy": step_accuracy,
-            }),
-            prog_bar=False,
-            logger=True,
-            on_epoch=True)
-        return y_hat
+    def test_step(self, batch):
+        with torch.no_grad():
+            landmarks, labels = batch[0].to(DEVICE), batch[1].to(DEVICE)
 
-    def on_validation_end(self):
+            # forward pass through the model
+            out = self(landmarks)
 
-        avg_loss = torch.stack([x['val_loss'] for x in self.validation_step_outputs]).mean()
+            # calculate loss
+            loss = 0
+            if labels is not None:
+                loss = self.criterion(out, labels.view(-1))  # need to "flatten" the labels
 
-        val_acc = torch.stack([x['val_accuracy'] for x in self.validation_step_outputs]).mean()
+            preds = torch.argmax(out, dim=1)
 
-        self.print(f"EPOCH {self.current_epoch}, Validation Accuracy: {val_acc}")
-        self.validation_step_outputs.clear()  # free memory
+            step_accuracy = self.calculate_accuracy(out, labels)
 
-    def test_step(self, batch, batch_idx):
-        landmarks,labels = batch
+            del landmarks, labels
 
-        # forward pass through the model
-        out = self(landmarks)
+            self.log("test", "loss", loss.cpu())
+            self.log("test", "accuracy", step_accuracy)
 
-        # calculate loss
-        loss = 0
-        if labels is not None:
-            loss = self.criterion(out, labels.view(-1))  # need to "flatten" the labels
+        return loss, step_accuracy, preds
 
-        y_hat = torch.argmax(out, dim=1)
-        step_accuracy = self.accuracy(y_hat, labels.view(-1))
+    def optimize(self):
+        self.optimizer.step()
+        self.optimizer.zero_grad()
 
-        self.test_step_outputs.append(dict({"test_accuracy": step_accuracy,
-                                            "test_loss": loss,
-                                            "preds": y_hat,
-                                            "target": labels.view(-1)}))
+    def train_mode(self):
+        self.optimizer.zero_grad()
+        self.train()
 
-        self.log_dict(dict({"test_loss": loss,
-                            "test_accuracy": step_accuracy}),
-                      logger=True,
-                      on_epoch=True)
-        return y_hat
+    def eval_mode(self):
+        self.eval()
 
-    def on_test_end(self) -> None:
-        avg_loss = torch.stack([x['test_loss'] for x in self.test_step_outputs]).mean()
+    def step_scheduler(self):
+        self.scheduler.step()
 
-        val_acc = torch.stack([x['test_accuracy'] for x in self.test_step_outputs]).mean()
-
-        self.print(f"EPOCH {self.current_epoch}, Accuracy: {val_acc}")
-        self.test_step_outputs.clear()  # free memory
 
 class TransformerSequenceClassifier(nn.Module):
     """Transformer-based Sequence Classifier"""
@@ -179,7 +162,7 @@ class TransformerSequenceClassifier(nn.Module):
     @property
     def batch_first(self):
         return self.settings['batch_first']
-    
+
     def forward(self, inputs):
         """Forward pass through the model"""
         # Check input shape
@@ -201,14 +184,20 @@ class TransformerSequenceClassifier(nn.Module):
 
         return output
 
+
 class TransformerPredictor(BaseModel):
     def __init__(self, **kwargs):
         super().__init__(learning_rate=kwargs["learning_rate"],n_classes=kwargs["num_classes"])
 
+        self.learning_rate = kwargs["learning_rate"]
+
         # Instantiate the Transformer model
         self.model = TransformerSequenceClassifier(**kwargs)
 
-        self.save_hyperparameters()
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
+        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.9)
+
+        ##self.save_hyperparameters() ## TODO
 
     def forward(self, x):
         return self.model(x)

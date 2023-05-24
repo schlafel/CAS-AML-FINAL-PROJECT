@@ -10,7 +10,7 @@ import numpy as np
 
 from tqdm import tqdm
 from data.dataset import ASL_DATASET, label_dict_inference, label_dict
-from dl_utils import *
+from dl_utils import get_dataloader
 
 from sklearn.model_selection import train_test_split
 
