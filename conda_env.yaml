@@ -18,6 +18,8 @@ dependencies:
   - pip
   - jupyterlab=3.*
   - ipywidgets
+  - fastparquet
+  - pyarrow
   - pip:
     - albumentations
     - captum
