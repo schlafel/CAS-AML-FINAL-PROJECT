@@ -3,11 +3,12 @@ sys.path.insert(0,"./..")
 
 from config import *
 
+import pytorch_lightning as pl
 from torchmetrics.classification import accuracy
 import torch
 import torch.nn as nn
 
-class BaseModel(nn.Module):
+class BaseModel(pl.LightningModule):
     def __init__(self, learning_rate, n_classes=N_CLASSES):
         super().__init__()
         self.learning_rate = learning_rate
@@ -20,12 +21,6 @@ class BaseModel(nn.Module):
         self.train_step_outputs = []
         self.validation_step_outputs = []
         self.test_step_outputs = []
-
-    def calculate_accuracy(self, y_hat, y):
-        preds = torch.argmax(y_hat, dim=1).cpu()
-        targets = y.cpu()
-        acc = accuracy_score(targets, preds)
-        return acc
 
     def forward(self, x):
         raise NotImplementedError()
@@ -184,7 +179,7 @@ class TransformerSequenceClassifier(nn.Module):
     @property
     def batch_first(self):
         return self.settings['batch_first']
-
+    
     def forward(self, inputs):
         """Forward pass through the model"""
         # Check input shape
