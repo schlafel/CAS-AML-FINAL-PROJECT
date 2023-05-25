@@ -3,11 +3,8 @@ sys.path.insert(0,"./..")
 
 from config import DEVICE, N_CLASSES
 
-import pytorch_lightning as pl
-
 import torch
 import torch.nn as nn
-from sklearn.metrics import accuracy_score
 from torchmetrics.classification import accuracy
 
 
@@ -24,10 +21,6 @@ class BaseModel(nn.Module):
         self.learning_rate = learning_rate
         self.optimizer = None
         self.scheduler = None
-
-    def log(self, phase, metric, value):
-        #self.metrics[phase].append((metric, value))
-        pass
 
     def calculate_accuracy(self, y_hat, y):
         preds = torch.argmax(y_hat, dim=1)
@@ -49,15 +42,12 @@ class BaseModel(nn.Module):
         if labels is not None:
             loss = self.criterion(out, labels.view(-1))  # need to "flatten" the labels
         loss.backward()
-        
-        step_accuracy = self.calculate_accuracy(out, labels)
 
-        self.log("train", "loss", loss.cpu())
-        self.log("train", "accuracy", step_accuracy)
+        step_accuracy = self.calculate_accuracy(out, labels)
 
         del landmarks, labels
 
-        return loss, step_accuracy
+        return loss.cpu().detach().numpy(), step_accuracy.cpu().numpy()
 
     def validation_step(self, batch):
 
@@ -76,10 +66,7 @@ class BaseModel(nn.Module):
 
             del landmarks, labels
 
-            self.log("val", "loss", loss.cpu())
-            self.log("val", "accuracy", step_accuracy)
-
-        return loss, step_accuracy
+        return loss.cpu().detach().numpy(), step_accuracy.cpu().numpy()
 
     def test_step(self, batch):
         with torch.no_grad():
@@ -99,10 +86,7 @@ class BaseModel(nn.Module):
 
             del landmarks, labels
 
-            self.log("test", "loss", loss.cpu())
-            self.log("test", "accuracy", step_accuracy)
-
-        return loss, step_accuracy, preds
+        return loss.cpu().detach().numpy(), step_accuracy.cpu().numpy(), preds.cpu().numpy()
 
     def optimize(self):
         self.optimizer.step()

@@ -20,6 +20,8 @@ dependencies:
   - ipywidgets
   - fastparquet
   - pyarrow
+  - tensorflow
+  - tensorflow_addons
   - pip:
     - albumentations
     - captum
