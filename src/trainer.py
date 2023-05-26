@@ -1,19 +1,24 @@
-import sys
+import sys,os
 sys.path.insert(0, '../src')
 
 from config import *
 import numpy as np
 from tqdm import tqdm
 
+import datetime
+
+from torch.utils.tensorboard import SummaryWriter
 import time
 
 
 class Trainer:
-    def __init__(self, model, train_loader, valid_loader, test_loader):
+    def __init__(self, model, train_loader, valid_loader, test_loader, log_dir = f'./../checkpoints/{DL_FRAMEWORK}/{MODELNAME}/{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}'):
         self.model = model
         self.train_loader = train_loader
         self.valid_loader = valid_loader
         self.test_loader  = test_loader
+
+        self.writer = SummaryWriter(log_dir)
 
     def train(self, n_epochs=EPOCHS):
         for epoch in range(n_epochs):
@@ -55,11 +60,24 @@ class Trainer:
             print(f"EPOCH {epoch+1:>3}: Train accuracy: {avg_train_acc:>3.2f}, Train Loss: {avg_train_loss:>9.8f}",
                   flush=True)
 
+
+
             val_loss, val_acc = self.evaluate()
             print(f"EPOCH {epoch+1:>3}: Validation accuracy: {val_acc:>3.2f}, Validation Loss: {val_loss:>9.8f}",
                   flush=True)
 
             print(flush=True)
+
+
+            self.writer.add_scalars('loss',
+                                    {'train':avg_train_loss,
+                                     'val':val_loss}, global_step=epoch+1,)
+            self.writer.add_scalars('accuracy',
+                                    {'train':avg_train_acc,
+                                     'val':val_acc}, global_step=epoch+1,)
+
+            # self.writer.add_scalar('loss/val', val_loss, global_step=epoch+1,)
+            # self.writer.add_scalar('accuracy/val', val_acc, global_step=epoch+1,)
 
     def evaluate(self):
         self.model.eval_mode()
@@ -90,7 +108,13 @@ class Trainer:
 
         return avg_valid_loss, avg_valid_acc
 
-    def test(self):
+    def test(self,load_best = True):
+        """
+        Method to thest the model.
+        :param load_best: Load best model before testing (based on val-accuracy)
+        :type load_best: bool
+        :return:
+        """
         self.model.eval_mode()
 
         test_losses = []
@@ -114,6 +138,9 @@ class Trainer:
         avg_test_acc = np.mean(test_accuracies)
 
         print(f"Test Accuracy: {avg_test_acc:>3.2f}, Test Loss: {avg_test_loss:>9.8f}")
+
+        self.writer.add_scalar('test_loss', avg_test_loss, global_step=1, )
+        self.writer.add_scalar('test_accuracy', avg_test_acc, global_step=1, )
 
         return all_preds, all_labels
 
@@ -150,5 +177,6 @@ if __name__ == '__main__':
     trainer = Trainer(model, train_ds, val_ds, test_ds)
 
     trainer.train()
+    #Todo  do we have to select the best model beforehand?
     trainer.test()
 
