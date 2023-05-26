@@ -47,7 +47,7 @@ class BaseModel(nn.Module):
 
         del landmarks, labels
 
-        return loss.cpu().detach().numpy(), step_accuracy.cpu().numpy()
+        return loss.cpu().detach(), step_accuracy.cpu()
 
     def validation_step(self, batch):
 
@@ -66,7 +66,7 @@ class BaseModel(nn.Module):
 
             del landmarks, labels
 
-        return loss.cpu().detach().numpy(), step_accuracy.cpu().numpy()
+        return loss.cpu().detach(), step_accuracy.cpu()
 
     def test_step(self, batch):
         with torch.no_grad():
@@ -86,7 +86,7 @@ class BaseModel(nn.Module):
 
             del landmarks, labels
 
-        return loss.cpu().detach().numpy(), step_accuracy.cpu().numpy(), preds.cpu().numpy()
+        return loss.cpu().detach(), step_accuracy.cpu(), preds.cpu()
 
     def optimize(self):
         self.optimizer.step()

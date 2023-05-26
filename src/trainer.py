@@ -36,8 +36,8 @@ class Trainer:
                 loss, acc = self.model.training_step(batch)
                 self.model.optimize()
 
-                total_loss += loss
-                total_acc += acc
+                total_loss += loss.numpy()
+                total_acc += acc.numpy()
 
                 pbar.set_postfix({'Loss': total_loss / (i + 1), 'Accuracy': total_acc / (i + 1)})
 
@@ -72,8 +72,8 @@ class Trainer:
         for i, batch in pbar:
             loss, acc = self.model.validation_step(batch)
 
-            valid_losses.append(loss)
-            valid_accuracies.append(acc)
+            valid_losses.append(loss.numpy())
+            valid_accuracies.append(acc.numpy())
 
             total_loss += loss
             total_acc += acc
@@ -96,9 +96,9 @@ class Trainer:
                              desc=f"Testing progress"):
             loss, acc, preds = self.model.test_step(batch)
 
-            test_losses.append(loss)
-            test_accuracies.append(acc)
-            all_preds.append(preds)
+            test_losses.append(loss.numpy())
+            test_accuracies.append(acc.numpy())
+            all_preds.append(preds.numpy())
             all_labels.append(batch[1])
 
         avg_test_loss = np.mean(test_losses)

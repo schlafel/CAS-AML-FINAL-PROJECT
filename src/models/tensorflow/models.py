@@ -33,7 +33,7 @@ class BaseModel(tf.keras.Model):
 
     def call(self, inputs, training=False):
         raise NotImplementedError()
-
+    @tf.function
     def training_step(self, batch):
         landmarks, labels = batch
 
@@ -54,8 +54,8 @@ class BaseModel(tf.keras.Model):
 
         del landmarks, labels
 
-        return loss.numpy(), accuracy.numpy()
-
+        return loss, accuracy
+    @tf.function
     def validation_step(self, batch):
         landmarks, labels = batch
 
@@ -67,8 +67,8 @@ class BaseModel(tf.keras.Model):
 
         accuracy = self.calculate_accuracy(predictions, labels)
 
-        return loss.numpy(), accuracy.numpy()
-
+        return loss, accuracy
+    @tf.function
     def test_step(self, batch):
 
         landmarks, labels = batch
@@ -82,7 +82,7 @@ class BaseModel(tf.keras.Model):
         preds = tf.argmax(predictions, axis=-1)
         accuracy = self.calculate_accuracy(predictions, labels)
 
-        return loss.numpy(), accuracy.numpy(), preds.numpy()
+        return loss, accuracy, preds
 
     def optimize(self):
         self.training = True
@@ -96,18 +96,21 @@ class BaseModel(tf.keras.Model):
     def step_scheduler(self):
         pass
 
+
+
 class TransformerEncoderLayer(tf.keras.layers.Layer):
-    def __init__(self, d_model, n_head, dim_feedforward, dropout):
+    def __init__(self, d_model, n_head, dim_feedforward, dropout, layer_norm_eps = 1e-6):
         super(TransformerEncoderLayer, self).__init__()
 
-        self.self_attn = MultiHeadAttention(num_heads=n_head, key_dim=d_model)
+        self.self_attn = MultiHeadAttention(num_heads=n_head,
+                                            key_dim=int(d_model/n_head))
         self.feed_forward = tf.keras.Sequential([
             Dense(dim_feedforward, activation='relu'),
             Dense(d_model)
         ])
 
-        self.layernorm1 = LayerNormalization(epsilon=1e-6)
-        self.layernorm2 = LayerNormalization(epsilon=1e-6)
+        self.layernorm1 = LayerNormalization(epsilon=layer_norm_eps)
+        self.layernorm2 = LayerNormalization(epsilon=layer_norm_eps)
 
         self.dropout1 = Dropout(dropout)
         self.dropout2 = Dropout(dropout)
@@ -128,6 +131,7 @@ class TransformerSequenceClassifier(Model):
         d_model=256,
         n_head=8,
         dim_feedforward=512,
+        layer_norm_eps = 1e-6,
         dropout=0.1,
         num_layers=2,
         num_classes=N_CLASSES,
@@ -146,6 +150,7 @@ class TransformerSequenceClassifier(Model):
                 n_head=self.settings['n_head'],
                 dim_feedforward=self.settings['dim_feedforward'],
                 dropout=self.settings['dropout'],
+                layer_norm_eps = self.settings['layer_norm_eps']
             )
             for _ in range(self.settings['num_layers'])
         ]

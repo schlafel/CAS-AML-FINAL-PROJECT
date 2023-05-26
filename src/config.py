@@ -43,7 +43,7 @@ BATCH_SIZE = 128
 #: Training Learning rate
 LEARNING_RATE = 0.001
 #: Training Number of epochs
-EPOCHS = 10
+EPOCHS = 2
 #: Training Train set split size
 TRAIN_SIZE = 0.85
 #: Training Validation set size
@@ -51,7 +51,7 @@ VALID_SIZE = 0.05
 #: Testing Test set size
 TEST_SIZE = 0.1
 
-DL_FRAMEWORK='pytorch'                 # or 'tensorflow'
+DL_FRAMEWORK='tensorflow'                 # or 'tensorflow'
 MODELNAME='TransformerPredictor'
 
 #: Data files
