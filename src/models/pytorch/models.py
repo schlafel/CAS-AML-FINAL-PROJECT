@@ -138,7 +138,7 @@ class TransformerSequenceClassifier(nn.Module):
             ),
             num_layers=self.settings['num_layers'],
             norm=nn.LayerNorm(self.settings['d_model'])
-        )
+        ).to(DEVICE)
 
         # Output layer
         self.output_layer = nn.Linear(self.settings['d_model'], self.settings['num_classes'])
@@ -155,7 +155,7 @@ class TransformerSequenceClassifier(nn.Module):
 
         # Flatten the last two dimensions
         batch_size, seq_length, height, width = inputs.shape
-        inputs = inputs.view(batch_size, seq_length, height * width)
+        inputs = inputs.view(batch_size, seq_length, height * width).to(DEVICE)
 
         # Pass the input sequence through the Transformer layers
         transformed = self.transformer(inputs.to(torch.float32))
@@ -181,7 +181,68 @@ class TransformerPredictor(BaseModel):
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
         self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.9)
 
+        self.to(DEVICE)
         ##self.save_hyperparameters() ## TODO
 
     def forward(self, x):
         return self.model(x)
+
+class LSTMClassifier(nn.Module):
+    """LSTM-based Sequence Classifier"""
+    DEFAULTS = dict(
+        input_dim=192,
+        hidden_dim=100,
+        layer_dim=5,
+        output_dim=N_CLASSES,
+        learning_rate=0.001
+    )
+
+    def __init__(self, **kwargs):
+        super().__init__()
+
+        # Override defaults with passed-in values
+        self.settings = {**self.DEFAULTS, **kwargs}
+
+        # LSTM
+        self.lstm = nn.LSTM(self.settings['input_dim'], self.settings['hidden_dim'],
+                            self.settings['layer_dim'], batch_first=True)
+
+        # Readout layer
+        self.output_layer = nn.Linear(self.settings['hidden_dim'], self.settings['output_dim'])
+
+    def forward(self, x):
+        """Forward pass through the model"""
+        # Check input shape
+        if len(x.shape) != 3:
+            raise ValueError(f'Expected input of shape (batch_size, seq_length, input_dim), got {x.shape}')
+
+        # Initialize hidden state with zeros
+        h0 = torch.zeros(self.settings['layer_dim'], x.size(0), self.settings['hidden_dim']).to(DEVICE)
+
+        # Initialize cell state
+        c0 = torch.zeros(self.settings['layer_dim'], x.size(0), self.settings['hidden_dim']).to(DEVICE)
+
+        # LSTM forward pass
+        out, (hn, cn) = self.lstm(x, (h0.detach(), c0.detach()))
+
+        # Index hidden state of last time step
+        out = self.output_layer(out[:, -1, :])
+        return out
+
+
+class LSTMPredictor(BaseModel):
+    def __init__(self, **kwargs):
+        super().__init__(learning_rate=kwargs["learning_rate"], n_classes=kwargs["output_dim"])
+
+        self.learning_rate = kwargs["learning_rate"]
+
+        # Instantiate the LSTM model
+        self.model = LSTMClassifier(**kwargs).to(DEVICE)
+
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
+        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.9)
+
+        self.to(DEVICE)
+
+    def forward(self, x):
+        return self.model(x.to(DEVICE))

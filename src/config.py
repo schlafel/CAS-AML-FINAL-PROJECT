@@ -51,6 +51,9 @@ VALID_SIZE = 0.05
 #: Testing Test set size
 TEST_SIZE = 0.1
 
+DL_FRAMEWORK='pytorch'                 # or 'tensorflow'
+MODELNAME='TransformerPredictor'
+
 #: Data files
 TRAIN_CSV_FILE = 'train.csv'
 MAP_JSON_FILE = 'sign_to_prediction_index_map.json'
@@ -115,4 +118,3 @@ SKIP_CONSECUTIVE_ZEROS = 4
 INPUT_SIZE = 32
 MAX_SEQUENCES = 32
 MIN_SEQUEENCES = INPUT_SIZE / 4
-DL_FRAMEWORK='pytorch' ## or 'tensorflow'

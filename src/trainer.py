@@ -7,6 +7,7 @@ from tqdm import tqdm
 
 import time
 
+
 class Trainer:
     def __init__(self, model, train_loader, valid_loader, test_loader):
         self.model = model
@@ -110,46 +111,35 @@ class Trainer:
 import importlib
 from data.dataset import ASL_DATASET
 from data.data_utils import create_data_loaders
+from dl_utils import get_model_params
+
 
 
 if __name__ == '__main__':
-    DL_FRAMEWORK='tensorflow'
 
     module_name = f"models.{DL_FRAMEWORK}.models"
-    class_name = "TransformerPredictor"
+    class_name = MODELNAME
+    params = get_model_params(MODELNAME)
 
     print(f"Using model: {module_name}.{class_name}")
 
     module = importlib.import_module(module_name)
     TransformerPredictorModel = getattr(module, class_name)
 
+    # Get Model
+    model = TransformerPredictorModel(**params)
+
+    # Get Data
     asl_dataset = ASL_DATASET(augment=True, augmentation_threshold=0.3)
     train_ds, val_ds, test_ds = create_data_loaders(asl_dataset,batch_size=BATCH_SIZE,dl_framework=DL_FRAMEWORK,
                                                                num_workers=4)
-
     batch = next(iter(train_ds))[0]
 
-    params = {
-        "d_model": 192,
-        "n_head": 8,
-        "dim_feedforward": 512,
-        "dropout": 0.1,
-        "layer_norm_eps": 1e-5,
-        "norm_first": True,
-        "batch_first": True,
-        "num_layers": 2,
-        "num_classes": 250,
-        "learning_rate": 0.001
-    }
-
-    model = TransformerPredictorModel(**params)
-
+    # Start Training
     model(batch)
-    if DL_FRAMEWORK=='pytorch':
-        model = model.float().to(DEVICE)
 
     trainer = Trainer(model, train_ds, val_ds, test_ds)
 
     trainer.train()
-
+    trainer.test()
 

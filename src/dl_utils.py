@@ -6,6 +6,12 @@ from config import *
 import tensorflow as tf
 from torch.utils.data import DataLoader
 import math
+import yaml
+
+def get_model_params(model_name):
+    with open('models/modelconfig.yaml') as f:
+        data = yaml.safe_load(f)
+    return data['models'][model_name]
 
 def get_dataloader(dataset, batch_size=BATCH_SIZE, shuffle=True, dl_framework=DL_FRAMEWORK,num_workers=os.cpu_count()):
     
