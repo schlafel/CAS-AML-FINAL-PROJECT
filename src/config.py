@@ -51,7 +51,7 @@ VALID_SIZE = 0.05
 #: Testing Test set size
 TEST_SIZE = 0.1
 
-DL_FRAMEWORK='tensorflow'                 # or 'tensorflow'
+DL_FRAMEWORK='pytorch'                 # or 'tensorflow'
 MODELNAME='TransformerPredictor'
 
 #: Data files
