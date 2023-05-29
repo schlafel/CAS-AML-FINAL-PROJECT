@@ -4,7 +4,7 @@ import src
 from config import *
 import sys
 import os
-sys.path.insert(0,os.path.join(os.path.dirname(os.path.abspath(__file__)), "./.."))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "../.."))
 sys.path.extend(['C:\\Users\\fs.GUNDP\\Python\\CAS-AML-FINAL-PROJECT', 'C:\\Users\\fs.GUNDP\\Python\\CAS-AML-FINAL-PROJECT', 'C:/Users/fs.GUNDP/Python/CAS-AML-FINAL-PROJECT'])
 
 # simple demo classes for your convenience

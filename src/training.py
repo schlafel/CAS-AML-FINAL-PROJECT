@@ -173,7 +173,7 @@ def train():
 
     train_loader, valid_loader, test_loader = create_data_loaders(asl_dataset)
 
-    from models.models import ImprovedLSTMModel
+    from src._old.models import ImprovedLSTMModel
 
     model = ImprovedLSTMModel()
 

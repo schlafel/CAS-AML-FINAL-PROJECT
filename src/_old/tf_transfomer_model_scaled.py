@@ -1,11 +1,9 @@
 import tensorflow as tf
 from src.data.data_utils import get_stratified_TrainValFrames, load_relevant_data_subset
-import numpy as np
-from src.config import *
 from src.augmentations import *
 import os
 from tqdm import tqdm
-from src.models.preprocessing_layers import PreprocessLayer
+from src._old.preprocessing_layers import PreprocessLayer
 
 # Model Config
 # Epsilon value for layer normalisation
@@ -120,13 +118,6 @@ def run_transformer():
 
 
     ######### DEFINE MODEL #########
-
-    from src.models.tf_models import Transformer
-
-
-
-
-
 
     # for (X, idx), y in train_data:
     #     print(X.shape, idx.shape, y.shape)

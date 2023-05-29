@@ -1,27 +1,14 @@
-import torch
-import torch.nn as nn
-import os
-import json
-import pandas as pd
-from torch.utils.data import Dataset, DataLoader
-import pyarrow.parquet as pq
-import numpy as np
-import torch.nn.functional as F
-from tqdm import tqdm
 import pytorch_lightning as pl
 import sys
 # from sklearn import *
-from torchmetrics.classification import accuracy
 
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint, DeviceStatsMonitor, TQDMProgressBar,EarlyStopping
 from pytorch_lightning.loggers import TensorBoardLogger
-from pytorch_lightning.tuner import Tuner
 from src.config import *
 from src.data import data_utils
 from src.data.dataset import ASL_DATASET
-from src.dl_utils import get_dataloader
 
-from src.models.models import LSTM_BASELINE_Model, LSTM_Predictor, TransformerPredictor
+from src._old.models import TransformerPredictor
 
 
 class MyProgressBar(TQDMProgressBar):

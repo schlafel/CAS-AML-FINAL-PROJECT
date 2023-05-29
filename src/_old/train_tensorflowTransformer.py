@@ -1,5 +1,5 @@
 import tensorflow as tf
-from src.models.tf_models import TransformerClassifierModel
+from src._old.tf_models import TransformerClassifierModel
 from src._old.tf_data import get_TF_ASL_DATASET
 import os
 from config import *

@@ -43,16 +43,20 @@ BATCH_SIZE = 128
 #: Training Learning rate
 LEARNING_RATE = 0.001
 #: Training Number of epochs
-EPOCHS = 10
+EPOCHS = 50
 #: Training Train set split size
 TRAIN_SIZE = 0.85
 #: Training Validation set size
 VALID_SIZE = 0.05
 #: Testing Test set size
 TEST_SIZE = 0.1
+#: The number of epochs to wait for improvement in the validation loss before stopping training
+EARLY_STOP_PATIENCE = 5
+#: The value of loss as margin to tolerate
+EARLY_STOP_TOLERENCE = 0.000001
 
 DL_FRAMEWORK='pytorch'                 # or 'tensorflow'
-MODELNAME='TransformerPredictor'
+MODELNAME='LSTMPredictor' #MODELNAME='TransformerPredictor'
 
 #: Data files
 TRAIN_CSV_FILE = 'train.csv'

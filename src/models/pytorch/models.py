@@ -102,6 +102,22 @@ class BaseModel(nn.Module):
     def step_scheduler(self):
         self.scheduler.step()
 
+    def get_lr(self):
+        return self.optimizer.param_groups[0]['lr']
+
+    def save_checkpoint(self, filepath):
+        checkpoint = {
+            'model_state_dict': self.state_dict(),
+            'optimizer_state_dict': self.optimizer.state_dict(),
+            'scheduler_state_dict': self.scheduler.state_dict()
+        }
+        torch.save(checkpoint, filepath)
+
+    def load_checkpoint(self, filepath):
+        checkpoint = torch.load(filepath)
+        self.load_state_dict(checkpoint['model_state_dict'])
+        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        self.scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
 
 class TransformerSequenceClassifier(nn.Module):
     """Transformer-based Sequence Classifier"""
@@ -194,7 +210,8 @@ class LSTMClassifier(nn.Module):
         hidden_dim=100,
         layer_dim=5,
         output_dim=N_CLASSES,
-        learning_rate=0.001
+        learning_rate=0.001,
+        dropout=0.5
     )
 
     def __init__(self, **kwargs):
@@ -205,18 +222,21 @@ class LSTMClassifier(nn.Module):
 
         # LSTM
         self.lstm = nn.LSTM(self.settings['input_dim'], self.settings['hidden_dim'],
-                            self.settings['layer_dim'], batch_first=True)
+                            self.settings['layer_dim'], dropout=self.settings['dropout'], batch_first=True)
+
+        # Dropout layer
+        self.dropout = nn.Dropout(self.settings['dropout'])
 
         # Readout layer
         self.output_layer = nn.Linear(self.settings['hidden_dim'], self.settings['output_dim'])
 
     def forward(self, x):
         """Forward pass through the model"""
-        # Check input shape
-        if len(x.shape) != 3:
-            raise ValueError(f'Expected input of shape (batch_size, seq_length, input_dim), got {x.shape}')
 
         # Initialize hidden state with zeros
+        batch_size, seq_length, height, width = x.shape
+        x = x.view(batch_size, seq_length, height * width).to(DEVICE)
+
         h0 = torch.zeros(self.settings['layer_dim'], x.size(0), self.settings['hidden_dim']).to(DEVICE)
 
         # Initialize cell state
@@ -228,7 +248,6 @@ class LSTMClassifier(nn.Module):
         # Index hidden state of last time step
         out = self.output_layer(out[:, -1, :])
         return out
-
 
 class LSTMPredictor(BaseModel):
     def __init__(self, **kwargs):
@@ -246,3 +265,61 @@ class LSTMPredictor(BaseModel):
 
     def forward(self, x):
         return self.model(x.to(DEVICE))
+
+
+class HybridModel(BaseModel):
+    def __init__(self, **kwargs):
+        common_params = kwargs['common_params']
+        transformer_kwargs = kwargs['transformer_params']
+        lstm_kwargs = kwargs['lstm_params']
+
+        super().__init__(learning_rate=common_params["learning_rate"], n_classes=common_params["num_classes"])
+
+        self.lstm = LSTMClassifier(**lstm_kwargs).to(DEVICE)
+        self.transformer = TransformerSequenceClassifier(**transformer_kwargs).to(DEVICE)
+        self.fc = nn.Linear(common_params["num_classes"]*2, common_params["num_classes"]).to(DEVICE)
+
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=common_params["learning_rate"])
+        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.9)
+
+        self.to(DEVICE)
+
+    def forward(self, x):
+        lstm_output = self.lstm(x)
+        transformer_output = self.transformer(x)
+
+        # Concatenate the outputs of LSTM and Transformer along the feature dimension
+        combined = torch.cat((lstm_output, transformer_output), dim=1)
+
+        # Pass the combined output through the final fully-connected layer
+        output = self.fc(combined)
+
+        return output
+
+class TransformerEnsemble(BaseModel):
+    def __init__(self, **kwargs):
+        common_params = kwargs['common_params']
+        transformer_params=kwargs['TransformerSequenceClassifier']
+
+        n_models = common_params["n_models"]
+        super().__init__(learning_rate=common_params["learning_rate"],n_classes=common_params["num_classes"])
+
+        self.learning_rate = common_params["learning_rate"]
+
+        # Ensemble
+        self.models = nn.ModuleList([TransformerSequenceClassifier( num_layers=2+i,
+                                    **transformer_params) for i, _ in enumerate(range(n_models))])
+
+        self.fc = nn.Linear(common_params["num_classes"] * n_models, common_params["num_classes"]).to(DEVICE)
+
+        self.optimizer = torch.optim.Adam(self.models.parameters(), lr=self.learning_rate)
+        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.9)
+
+        self.to(DEVICE)
+        ##self.save_hyperparameters() ## TODO
+
+    def forward(self, x):
+        model_outputs = [model(x) for model in self.models]
+        combined = torch.cat(model_outputs, dim=1)
+        output = self.fc(combined)
+        return output

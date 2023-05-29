@@ -1,5 +1,4 @@
 import tensorflow as tf
-import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 import json
 from tensorflow.lite.python.interpreter import Interpreter
@@ -8,7 +7,7 @@ import os
 from src.data.data_utils import load_relevant_data_subset
 from tqdm import tqdm
 
-from src.models.preprocessing_layers import PreprocessLayer
+from src._old.preprocessing_layers import PreprocessLayer
 
 def load_full_train_datafile():
     # Path to raw json dictionary file
