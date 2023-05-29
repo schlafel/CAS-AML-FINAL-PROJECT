@@ -144,6 +144,11 @@ class Trainer:
         return avg_valid_loss, avg_valid_acc
 
     def test(self):
+
+        checkpoint_filepath = os.path.join(self.checkpoint_path, f"{self.model_name}_best_model.ckpt")
+        print(f"\nBest model saved at {checkpoint_filepath}")
+        self.model.load_checkpoint(checkpoint_filepath)
+
         self.model.eval_mode()
 
         test_losses = []
