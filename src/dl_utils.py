@@ -51,7 +51,7 @@ def to_TF_DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True):
 
     tf_data = tf.data.Dataset.from_generator(shuffled_dataset_gen, output_types=(tf.float32, tf.int32))
 
-    #tf_data = tf_data.take(batch_size).cache()
+    tf_data = tf_data.cache()
 
     tf_data = tf_data.map(preprocess_sample, num_parallel_calls=tf.data.AUTOTUNE)
     tf_data = tf_data.batch(batch_size)

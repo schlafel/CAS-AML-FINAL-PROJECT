@@ -1,0 +1,10 @@
+batch_first: true
+d_model: 192
+dim_feedforward: 512
+dropout: 0.1
+layer_norm_eps: 1.0e-05
+learning_rate: 0.001
+n_head: 8
+norm_first: true
+num_classes: 250
+num_layers: 2
