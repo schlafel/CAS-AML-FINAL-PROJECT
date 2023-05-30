@@ -14,22 +14,24 @@ from dl_utils import get_model_params, log_metrics
 from data.data_utils import create_data_loaders
 from data.dataset import ASL_DATASET
 from datetime import datetime
+import yaml
 
 class Trainer:
     def __init__(self, modelname=MODELNAME, dataset=ASL_DATASET, patience=EARLY_STOP_PATIENCE):
 
         self.model_name = modelname
         module_name = f"models.{DL_FRAMEWORK}.models"
-        params = get_model_params(modelname)
+        self.params = get_model_params(modelname)
 
         module = importlib.import_module(module_name)
         TransformerPredictorModel = getattr(module, modelname)
 
         # Get Model
-        self.model = TransformerPredictorModel(**params)
+        self.model = TransformerPredictorModel(**self.params)
         print(f"Using model: {module_name}.{modelname}")
 
-        asl_dataset = dataset(augment=True, augmentation_threshold=0.3)
+        # Get Data
+        asl_dataset = dataset(augment=True, augmentation_threshold=0.35)
         self.train_loader, self.valid_loader, self.test_loader = create_data_loaders(
             asl_dataset, batch_size=BATCH_SIZE, dl_framework=DL_FRAMEWORK, num_workers=4)
 
@@ -43,7 +45,7 @@ class Trainer:
 
         self.model_class = self.model.__class__.__name__
         self.writer = SummaryWriter(os.path.join(ROOT_PATH, RUNS_DIR, DL_FRAMEWORK,
-                                                 self.model_class, now.strftime("%Y-%m-%d %H:%M")))
+                                                 self.model_class, now.strftime("%Y-%m-%d %H_%M")))
 
         self.checkpoint_path = os.path.join(ROOT_PATH, CHECKPOINT_DIR, DL_FRAMEWORK, self.model_class)
 
@@ -98,7 +100,12 @@ class Trainer:
                 os.makedirs(self.checkpoint_path, exist_ok=True)
                 checkpoint_filepath = os.path.join(self.checkpoint_path, f"{self.model_name}_best_model.ckpt")
                 self.model.save_checkpoint(checkpoint_filepath)
-                print(f"Best model saved at epoch {epoch + 1}")
+
+                # Save model params
+                checkpoint_param_path = os.path.join(self.checkpoint_path, f"{self.model_name}_best_model_params.yaml")
+                with open(checkpoint_param_path, 'w') as outfile:
+                    yaml.dump(self.params, outfile, default_flow_style=False)
+                print(f"Best model and parameters saved at epoch {epoch + 1}")
 
             else:
                 self.patience_counter += 1
@@ -146,7 +153,7 @@ class Trainer:
     def test(self):
 
         checkpoint_filepath = os.path.join(self.checkpoint_path, f"{self.model_name}_best_model.ckpt")
-        print(f"\nBest model saved at {checkpoint_filepath}")
+        print(f"\nRetrieving best model saved at {checkpoint_filepath}")
         self.model.load_checkpoint(checkpoint_filepath)
 
         self.model.eval_mode()
@@ -176,6 +183,6 @@ class Trainer:
 
 if __name__ == '__main__':
     # Get Data
-    trainer = Trainer(modelname='TransformerEnsemble')
+    trainer = Trainer(modelname='HybridEnsembleModel')
     trainer.train()
     trainer.test()

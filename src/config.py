@@ -51,7 +51,7 @@ VALID_SIZE = 0.05
 #: Testing Test set size
 TEST_SIZE = 0.1
 #: The number of epochs to wait for improvement in the validation loss before stopping training
-EARLY_STOP_PATIENCE = 5
+EARLY_STOP_PATIENCE = 10
 #: The value of loss as margin to tolerate
 EARLY_STOP_TOLERENCE = 0.000001
 
