@@ -173,6 +173,7 @@ class TransformerSequenceClassifier(Model):
         # Output layer
         self.output_layer = Dense(self.settings['num_classes'])
 
+    @tf.function
     def call(self, inputs, training=False):
         # Check input shape
         if len(inputs.shape) != 4:
