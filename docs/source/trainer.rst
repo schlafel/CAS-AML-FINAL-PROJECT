@@ -1,5 +1,5 @@
 Training
 ======
 
-.. automodule:: training
+.. automodule:: trainer
    :members:

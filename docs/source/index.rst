@@ -12,10 +12,9 @@ Welcome to American Sign Language Recognition's documentation!
 
    config
    augmentations
-   data_utils
-   dataset
+   dl_utils
    visualizations
-   training
+   trainer
 
 
 Indices and tables
