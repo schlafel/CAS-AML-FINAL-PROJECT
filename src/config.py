@@ -38,6 +38,8 @@ SEED = 0
 torch.manual_seed(SEED)
 
 #: Training hyperparameters
+#: Tune hyperparameters
+TUNE_HP = True
 #: Training Batch Size
 BATCH_SIZE = 128
 #: Training Learning rate
@@ -50,13 +52,15 @@ TRAIN_SIZE = 0.85
 VALID_SIZE = 0.05
 #: Testing Test set size
 TEST_SIZE = 0.1
+#: Which metric should be used for early stopping loss/accuracy
+EARLY_STOP_METRIC = "loss"
 #: The number of epochs to wait for improvement in the validation loss before stopping training
 EARLY_STOP_PATIENCE = 10
 #: The value of loss as margin to tolerate
 EARLY_STOP_TOLERENCE = 0.000001
 
 DL_FRAMEWORK='pytorch'                 # or 'tensorflow'
-MODELNAME='LSTMPredictor' #MODELNAME='TransformerPredictor'
+MODELNAME='TransformerPredictor' #MODELNAME='TransformerPredictor'
 
 #: Data files
 TRAIN_CSV_FILE = 'train.csv'

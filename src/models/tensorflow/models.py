@@ -215,7 +215,7 @@ class TransformerPredictor(BaseModel):
         self.scheduler = tf.keras.optimizers.schedules.ExponentialDecay(
             initial_learning_rate=self.learning_rate,
             decay_steps=10000,
-            decay_rate=0.9
+            decay_rate=kwargs["gamma"]
         )
 
         self.optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=self.scheduler)
