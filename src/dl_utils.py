@@ -1,4 +1,4 @@
-import sys
+import sys,os
 
 sys.path.insert(0, '..')
 from config import *
@@ -9,7 +9,7 @@ import math
 import yaml
 
 def get_model_params(model_name):
-    with open('models/modelconfig.yaml') as f:
+    with open(os.path.join(os.path.dirname(__file__),'models','modelconfig.yaml')) as f:
         data = yaml.safe_load(f)
     return data['models'][model_name]
 

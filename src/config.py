@@ -45,7 +45,7 @@ BATCH_SIZE = 128
 #: Training Learning rate
 LEARNING_RATE = 0.001
 #: Training Number of epochs
-EPOCHS = 50
+EPOCHS = 2
 #: Training Train set split size
 TRAIN_SIZE = 0.85
 #: Training Validation set size
