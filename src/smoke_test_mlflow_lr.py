@@ -32,6 +32,7 @@ import mlflow
 from ray import air, tune
 from ray.air import session
 from ray.air.integrations.mlflow import MLflowLoggerCallback, setup_mlflow
+from ray.tune.schedulers import ASHAScheduler
 
 
 def evaluation_fn(step, width, height):
@@ -122,10 +123,10 @@ def train(config):
 
         session.report({
             "iterations": epoch,
-            "val_loss": avg_valid_loss,
-            "val_accuracy": avg_valid_acc,
-            "train_loss": avg_train_loss,
-            "train_accuracy": avg_train_acc,
+            "val_loss": float(avg_valid_loss),
+            "val_accuracy": float(avg_valid_acc),
+            "train_loss": float(avg_train_loss),
+            "train_accuracy": float(avg_train_acc),
         },
         )
 
@@ -154,21 +155,31 @@ def tune_with_callback(mlflow_tracking_uri, finish_fast=False):
 
     }
 
+    scheduler = ASHAScheduler(
+        max_t=EPOCHS,
+        grace_period=1,
+        reduction_factor=2)
+
     tuner = tune.Tuner(
-        tune.with_resources(trainable=train, resources={"gpu": 1}),
+        tune.with_resources(trainable=train, resources={"cpu": 3,
+                                                        "gpu": 0.25}),
         run_config=air.RunConfig(
+
             name="mlflow",
             callbacks=[
                 MLflowLoggerCallback(
                     tracking_uri=mlflow_tracking_uri,
-                    experiment_name="test",
+                    experiment_name=f"{DL_FRAMEWORK}_{MODELNAME}",
                     save_artifact=True,
                 )
             ],
         ),
         tune_config=tune.TuneConfig(
             num_samples=30,
-
+            scheduler=scheduler,
+            search_alg=OptunaSearch(),
+            metric="val_accuracy",
+            mode="max",
         ),
         param_space=search_space,
     )
