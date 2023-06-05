@@ -38,7 +38,7 @@ class Trainer:
         self.model(next(iter(self.train_loader))[0])
 
         self.patience = patience
-        self.best_val_loss = float('inf')
+        self.best_val_metric = float('inf') if EARLY_STOP_MODE == "min" else float('-inf')
         self.patience_counter = 0
 
         now = datetime.now()
@@ -90,12 +90,24 @@ class Trainer:
 
             val_loss, val_acc = self.evaluate()
 
+            if EARLY_STOP_METRIC == "loss":
+                metric = val_loss
+            elif EARLY_STOP_METRIC == "accuracy":
+                metric = val_acc
+
+            # check if early_stop_criterion has improved
+            if EARLY_STOP_MODE == "min":
+                early_stop_criterion = metric - EARLY_STOP_TOLERENCE < self.best_val_metric
+            else:
+                early_stop_criterion = metric + EARLY_STOP_TOLERENCE > self.best_val_metric
+
+
             # Check for early stopping
-            if val_loss - EARLY_STOP_TOLERENCE < self.best_val_loss:
-                self.best_val_loss = val_loss
+            if early_stop_criterion:
+                self.best_val_metric = metric
                 self.patience_counter = 0
 
-                # Save the model checkpoint when validation loss improves
+                # Save the model checkpoint when Early-Stop-Metric loss improves
 
                 os.makedirs(self.checkpoint_path, exist_ok=True)
                 checkpoint_filepath = os.path.join(self.checkpoint_path, f"{self.model_name}_best_model.ckpt")

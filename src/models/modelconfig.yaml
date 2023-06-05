@@ -93,3 +93,15 @@ models:
       num_classes: 250
       learning_rate: 0.001
       n_models: 4
+
+  CVTransferLearningModel:
+    params:
+        n_classes: 250
+    hparams:
+      backbone: resnet152
+      weights: IMAGENET1K_V2
+      learning_rate: 0.001
+      pretrained: True
+
+
+

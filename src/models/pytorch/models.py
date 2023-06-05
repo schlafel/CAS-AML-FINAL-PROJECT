@@ -7,6 +7,7 @@ from config import DEVICE, N_CLASSES
 import torch
 import torch.nn as nn
 from torchmetrics.classification import accuracy
+from torchvision import models
 
 
 class BaseModel(nn.Module):
@@ -372,3 +373,49 @@ class HybridEnsembleModel(BaseModel):
         output = self.fc(output)
 
         return output
+
+class CVTransferLearningModel(BaseModel):
+    def __init__(self, **kwargs):
+        super().__init__()
+
+        # Override defaults with passed-in values
+        self.settings = {**self.DEFAULTS, **kwargs}
+
+        #get weights
+        if "weights" not in self.settings['hparams']["weights"].keys():
+            self.settings['hparams']['weights'] = None
+
+
+
+        self.model = models.get_model(self.settings['hparams']['backbone'],
+                                 weights = self.settings['hparams']['weights'],
+                                      )
+
+        #Freeze layers
+        # Freeze the parameters....
+        for p in self.model.parameters():
+            if hasattr(p,"requires_grad"):
+                p.requires_grad = False
+
+        # recursively iterate over child modules until we find the last fully connected layer
+        for name, module in self.model.named_children():
+            if isinstance(module, nn.Linear):
+                last_layer = module
+                last_layer_name = name
+            if isinstance(module, nn.Sequential):
+                for name2,module2 in module.named_children():
+                    if isinstance(module2, nn.Linear):
+                        last_layer = module2
+                        last_layer_name = name + "." + name2
+
+        new_last_layer = nn.Linear(last_layer.in_features,
+                                   self.settings['params']['n_classes'], bias=True,
+                                   )
+    def forward(self,x):
+        #reshape inputs?
+
+        #pass it to the model
+        x =  self.model(x)
+        return(x)
+
+
