@@ -198,7 +198,7 @@ class TransformerPredictor(BaseModel):
         self.model = TransformerSequenceClassifier(**kwargs)
 
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
-        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.9)
+        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=kwargs["gamma"])
 
         self.to(DEVICE)
         ##self.save_hyperparameters() ## TODO
@@ -264,7 +264,7 @@ class LSTMPredictor(BaseModel):
         self.model = LSTMClassifier(**kwargs).to(DEVICE)
 
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
-        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.9)
+        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=kwargs["gamma"])
 
         self.to(DEVICE)
 
@@ -320,7 +320,7 @@ class TransformerEnsemble(BaseModel):
         self.fc = nn.Linear(common_params["num_classes"] * n_models, common_params["num_classes"]).to(DEVICE)
 
         self.optimizer = torch.optim.Adam(self.models.parameters(), lr=self.learning_rate)
-        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.9)
+        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=common_params["gamma"])
 
         self.to(DEVICE)
         ##self.save_hyperparameters() ## TODO
