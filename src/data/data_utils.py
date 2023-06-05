@@ -56,10 +56,10 @@ def interpolate_missing_values(arr, max_gap=INTEREMOLATE_MISSING):
                             [left_boundary, right_boundary],
                             [arr[left_boundary, lm_idx, coord_idx], arr[right_boundary, lm_idx, coord_idx]]
                         )
-                    elif left_boundary < 0 and right_boundary < arr.shape[0]:
-                        arr[:idx, lm_idx, coord_idx] = arr[right_boundary, lm_idx, coord_idx]
-                    elif left_boundary >= 0 and right_boundary >= arr.shape[0]:
-                        arr[start_idx:, lm_idx, coord_idx] = arr[left_boundary, lm_idx, coord_idx]
+                    elif left_boundary == 0 and right_boundary < arr.shape[0]:
+                        arr[:right_boundary, lm_idx, coord_idx] = arr[right_boundary, lm_idx, coord_idx]
+                    elif left_boundary >= 0 and right_boundary == arr.shape[0]:
+                        arr[left_boundary:, lm_idx, coord_idx] = arr[left_boundary, lm_idx, coord_idx]
 
     return arr
 
@@ -126,7 +126,7 @@ def preprocess_raw_data(sample=100000):
     processed_files = np.array(
         [f"{x}-{y}.npy" for (x, y) in zip(df_train["participant_id"].values, df_train["sequence_id"].values)])
 
-    # keep tect signs and their respective indices
+    # keep target signs and their respective indices
     signs = df_train["sign"].values
     targets = df_train["sign"].map(label_dict).values
 
@@ -219,6 +219,8 @@ def preprocess_data_item(raw_landmark_path, targets_sign):
 
 def preprocess_data_to_same_size(landmarks):
     num_orig_frames = landmarks.shape[0]
+
+    landmarks[:, USEFUL_HAND_LANDMARKS] = interpolate_missing_values(landmarks[:, USEFUL_HAND_LANDMARKS])
 
     frames_hands_nansum = np.nanmean(landmarks[:, USEFUL_HAND_LANDMARKS], axis=(1, 2))
     non_empty_frames_idxs = np.where(frames_hands_nansum > 0)[0]
@@ -468,6 +470,7 @@ def remove_unusable_data():
         # Load the file and get the length of its landmarks data
         file_path = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, row['path'])
 
+        missing_file = False
         try:
             data = np.load(file_path)
         except Exception as e:
@@ -684,5 +687,4 @@ def create_data_loaders(asl_dataset, train_size=TRAIN_SIZE, valid_size=VALID_SIZ
 if __name__ == '__main__':
 
     preprocess_raw_data(sample=100000)
-
     remove_unusable_data()

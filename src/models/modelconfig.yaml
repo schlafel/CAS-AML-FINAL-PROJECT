@@ -53,8 +53,8 @@ models:
     TransformerSequenceClassifier:
       d_model: 192
       n_head: 8
-      dim_feedforward: 1024
-      dropout: 0.05
+      dim_feedforward: 2048
+      dropout: 0.1
       layer_norm_eps: !!float 1e-5
       norm_first: True
       batch_first: True
@@ -68,4 +68,4 @@ models:
     common_params:
       num_classes: 250
       learning_rate: 0.001
-      n_models: 2
+      n_models: 4

@@ -24,8 +24,9 @@ class BaseModel(nn.Module):
         self.scheduler = None
 
     def calculate_accuracy(self, y_hat, y):
-        preds = torch.argmax(y_hat, dim=1)
-        targets = y.view(-1)
+        # Damn Mac https://github.com/pytorch/pytorch/issues/92311
+        preds = torch.argmax(y_hat.cpu(), dim=1)
+        targets = y.view(-1).cpu()
         acc = self.accuracy(preds, targets)
         return acc.cpu()
 
@@ -346,7 +347,7 @@ class HybridEnsembleModel(BaseModel):
         self.lstms = nn.ModuleList([LSTMClassifier(**lstm_kwargs).to(DEVICE) for i, _ in
                                      enumerate(range(n_models))])
 
-        self.models = nn.ModuleList([TransformerSequenceClassifier(num_layers=i,
+        self.models = nn.ModuleList([TransformerSequenceClassifier(num_layers=i+1,
                                                                    **transformer_params) for i, _ in
                                      enumerate(range(n_models))])
 

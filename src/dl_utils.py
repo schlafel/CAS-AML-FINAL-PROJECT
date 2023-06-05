@@ -9,7 +9,7 @@ import math
 import yaml
 
 def get_model_params(model_name):
-    with open('models/modelconfig.yaml') as f:
+    with open(os.path.join(ROOT_PATH, SRC_DIR, MODEL_DIR, 'modelconfig.yaml')) as f:
         data = yaml.safe_load(f)
     return data['models'][model_name]
 

@@ -210,7 +210,7 @@ class LightningTransformerPredictor(LightningBaseModel):
         # Instantiate the Transformer model
         self.model = LightningTransformerSequenceClassifier(**kwargs)
 
-        self.save_hyperparameters()
+        #self.save_hyperparameters()
 
     def forward(self, x):
         return self.model(x)

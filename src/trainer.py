@@ -183,6 +183,6 @@ class Trainer:
 
 if __name__ == '__main__':
     # Get Data
-    trainer = Trainer(modelname='HybridEnsembleModel')
+    trainer = Trainer()
     trainer.train()
     trainer.test()

@@ -100,9 +100,33 @@ def random_rotation(frames, max_angle=10):
     return frames
 
 #TODO 
-def normalize(frames, mn,std):
-    pass
+def normalize(frames, mn, std):
+    """
+    Normalize the frames with a given mean and standard deviation.
+
+    Args:
+        frames (numpy.ndarray): An array of landmarks data.
+        mn (float): The mean value for normalization.
+        std (float): The standard deviation for normalization.
+
+    Returns:
+        numpy.ndarray: An array of normalized landmarks.
+    """
+    return (frames - mn) / std
+
 
 #TODO
-def standardize():
-    pass
+def standardize(frames):
+    """
+    Standardize the frames so that they have mean 0 and standard deviation 1.
+
+    Args:
+        frames (numpy.ndarray): An array of landmarks data.
+
+    Returns:
+        numpy.ndarray: An array of standardized landmarks.
+    """
+    frames_mean = frames.mean()
+    frames_std = frames.std()
+    return (frames - frames_mean) / frames_std
+
