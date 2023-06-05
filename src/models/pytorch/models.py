@@ -6,6 +6,7 @@ from config import DEVICE, N_CLASSES
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torchmetrics.classification import accuracy
 from torchvision import models
 
@@ -375,30 +376,32 @@ class HybridEnsembleModel(BaseModel):
         return output
 
 class CVTransferLearningModel(BaseModel):
+    DEFAULTS = dict({})
     def __init__(self, **kwargs):
-        super().__init__()
+
 
         # Override defaults with passed-in values
         self.settings = {**self.DEFAULTS, **kwargs}
+        super().__init__(learning_rate=self.settings['hparams']['learning_rate'])
 
         #get weights
-        if "weights" not in self.settings['hparams']["weights"].keys():
+        if "weights" not in self.settings['hparams'].keys():
             self.settings['hparams']['weights'] = None
 
 
 
-        self.model = models.get_model(self.settings['hparams']['backbone'],
+        model = models.get_model(self.settings['hparams']['backbone'],
                                  weights = self.settings['hparams']['weights'],
                                       )
 
         #Freeze layers
         # Freeze the parameters....
-        for p in self.model.parameters():
+        for p in model.parameters():
             if hasattr(p,"requires_grad"):
                 p.requires_grad = False
 
         # recursively iterate over child modules until we find the last fully connected layer
-        for name, module in self.model.named_children():
+        for name, module in model.named_children():
             if isinstance(module, nn.Linear):
                 last_layer = module
                 last_layer_name = name
@@ -409,13 +412,27 @@ class CVTransferLearningModel(BaseModel):
                         last_layer_name = name + "." + name2
 
         new_last_layer = nn.Linear(last_layer.in_features,
-                                   self.settings['params']['n_classes'], bias=True,
+                                   self.settings['params']['n_classes'],
+                                   bias=True,
                                    )
+
+        setattr(model, last_layer_name, new_last_layer)
+
+
+
+        self.optimizer = torch.optim.Adam(model.parameters(), lr=self.learning_rate)
+        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer,
+                                                                gamma=kwargs['hparams']["gamma"])
+
+        self.model = model
+
+        self.to(DEVICE)
+
+
     def forward(self,x):
         #reshape inputs?
-
+        x_new = F.pad(x,(0,1),value = 0.).reshape(-1,64,48,3).moveaxis(-1,1)
         #pass it to the model
-        x =  self.model(x)
-        return(x)
+        return self.model(x_new.to(DEVICE))
 
 

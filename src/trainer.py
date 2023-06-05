@@ -24,10 +24,10 @@ class Trainer:
         self.params = get_model_params(modelname)
 
         module = importlib.import_module(module_name)
-        TransformerPredictorModel = getattr(module, modelname)
+        Model = getattr(module, modelname)
 
         # Get Model
-        self.model = TransformerPredictorModel(**self.params)
+        self.model = Model(**self.params)
         print(f"Using model: {module_name}.{modelname}")
 
         # Get Data
@@ -35,7 +35,8 @@ class Trainer:
         self.train_loader, self.valid_loader, self.test_loader = create_data_loaders(
             asl_dataset, batch_size=BATCH_SIZE, dl_framework=DL_FRAMEWORK, num_workers=4)
 
-        self.model(next(iter(self.train_loader))[0])
+        batch = next(iter(self.train_loader))[0]
+        self.model(batch)
 
         self.patience = patience
         self.best_val_metric = float('inf') if EARLY_STOP_MODE == "min" else float('-inf')
