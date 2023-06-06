@@ -465,7 +465,7 @@ def remove_unusable_data():
     # Iterate over each row in the DataFrame
     for index, row in tqdm(df_train.iterrows(), total=len(df_train)):
 
-        missing_file = False
+
 
         # Load the file and get the length of its landmarks data
         file_path = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, row['path'])

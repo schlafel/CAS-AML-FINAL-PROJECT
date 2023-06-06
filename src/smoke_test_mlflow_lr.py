@@ -54,7 +54,7 @@ def train(config):
     model = model_cls(**base_config)
     print(f"Using model: {module_name}.{MODELNAME}")
     # Get Data
-    asl_dataset = ASL_DATASET(augment=True, augmentation_threshold=0.35)
+    asl_dataset = ASL_DATASET(augment=True, augmentation_threshold=base_config["augmentation_threshold"])
     train_loader, valid_loader, test_loader = create_data_loaders(
         asl_dataset, batch_size=BATCH_SIZE, dl_framework=DL_FRAMEWORK, num_workers=4)
     model(next(iter(train_loader))[0])
@@ -146,12 +146,13 @@ def train_function(config):
 
 def tune_with_callback(mlflow_tracking_uri, finish_fast=False):
     search_space = {
-        "learning_rate": tune.loguniform(0.0001, 0.01),
+        "learning_rate": tune.loguniform(0.0001, 0.001),
         "dropout": tune.uniform(0.1, 0.4),
-        "num_layers": tune.choice([2, 3, 4, 5]),
-        "n_head": tune.choice([4, 8]),
-        "dim_feedforward": tune.choice([256, 512, 1024, 2048]),
-        "gamma": tune.loguniform(0.9, 0.99),
+        "num_layers": tune.choice([2, 3, 4, 5,6]),
+        "n_head": tune.choice([8]),
+        "dim_feedforward": tune.choice([1024, 2048]),
+        "gamma": tune.loguniform(0.92, 0.96),
+        "augmentation_threshold": tune.uniform(0.2, 0.55)
 
     }
 
@@ -164,7 +165,6 @@ def tune_with_callback(mlflow_tracking_uri, finish_fast=False):
         tune.with_resources(trainable=train, resources={"cpu": 3,
                                                         "gpu": 0.25}),
         run_config=air.RunConfig(
-
             name="mlflow",
             callbacks=[
                 MLflowLoggerCallback(
@@ -247,15 +247,4 @@ if __name__ == "__main__":
         mlflow_tracking_uri = args.tracking_uri
 
     tune_with_callback(mlflow_tracking_uri, finish_fast=args.smoke_test)
-    if not args.smoke_test:
-        df = mlflow.search_runs(
-            [mlflow.get_experiment_by_name("example").experiment_id]
-        )
-        print(df)
 
-    # tune_with_setup(mlflow_tracking_uri, finish_fast=args.smoke_test)
-    # if not args.smoke_test:
-    #     df = mlflow.search_runs(
-    #         [mlflow.get_experiment_by_name("mixin_example").experiment_id]
-    #     )
-    #     print(df)
