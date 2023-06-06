@@ -45,10 +45,12 @@ class Trainer:
         now = datetime.now()
 
         self.model_class = self.model.__class__.__name__
-        self.writer = SummaryWriter(os.path.join(ROOT_PATH, RUNS_DIR, DL_FRAMEWORK,
-                                                 self.model_class, now.strftime("%Y-%m-%d %H_%M")))
+        self.train_start_time = now.strftime("%Y-%m-%d %H_%M")
 
-        self.checkpoint_path = os.path.join(ROOT_PATH, CHECKPOINT_DIR, DL_FRAMEWORK, self.model_class)
+        self.writer = SummaryWriter(os.path.join(ROOT_PATH, RUNS_DIR, DL_FRAMEWORK,
+                                                 self.model_class, self.train_start_time))
+
+        self.checkpoint_path = os.path.join(ROOT_PATH, CHECKPOINT_DIR, DL_FRAMEWORK, self.model_class, self.train_start_time)
 
         self.epoch = 0
 
