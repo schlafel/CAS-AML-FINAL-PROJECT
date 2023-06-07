@@ -70,7 +70,7 @@ DYNAMIC_DROP_OUT_MAX_THRESHOLD = 0.2
 DYNAMIC_DROP_OUT_REDUCTION_INTERVAL = 1
 
 DL_FRAMEWORK='pytorch'                 # or 'tensorflow'
-MODELNAME='CVTransferLearningModel' #MODELNAME='TransformerPredictor'
+MODELNAME='TransformerPredictor' #MODELNAME='TransformerPredictor'
 
 #: Data files
 TRAIN_CSV_FILE = 'train.csv'

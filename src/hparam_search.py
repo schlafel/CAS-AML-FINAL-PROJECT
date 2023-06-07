@@ -27,6 +27,8 @@ import os
 import tempfile
 import time
 
+from trainer import Trainer
+
 import mlflow
 
 from ray import air, tune
@@ -35,8 +37,90 @@ from ray.air.integrations.mlflow import MLflowLoggerCallback, setup_mlflow
 from ray.tune.schedulers import ASHAScheduler
 
 
-def evaluation_fn(step, width, height):
-    return (0.1 + width * step / 100) ** (-1) + height * 0.1
+class Trainer_HparamSearch(Trainer):
+    def __init__(self,  modelname=MODELNAME, dataset=ASL_DATASET, patience=EARLY_STOP_PATIENCE):
+        super.__init__( modelname, dataset, patience)
+
+
+
+    def train(self, n_epochs=EPOCHS):
+        for epoch in range(n_epochs):
+            print(f"Epoch {epoch + 1}/{n_epochs}", flush=True)
+            time.sleep(0.5)  # time to flush std out
+
+            train_losses = []
+            train_accuracies = []
+
+            self.model.train_mode()
+
+            pbar = tqdm(enumerate(self.train_loader), total=len(self.train_loader), desc=f"Training progress")
+
+            total_loss = 0
+            total_acc = 0
+
+            print(end='', flush=True)
+            for i, batch in pbar:
+                loss, acc = self.model.training_step(batch)
+                self.model.optimize()
+
+                total_loss += loss
+                total_acc += acc
+
+                pbar.set_postfix({'Loss': total_loss / (i + 1), 'Accuracy': total_acc / (i + 1)})
+
+                train_losses.append(loss)
+                train_accuracies.append(acc)
+
+            print(end='', flush=True)
+
+            avg_train_loss = np.mean(train_losses)
+            avg_train_acc = np.mean(train_accuracies)
+            log_metrics('Train', avg_train_loss, avg_train_acc, epoch, self.model.get_lr(), self.writer)
+            print(end='', flush=True)
+
+            self.epoch = epoch
+
+            val_loss, val_acc = self.evaluate()
+
+            if EARLY_STOP_METRIC == "loss":
+                metric = val_loss
+            elif EARLY_STOP_METRIC == "accuracy":
+                metric = val_acc
+
+            # check if early_stop_criterion has improved
+            if EARLY_STOP_MODE == "min":
+                early_stop_criterion = metric - EARLY_STOP_TOLERENCE < self.best_val_metric
+            else:
+                early_stop_criterion = metric + EARLY_STOP_TOLERENCE > self.best_val_metric
+
+
+            # Check for early stopping
+            if early_stop_criterion:
+                self.best_val_metric = metric
+                self.patience_counter = 0
+
+                # Save the model checkpoint when Early-Stop-Metric loss improves
+
+                os.makedirs(self.checkpoint_path, exist_ok=True)
+                checkpoint_filepath = os.path.join(self.checkpoint_path, f"{self.model_name}_best_model.ckpt")
+                self.model.save_checkpoint(checkpoint_filepath)
+
+                # Save model params
+                checkpoint_param_path = os.path.join(self.checkpoint_path, f"{self.model_name}_best_model_params.yaml")
+                with open(checkpoint_param_path, 'w') as outfile:
+                    yaml.dump(self.params, outfile, default_flow_style=False)
+                print(f"Best model and parameters saved at epoch {epoch + 1}")
+
+            else:
+                self.patience_counter += 1
+                print(f'No improvement in loss for {self.patience_counter} epoch(s)')
+
+            if self.patience_counter >= self.patience:
+                print(f'Early stopping at epoch {epoch+1}')
+                break
+
+            self.model.step_scheduler()
+            print("")
 
 
 def train(config):
@@ -131,29 +215,17 @@ def train(config):
         )
 
 
-def train_function(config):
-    # Hyperparameters
-    width, height = config["width"], config["height"]
-
-    for step in range(config.get("steps", 100)):
-        # Iterative training function - can be any arbitrary training procedure
-        intermediate_score = evaluation_fn(step, width, height)
-        # Feed the score back to Tune.
-        session.report({"iterations": step,
-                        "mean_loss": intermediate_score})
-        time.sleep(0.1)
-
-
-def tune_with_callback(mlflow_tracking_uri, finish_fast=False):
+def tune_with_callback(
+        mlflow_tracking_uri,
+        finish_fast=False):
     search_space = {
         "learning_rate": tune.loguniform(0.0001, 0.001),
         "dropout": tune.uniform(0.1, 0.4),
-        "num_layers": tune.choice([2, 3, 4, 5,6]),
+        "num_layers": tune.choice([2, 3, 4, 5, 6]),
         "n_head": tune.choice([8]),
         "dim_feedforward": tune.choice([1024, 2048]),
         "gamma": tune.loguniform(0.92, 0.96),
         "augmentation_threshold": tune.uniform(0.2, 0.55)
-
     }
 
     scheduler = ASHAScheduler(
@@ -186,65 +258,12 @@ def tune_with_callback(mlflow_tracking_uri, finish_fast=False):
     tuner.fit()
 
 
-def train_function_mlflow(config):
-    setup_mlflow(config)
-
-    # Hyperparameters
-    width, height = config["width"], config["height"]
-
-    for step in range(config.get("steps", 100)):
-        # Iterative training function - can be any arbitrary training procedure
-        intermediate_score = evaluation_fn(step, width, height)
-        # Log the metrics to mlflow
-        mlflow.log_metrics(dict(mean_loss=intermediate_score), step=step)
-        # Feed the score back to Tune.
-        session.report({"iterations": step, "mean_loss": intermediate_score})
-        time.sleep(0.1)
-
-
-def tune_with_setup(mlflow_tracking_uri, finish_fast=False):
-    # Set the experiment, or create a new one if does not exist yet.
-    mlflow.set_tracking_uri(mlflow_tracking_uri)
-    mlflow.set_experiment(experiment_name="mixin_example")
-    tuner = tune.Tuner(
-        train_function_mlflow,
-        run_config=air.RunConfig(
-            name="mlflow",
-        ),
-        tune_config=tune.TuneConfig(
-            num_samples=5,
-        ),
-        param_space={
-            "width": tune.randint(10, 100),
-            "height": tune.randint(0, 100),
-            "steps": 5 if finish_fast else 100,
-            "mlflow": {
-                "experiment_name": "mixin_example",
-                "tracking_uri": mlflow.get_tracking_uri(),
-            },
-        },
-    )
-    tuner.fit()
-
 
 if __name__ == "__main__":
-    import argparse
+    tr = Trainer_HparamSearch()
+    tr.train()
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--smoke-test", action="store_true", help="Finish quickly for testing"
-    )
-    parser.add_argument(
-        "--tracking-uri",
-        type=str,
-        help="The tracking URI for the MLflow tracking server.",
-    )
-    args, _ = parser.parse_known_args()
+    mlflow_tracking_uri = os.path.join(tempfile.gettempdir(), "mlruns")
 
-    if args.smoke_test:
-        mlflow_tracking_uri = os.path.join(tempfile.gettempdir(), "mlruns")
-    else:
-        mlflow_tracking_uri = args.tracking_uri
 
-    tune_with_callback(mlflow_tracking_uri, finish_fast=args.smoke_test)
-
+    tune_with_callback(mlflow_tracking_uri)
