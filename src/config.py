@@ -62,7 +62,7 @@ EARLY_STOP_PATIENCE = 10
 EARLY_STOP_TOLERENCE = 0.001
 
 DL_FRAMEWORK='pytorch'                 # or 'tensorflow'
-MODELNAME='CVTransferLearningModel' #MODELNAME='TransformerPredictor'
+MODELNAME='TransformerPredictor' #MODELNAME='TransformerPredictor'
 
 #: Data files
 TRAIN_CSV_FILE = 'train.csv'
