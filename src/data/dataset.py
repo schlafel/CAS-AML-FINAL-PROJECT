@@ -23,7 +23,8 @@ class ASL_DATASET:
     def __init__(self, metadata_df=None, transform=None,
                  max_seq_length=INPUT_SIZE,
                  augment=False,
-                 augmentation_threshold = .1):
+                 augmentation_threshold=0.1,
+                 enableDropout=True):
         """
         Initialize the dataset.
 
@@ -54,6 +55,7 @@ class ASL_DATASET:
         self.transform = transform
         self.augment = augment
         self.augmentation_threshold = augmentation_threshold
+        self.enableDropout = enableDropout
 
         # [TODO] get this from data
         self.max_seq_length = max_seq_length
@@ -142,12 +144,12 @@ class ASL_DATASET:
             if random.random() < self.augmentation_threshold:
                 landmarks = shift_landmarks(landmarks)
             if random.random() < self.augmentation_threshold:
-                landmarks = mirror_landmarks(landmarks)  # TODO : Change Names
+                landmarks = mirror_landmarks(landmarks)
             if random.random() < self.augmentation_threshold:
                 landmarks = random_scaling(landmarks)
             if random.random() < self.augmentation_threshold:
-                landmarks = random_rotation(landmarks)  # TODO : Change Names
-            if random.random() < self.augmentation_threshold:
+                landmarks = random_rotation(landmarks)
+            if random.random() < self.augmentation_threshold and self.enableDropout:
                 landmarks = frame_dropout(landmarks)
                 size = len(landmarks)
 

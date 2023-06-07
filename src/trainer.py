@@ -14,10 +14,11 @@ from dl_utils import get_model_params, log_metrics
 from data.data_utils import create_data_loaders
 from data.dataset import ASL_DATASET
 from datetime import datetime
+from callbacks import dropout_callback
 import yaml
 
 class Trainer:
-    def __init__(self, modelname=MODELNAME, dataset=ASL_DATASET, patience=EARLY_STOP_PATIENCE):
+    def __init__(self, modelname=MODELNAME, dataset=ASL_DATASET, patience=EARLY_STOP_PATIENCE, enableAugmentationDropout=True):
 
         self.model_name = modelname
         module_name = f"models.{DL_FRAMEWORK}.models"
@@ -31,7 +32,7 @@ class Trainer:
         print(f"Using model: {module_name}.{modelname}")
 
         # Get Data
-        asl_dataset = dataset(augment=True, augmentation_threshold=0.35)
+        asl_dataset = dataset(augment=True, augmentation_threshold=0.35, enableDropout=enableAugmentationDropout)
         self.train_loader, self.valid_loader, self.test_loader = create_data_loaders(
             asl_dataset, batch_size=BATCH_SIZE, dl_framework=DL_FRAMEWORK, num_workers=4)
 
@@ -53,6 +54,7 @@ class Trainer:
         self.checkpoint_path = os.path.join(ROOT_PATH, CHECKPOINT_DIR, DL_FRAMEWORK, self.model_class, self.train_start_time)
 
         self.epoch = 0
+        self.callbacks = []
 
     def train(self, n_epochs=EPOCHS):
         for epoch in range(n_epochs):
@@ -133,6 +135,9 @@ class Trainer:
             self.model.step_scheduler()
             print("")
 
+            for callback in self.callbacks:
+                callback(self.epoch, self.model)
+
     def evaluate(self):
         self.model.eval_mode()
 
@@ -195,9 +200,13 @@ class Trainer:
 
         return all_preds, all_labels
 
+    def add_callback(self, callback):
+        self.callbacks.append(callback)
+
 
 if __name__ == '__main__':
     # Get Data
-    trainer = Trainer()
+    trainer = Trainer(modelname='HybridModel', enableAugmentationDropout=False)
+    trainer.add_callback(dropout_callback)
     trainer.train()
     trainer.test()

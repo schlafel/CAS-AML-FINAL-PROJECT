@@ -436,3 +436,141 @@ class CVTransferLearningModel(BaseModel):
         return self.model(x_new.to(DEVICE))
 
 
+class MultiHeadSelfAttention(nn.Module):
+    def __init__(self, dim, num_heads=8, dropout=0.1, layer_norm=True, causal=True):
+        super().__init__()
+        self.multihead_attn = nn.MultiheadAttention(dim, num_heads, dropout=dropout)
+        self.layer_norm = nn.LayerNorm(dim) if layer_norm else None
+        self.causal = causal
+
+    def forward(self, x):
+        x = x.permute(1, 0, 2)
+
+        # Apply a causal mask if requested
+        if self.causal:
+            seq_len = x.size(0)
+            mask = torch.triu(torch.ones(seq_len, seq_len), diagonal=1).bool().to(x.device)
+        else:
+            mask = None
+
+        attn_output, _ = self.multihead_attn(x, x, x, attn_mask=mask)
+
+        # Apply Layer Normalization if requested
+        if self.layer_norm is not None:
+            attn_output = self.layer_norm(attn_output)
+
+        return attn_output.permute(1, 0, 2)
+
+
+class TransformerBlock(nn.Module):
+    def __init__(self, dim=192, num_heads=4, expansion_factor=4, attn_dropout=0.2, drop_rate=0.2):
+        super().__init__()
+        self.norm1 = nn.LayerNorm(dim)
+        self.attn = MultiHeadSelfAttention(dim, num_heads, dropout=attn_dropout)
+
+        self.norm2 = nn.LayerNorm(dim)
+        self.feed_forward = nn.Sequential(
+            nn.Linear(dim, expansion_factor * dim),
+            nn.GELU(),
+            nn.Linear(expansion_factor * dim, dim),
+            nn.Dropout(drop_rate),
+            nn.Linear(dim, expansion_factor * dim),
+            nn.GELU(),
+            nn.Linear(expansion_factor * dim, dim),
+            nn.Dropout(drop_rate),
+        )
+
+        self.dropout = nn.Dropout(drop_rate)
+        self.norm3 = nn.LayerNorm(dim)
+
+    def forward(self, x):
+        # Apply norm and self attention
+        x = self.attn(self.norm1(x)) + x
+        x = self.dropout(x)
+
+        # Apply norm and feed forward network
+        res = x
+        x = self.norm2(x)
+        x = self.feed_forward(x) + res
+        x = self.dropout(x)
+        x = self.norm3(x)
+
+        return x
+
+
+class YetAnotherTransformerClassifier(nn.Module):
+    DEFAULTS = dict(
+        d_model=192,
+        n_head=8,
+        expand=4,
+        drop_rate=0.0001,
+        attn_dropout=0.1,
+        num_layers=2,
+        num_classes=N_CLASSES,
+        learning_rate=0.001
+    )
+
+    def __init__(self, **kwargs):
+        super().__init__()
+
+        # Override defaults with passed-in values
+        self.settings = {**self.DEFAULTS, **kwargs}
+
+        # Transformer layers
+        self.transformer = nn.ModuleList([
+            TransformerBlock(
+                dim=self.settings['d_model'],
+                num_heads=self.settings['n_head'],
+                expansion_factor=self.settings['expand'],
+                drop_rate=self.settings['drop_rate'],
+                attn_dropout=self.settings['attn_dropout']
+            ) for _ in range(self.settings['num_layers'])
+        ])
+
+        # Output layer
+        self.output_layer = nn.Linear(self.settings['d_model'], self.settings['num_classes'])
+
+    def forward(self, inputs):
+        """Forward pass through the model"""
+        # Check input shape
+        if len(inputs.shape) != 4:
+            raise ValueError(f'Expected input of shape (batch_size, seq_length, height, width), got {inputs.shape}')
+
+        # Flatten the last two dimensions
+        batch_size, seq_length, height, width = inputs.shape
+        inputs = inputs.view(batch_size, seq_length, height * width).to(DEVICE)
+
+        # Pass the input sequence through the Transformer layers
+        for transformer_block in self.transformer:
+            inputs = transformer_block(inputs)
+
+        # Take the mean of the transformed sequence over the time dimension
+        pooled = torch.mean(inputs, dim=1)
+
+        # Pass the pooled sequence through the output layer
+        output = self.output_layer(pooled)
+
+        return output
+
+
+class YetAnotherTransformer(BaseModel):
+    def __init__(self, **kwargs):
+        common_params = kwargs['common_params']
+        transformer_params = kwargs['YetAnotherTransformerClassifier']
+
+        super().__init__(learning_rate=common_params["learning_rate"], n_classes=common_params["num_classes"])
+
+        self.learning_rate = common_params["learning_rate"]
+
+        # Instantiate the Transformer model
+        self.model = YetAnotherTransformerClassifier(**transformer_params)
+
+        self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.learning_rate, weight_decay=1e-4)
+        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=common_params["gamma"])
+
+        self.to(DEVICE)
+
+    def forward(self, x):
+        return self.model(x)
+
+

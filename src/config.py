@@ -60,6 +60,14 @@ EARLY_STOP_MODE = "max"
 EARLY_STOP_PATIENCE = 10
 #: The value of loss as margin to tolerate
 EARLY_STOP_TOLERENCE = 0.001
+#: The value of initial low dropouts rate
+DYNAMIC_DROP_OUT_INIT_RATE = 0.0001
+#: The value to increase dropouts by
+DYNAMIC_DROP_OUT_REDUCTION_RATE = 1.25
+#: The max value of dynamic dropouts
+DYNAMIC_DROP_OUT_MAX_THRESHOLD = 0.2
+#: The epoch interval value to gradually change dropout rate
+DYNAMIC_DROP_OUT_REDUCTION_INTERVAL = 1
 
 DL_FRAMEWORK='pytorch'                 # or 'tensorflow'
 MODELNAME='CVTransferLearningModel' #MODELNAME='TransformerPredictor'

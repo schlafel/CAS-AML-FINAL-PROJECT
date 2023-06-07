@@ -9,7 +9,7 @@ models:
     batch_first: True
     num_layers: 4
     num_classes: 250
-    learning_rate: 0.05
+    learning_rate: 0.01
     gamma: 0.9
     augmentation_threshold: 0.35
     tune:
@@ -101,6 +101,22 @@ models:
       learning_rate: 0.001
       gamma: 0.95
       pretrained: True
+
+  YetAnotherTransformer:
+    YetAnotherTransformerClassifier:
+      learning_rate: 0.01
+      d_model: 192
+      embed_dim: 32
+      n_head: 8
+      expansion_factor: 4
+      drop_rate: 0.0001
+      attn_dropout: 0.0001
+      num_layers: 2
+      num_classes: 250
+    common_params:
+      num_classes: 250
+      learning_rate: 0.001
+      gamma: 0.9
 
 
 
