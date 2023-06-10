@@ -1,3 +1,23 @@
+"""
+================
+Data processing Utils
+================
+
+This module handles the loading and preprocessing of data. It is specifically tailored for loading ASL sign language
+dataset where the raw data includes information about the position of hands, face, and body over time.
+
+ASL stands for American Sign Language, which is a natural language used by individuals who are deaf or hard of hearing
+to communicate through hand gestures and facial expressions.
+
+The dataset consists of sequences of frames, where each frame contains multiple "landmarks". Each of these landmarks
+has multiple features, such as coordinates. The landmarks may represent various aspects of human body, such as facial
+features, hand positions, and body pose.
+
+This module is used to process the raw data, to create a uniform dataset where all sequences are of the same length and
+all missing values have been handled in a way that maintains the integrity of the data. This involves steps like
+detecting and removing empty frames, selecting specific landmarks, resizing sequences and handling NaN values.
+"""
+
 import sys
 
 sys.path.insert(0, '..')
@@ -19,6 +39,36 @@ import warnings
 warnings.filterwarnings("ignore")
 
 def load_relevant_data_subset(pq_path):
+    """
+    This function serves a key role in handling data in our pipeline by loading only a subset of the relevant data
+    from a given path. The primary purpose of this is to reduce memory overhead when working with large datasets.
+    The implementation relies on efficient data loading strategies, leveraging the speed of Parquet file format
+    and the ability to read in only necessary chunks of data instead of the whole dataset.
+
+    The function takes as input a string which represents the path to the data file. It makes use of pandas' parquet read function
+    to read the data file. This function is particularly suited for reading large datasets as it allows for efficient on-disk storage
+    and fast query capabilities. The function uses PyArrow library as the engine for reading the parquet files which ensures efficient
+    and fast reading of data. After reading the data, the function selects the relevant subset based on certain criteria, which is
+    task specific.
+
+    Args:
+        pq_path (str): Path to the data file.
+
+    Returns:
+        np.ndarray: Subset of the relevant data as a NumPy array.
+
+    Functionality:
+        Loads a subset of the relevant data from a given path.
+
+    :returns: Subset of the relevant data.
+    :rtype: np.ndarray
+
+    :param pq_path: Path to the data file.
+    :type pq_path: str
+
+    .. note:: The function assumes that the data file is in parquet format and the necessary libraries for reading
+    parquet files are installed. It also assumes that the path provided is a valid path to the data file.
+    """
     data_columns = COLUMNS_TO_USE
     data = pd.read_parquet(pq_path, columns=data_columns)
     n_frames = int(len(data) / ROWS_PER_FRAME)
@@ -27,6 +77,40 @@ def load_relevant_data_subset(pq_path):
 
 
 def interpolate_missing_values(arr, max_gap=INTEREMOLATE_MISSING):
+    """
+    This function provides a solution for handling missing values in the data array. It interpolates these missing
+    values, filling them with plausible values that maintain the overall data integrity. The function uses a linear
+    interpolation method that assumes a straight line between the two points on either side of the gap. The maximum
+    gap size for which interpolation should be performed is also configurable.
+
+    AThe function takes two arguments - an array with missing values, and a maximum gap size for interpolation. If the size of the gap
+    (i.e., number of consecutive missing values) is less than or equal to this specified maximum gap size, the function will fill it with
+    interpolated values. This ensures that the data maintains its continuity without making too far-fetched estimations for larger gaps.
+
+    Args:
+        arr (np.ndarray): Input array with missing values.
+        max_gap (int, optional): Maximum gap to fill. Defaults to INTEREMOLATE_MISSING.
+
+    Returns:
+        np.ndarray: Array with missing values interpolated.
+
+    Functionality:
+        Interpolates missing values in the array. The function fills gaps of up to a maximum size
+        with interpolated values, maintaining data integrity and continuity.
+
+    :returns: Array with missing values interpolated.
+    :rtype: np.ndarray
+
+    :param arr: Input array with missing values.
+    :type arr: np.ndarray
+
+    :param max_gap: Maximum gap to fill.
+    :type max_gap: int
+
+    .. note:: This function uses linear interpolation to fill the missing values. Other forms of interpolation such as polynomial or
+    spline may provide better results for specific types of data. It is also worth noting that no imputation method can fully recover
+    original data, and as such, results should be interpreted with caution when working with imputed data.
+    """
     nan_mask = np.isnan(arr)
 
     for coord_idx in range(arr.shape[2]):
@@ -68,17 +152,26 @@ def preprocess_raw_data(sample=100000):
     """
     Preprocesses the raw data, saves it as numpy arrays into processed data directory and updates the metadata CSV file.
 
-    This method preprocess_data preprocesses the data for easier and faster loading during training time. The data is processed and stored in PROCESSED_DATA_DIR if not already done.
+    This method preprocess_data preprocesses the data for easier and faster loading during training time. The data is
+    processed and stored in PROCESSED_DATA_DIR if not already done.
+
+    This function is responsible for preprocessing raw data. The primary functionality involves converting raw data
+    into a format more suitable for the machine learning pipeline, namely NumPy arrays. The function operates on a
+    sample of data, allowing for efficient processing of large datasets in manageable chunks. Additionally, this
+    function also takes care of persisting the preprocessed data for future use and updates the metadata accordingly.
+
 
     Args:
     sample (int): Number of samples to preprocess.
     Default is 100000.
 
     Functionality:
-    - The function reads the metadata CSV file for training data to obtain a dictionary that maps target values to integer indices.
+    - The function reads the metadata CSV file for training data to obtain a dictionary that maps target values to
+      integer indices.
     - It then reads the training data CSV file and generates the absolute path to locate landmark files.
     - Next, it keeps text signs and their respective indices and initializes a list to store the processed data.
-    - The data is then processed and stored in the list by iterating over each file path in the training data and reading in the parquet file for that file path.
+    - The data is then processed and stored in the list by iterating over each file path in the training data and
+      reading in the parquet file for that file path.
     - The landmark data is then processed and padded to have a length of max_seq_length.
     - Finally, a dictionary with the processed data is created and added to the list.
     - The processed data is saved to disk using the np.save method and the saved file is printed.
@@ -177,14 +270,16 @@ def preprocess_raw_data(sample=100000):
 
 def preprocess_data_item(raw_landmark_path, targets_sign):
     """
-    OUTDATED DOCSTRING
-    Preprocesses the landmark data for a single file. This method is used in pre processing of all data.
-    At inference, this method may be called to preprocess the data items in the same manner
-    This function is a handy function to process all landmark aequences on a particular location. This will come in handy while testing where individual sequences may be provided
+    The function preprocesses landmark data for a single file. The process involves applying transformations to
+    raw landmark data to convert it into a form more suitable for machine learning models. The transformations
+    may include normalization, scaling, etc. The target sign associated with the landmark data is also taken as input.
+
+    This function is a handy function to process all landmark aequences on a particular location. This will come in
+    handy while testing where individual sequences may be provided
 
     Args:
-    raw_landmark_path (str): Path to the raw landmark file.
-    targets_sign (int): The target sign for the given landmark data.
+        raw_landmark_path: Path to the raw landmark file
+        targets_sign: The target sign for the given landmark data
 
     Returns:
     dict: A dictionary containing the preprocessed landmarks, target, and size.
@@ -218,6 +313,26 @@ def preprocess_data_item(raw_landmark_path, targets_sign):
 
 
 def preprocess_data_to_same_size(landmarks):
+    """
+    This function preprocesses the input data to ensure all data arrays have the same size, specified by the global INPUT_SIZE variable.
+    This uniform size is necessary for subsequent processing and analysis stages, particularly those involving machine learning models
+    which often require consistent input sizes. The preprocessing involves several steps, including handling missing values, upsampling,
+    and reshaping arrays. It begins by interpolating any missing values, and then it subsets the data by selecting only non-empty frames.
+    Various strategies are applied to align the data size to the desired INPUT_SIZE, including padding, repeating, and pooling the data.
+
+    Args:
+        landmarks (np.ndarray): The input array with landmarks data.
+
+    Returns:
+        Tuple[np.ndarray, int, int, int]: A tuple containing processed landmark data, the set input size, the number of original frames,
+        and the number of frames after preprocessing.
+
+    :param landmarks: The input array with landmarks data.
+    :type landmarks: np.ndarray
+
+    :returns: A tuple containing processed landmark data, the set input size, the number of original frames, and the number of frames after preprocessing.
+    :rtype: Tuple[np.ndarray, int, int, int]
+    """
     num_orig_frames = landmarks.shape[0]
 
     landmarks[:, USEFUL_HAND_LANDMARKS] = interpolate_missing_values(landmarks[:, USEFUL_HAND_LANDMARKS])
@@ -277,6 +392,23 @@ def preprocess_data_to_same_size(landmarks):
 
 
 def preprocess_data(landmarks):
+    """
+    This function preprocesses the input data by applying similar steps as the preprocess_data_to_same_size function, but with the difference that
+    it does not interpolate missing values. The function again targets to adjust the size of the input data to align with the INPUT_SIZE.
+    It selects only non-empty frames and follows similar strategies of padding, repeating, and pooling the data for size alignment.
+
+    Args:
+        landmarks (np.ndarray): The input array with landmarks data.
+
+    Returns:
+        Tuple[np.ndarray, int]: A tuple containing processed landmark data and the final size of the data.
+
+    :param landmarks: The input array with landmarks data.
+    :type landmarks: np.ndarray
+
+    :returns: A tuple containing processed landmark data and the final size of the data.
+    :rtype: Tuple[np.ndarray, int]
+    """
     frames_hands_nansum = np.nanmean(landmarks[:, USEFUL_HAND_LANDMARKS], axis=(1, 2))
     non_empty_frames_idxs = np.where(frames_hands_nansum > 0)[0]
     landmark_data = landmarks[non_empty_frames_idxs]
@@ -453,6 +585,23 @@ def calculate_avg_landmark_positions(dataset):
 
 
 def remove_unusable_data():
+    """
+    This function checks the existing training data for unusable instances, like missing files or data that is smaller than the set
+    minimum sequence length. If unusable data is found, it is removed from the system, both in terms of files and entries in the training
+    dataframe. The dataframe is updated and saved back to the disk. If a cleansing marker file exists, it skips the process, indicating
+    that the data is already cleaned.
+
+    Functionality:
+        The function iterates through the DataFrame rows, attempting to load and check each landmark file specified in the row's path.
+        If the file is missing or if the file's usable size is less than a predefined threshold, the function deletes the corresponding
+        landmark file and marks the row for deletion in the DataFrame. At the end, the function removes all marked rows from the DataFrame,
+        updates it and saves it to the disk.
+
+    Returns:
+         None
+
+    :return: None, the function doesn't return anything. It modifies data in-place.
+    """
     marker_file_path = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, CLEANED_FILE)
 
     if os.path.exists(os.path.join(marker_file_path)):
@@ -508,22 +657,29 @@ def remove_unusable_data():
 
 def remove_outlier_or_missing_data(landmark_len_dict):
     """
-    Remove rows from the training data with missing or outlier landmark data.
-
-    Args:
-    landmark_len_dict (dict): A dictionary containing the statistics of landmark lengths for each sign type.
-
-    Returns: None
+    This function removes rows from the training data that contain missing or outlier landmark data. It takes as input a dictionary
+    containing the statistics of landmark lengths for each sign type. The function processes the training data and removes rows with
+    missing or outlier landmark data. The function also includes a nested function 'has_consecutive_zeros' which checks for consecutive
+    frames where X and Y coordinates are both zero. If a cleansing marker file exists, it skips the process, indicating that the data
+    is already cleaned.
 
     Functionality:
-    - The function takes a dictionary containing the statistics of landmark lengths for each sign type as input.
-    - It processes the training data and removes rows with missing or outlier landmark data.
-    - The function does not return any value.
+        This function takes a dictionary with the statistics of landmark lengths per sign type and uses it to identify outlier sequences.
+        It removes any rows with missing or outlier landmark data. An outlier sequence is defined as one that is either less than a third
+        of the median length or more than two standard deviations away from the mean length. A row is also marked for deletion if the
+        corresponding landmark file is missing or if the sign's left-hand or right-hand landmarks contain more than a specified number
+        of consecutive zeros.
+
+    Args:
+        landmark_len_dict (dict): A dictionary containing the statistics of landmark lengths for each sign type.
+
+    Returns:
+        None
 
     :param landmark_len_dict: A dictionary containing the statistics of landmark lengths for each sign type.
     :type landmark_len_dict: dict
 
-    return: None
+    :return: None, the function doesn't return anything. It modifies data in-place.
     """
 
     marker_file_path = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, CLEANED_FILE)

@@ -1,6 +1,6 @@
-Training
+Config
 ======
 
-.. automodule:: trainer
+.. automodule:: callbacks
    :members:
    :special-members:

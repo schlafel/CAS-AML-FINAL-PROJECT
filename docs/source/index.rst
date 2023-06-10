@@ -13,6 +13,9 @@ Welcome to American Sign Language Recognition's documentation!
    config
    augmentations
    dl_utils
+   data_utils
+   dataset
+   callbacks
    visualizations
    trainer
 
