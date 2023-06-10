@@ -1,0 +1,60 @@
+
+patch.linewidth: 0.5
+patch.facecolor: 348ABD  # blue
+patch.edgecolor: EEEEEE
+patch.antialiased: True
+
+font.size: 9
+font.family:Times New Roman
+#font.weight: light
+
+
+axes.facecolor: white
+axes.edgecolor: black
+axes.linewidth: .6
+
+axes.grid:          True   # display grid or not
+axes.grid.axis:     both    # which axis the grid should apply to
+axes.grid.which:    major   # gridlines at {major, minor, both} ticks
+axes.titlesize: large
+
+axes.labelcolor: 000000
+axes.axisbelow: True       # grid/ticks are below elements (e.g., lines, text)
+axes.labelsize: 10
+
+#axes.prop_cycle: cycler('color', ['2998E3', 'FFC000', '7F7F7F', 'E64823', '8EBA42', 'FFB5B8','ce0538', 'c6de51','4574E7', '444655', 'A9AABC', '987600', '614600', '8EBA42', 'FFB5B8'])
+#axes.prop_cycle: cycler('color', [ '2998E3', 'FFC000', 'E64823', '7F7F7F','8EBA42','6a4c93','42e2b8'])
+axes.prop_cycle: cycler('color', ['2998e3','ffc000','e64823', '7f7f7f', '000000', '8eba42', 'd5d300', '0056b1', '6a4c93', 'cc79a7', '009e73', '42e2b8'])
+
+                   # E24A33 : red
+                   # 348ABD : blue
+                   # 988ED5 : purple
+                   # 777777 : gray
+                   # FBC15E : yellow
+                   # 8EBA42 : green
+                   # FFB5B8 : pink
+
+xtick.color: 000000
+xtick.direction: out
+xtick.minor.visible :   True
+
+ytick.color: 000000
+ytick.direction: out
+ytick.minor.visible :   True
+
+grid.color: A9A9A9
+grid.linestyle: :    # solid line
+
+figure.facecolor: white
+figure.edgecolor: 0.50
+figure.figsize : 3.15 , 2.22
+
+
+#was 4.9, 3.15
+
+legend.framealpha : 1
+legend.edgecolor : "black"
+
+#svg.fonttype: none
+
+

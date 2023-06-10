@@ -5,7 +5,8 @@ Configuration
 import os
 import torch
 import numpy as np
-
+from matplotlib import style
+style.use("./../styles/CASAML_Style.mplstyle")
 #: Set the device for training
 DEVICE = 'cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu'
 
@@ -70,7 +71,7 @@ DYNAMIC_DROP_OUT_MAX_THRESHOLD = 0.2
 DYNAMIC_DROP_OUT_REDUCTION_INTERVAL = 1
 
 DL_FRAMEWORK='pytorch'                 # or 'tensorflow'
-MODELNAME='TransformerPredictor' #MODELNAME='TransformerPredictor'
+MODELNAME='YetAnotherTransformerClassifier' #MODELNAME='TransformerPredictor'
 
 #: Data files
 TRAIN_CSV_FILE = 'train.csv'
