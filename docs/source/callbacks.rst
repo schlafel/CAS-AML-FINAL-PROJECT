@@ -1,5 +1,5 @@
-Config
-======
+Training Callbacks
+==================
 
 .. automodule:: callbacks
    :members:

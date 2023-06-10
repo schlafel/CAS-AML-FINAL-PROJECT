@@ -1,5 +1,5 @@
-Data Augmentations
-==================
+Dataset
+=======
 
 .. automodule:: data.dataset
    :members:

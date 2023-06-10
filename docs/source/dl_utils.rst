@@ -1,5 +1,5 @@
-Data Utils
-==================
+Data Utilities
+==============
 
 .. automodule:: dl_utils
    :members:

@@ -1,7 +1,7 @@
 """
-================
-Data processing Utils
-================
+=================================
+Data processing Utils description
+=================================
 
 This module handles the loading and preprocessing of data. It is specifically tailored for loading ASL sign language
 dataset where the raw data includes information about the position of hands, face, and body over time.
@@ -66,7 +66,8 @@ def load_relevant_data_subset(pq_path):
     :param pq_path: Path to the data file.
     :type pq_path: str
 
-    .. note:: The function assumes that the data file is in parquet format and the necessary libraries for reading
+    .. note::
+    The function assumes that the data file is in parquet format and the necessary libraries for reading
     parquet files are installed. It also assumes that the path provided is a valid path to the data file.
     """
     data_columns = COLUMNS_TO_USE
@@ -83,9 +84,10 @@ def interpolate_missing_values(arr, max_gap=INTEREMOLATE_MISSING):
     interpolation method that assumes a straight line between the two points on either side of the gap. The maximum
     gap size for which interpolation should be performed is also configurable.
 
-    AThe function takes two arguments - an array with missing values, and a maximum gap size for interpolation. If the size of the gap
-    (i.e., number of consecutive missing values) is less than or equal to this specified maximum gap size, the function will fill it with
-    interpolated values. This ensures that the data maintains its continuity without making too far-fetched estimations for larger gaps.
+    AThe function takes two arguments - an array with missing values, and a maximum gap size for interpolation. If the
+    size of the gap (i.e., number of consecutive missing values) is less than or equal to this specified maximum gap
+    size, the function will fill it with interpolated values. This ensures that the data maintains its continuity
+    without making too far-fetched estimations for larger gaps.
 
     Args:
         arr (np.ndarray): Input array with missing values.
@@ -107,9 +109,11 @@ def interpolate_missing_values(arr, max_gap=INTEREMOLATE_MISSING):
     :param max_gap: Maximum gap to fill.
     :type max_gap: int
 
-    .. note:: This function uses linear interpolation to fill the missing values. Other forms of interpolation such as polynomial or
-    spline may provide better results for specific types of data. It is also worth noting that no imputation method can fully recover
-    original data, and as such, results should be interpreted with caution when working with imputed data.
+    .. note::
+    This function uses linear interpolation to fill the missing values. Other forms of interpolation such as polynomial
+    or spline may provide better results for specific types of data. It is also worth noting that no imputation method
+    can fully recover original data, and as such, results should be interpreted with caution when working with imputed
+    data.
     """
     nan_mask = np.isnan(arr)
 
@@ -167,11 +171,11 @@ def preprocess_raw_data(sample=100000):
 
     Functionality:
     - The function reads the metadata CSV file for training data to obtain a dictionary that maps target values to
-      integer indices.
+    integer indices.
     - It then reads the training data CSV file and generates the absolute path to locate landmark files.
     - Next, it keeps text signs and their respective indices and initializes a list to store the processed data.
     - The data is then processed and stored in the list by iterating over each file path in the training data and
-      reading in the parquet file for that file path.
+    reading in the parquet file for that file path.
     - The landmark data is then processed and padded to have a length of max_seq_length.
     - Finally, a dictionary with the processed data is created and added to the list.
     - The processed data is saved to disk using the np.save method and the saved file is printed.
@@ -314,23 +318,25 @@ def preprocess_data_item(raw_landmark_path, targets_sign):
 
 def preprocess_data_to_same_size(landmarks):
     """
-    This function preprocesses the input data to ensure all data arrays have the same size, specified by the global INPUT_SIZE variable.
-    This uniform size is necessary for subsequent processing and analysis stages, particularly those involving machine learning models
-    which often require consistent input sizes. The preprocessing involves several steps, including handling missing values, upsampling,
-    and reshaping arrays. It begins by interpolating any missing values, and then it subsets the data by selecting only non-empty frames.
-    Various strategies are applied to align the data size to the desired INPUT_SIZE, including padding, repeating, and pooling the data.
+    This function preprocesses the input data to ensure all data arrays have the same size, specified by the global
+    INPUT_SIZE variable. This uniform size is necessary for subsequent processing and analysis stages, particularly
+    those involving machine learning models which often require consistent input sizes. The preprocessing involves
+    several steps, including handling missing values, upsampling, and reshaping arrays. It begins by interpolating any
+    missing values, and then it subsets the data by selecting only non-empty frames. Various strategies are applied to
+    align the data size to the desired INPUT_SIZE, including padding, repeating, and pooling the data.
 
     Args:
         landmarks (np.ndarray): The input array with landmarks data.
 
     Returns:
-        Tuple[np.ndarray, int, int, int]: A tuple containing processed landmark data, the set input size, the number of original frames,
-        and the number of frames after preprocessing.
+        Tuple[np.ndarray, int, int, int]: A tuple containing processed landmark data, the set input size, the number of
+        original frames, and the number of frames after preprocessing.
 
     :param landmarks: The input array with landmarks data.
     :type landmarks: np.ndarray
 
-    :returns: A tuple containing processed landmark data, the set input size, the number of original frames, and the number of frames after preprocessing.
+    :returns: A tuple containing processed landmark data, the set input size, the number of original frames, and the
+    number of frames after preprocessing.
     :rtype: Tuple[np.ndarray, int, int, int]
     """
     num_orig_frames = landmarks.shape[0]
@@ -393,9 +399,10 @@ def preprocess_data_to_same_size(landmarks):
 
 def preprocess_data(landmarks):
     """
-    This function preprocesses the input data by applying similar steps as the preprocess_data_to_same_size function, but with the difference that
-    it does not interpolate missing values. The function again targets to adjust the size of the input data to align with the INPUT_SIZE.
-    It selects only non-empty frames and follows similar strategies of padding, repeating, and pooling the data for size alignment.
+    This function preprocesses the input data by applying similar steps as the preprocess_data_to_same_size function,
+    but with the difference that it does not interpolate missing values. The function again targets to adjust the size
+    of the input data to align with the INPUT_SIZE. It selects only non-empty frames and follows similar strategies of
+    padding, repeating, and pooling the data for size alignment.
 
     Args:
         landmarks (np.ndarray): The input array with landmarks data.
@@ -472,11 +479,14 @@ def calculate_landmark_length_stats():
     - An empty dictionary is created to store average landmarks for each sign type.
     - The function loops through each unique sign and its corresponding rows in the grouped DataFrame.
     - For each sign, it initializes a list to store the length of landmarks for each example of the current sign.
-    - It loops through each row of the current sign type, loads the data, and adds the length of landmarks of the current example to the list of current sign data.
-    - The function calculates the minimum, maximum, mean, standard deviation, and median of the landmarks for the current sign and updates the dictionary.
+    - It loops through each row of the current sign type, loads the data, and adds the length of landmarks of the
+    current example to the list of current sign data.
+    - The function calculates the minimum, maximum, mean, standard deviation, and median of the landmarks for the
+    current sign and updates the dictionary.
     - The resulting dictionary containing average landmarks for each sign type is returned.
 
-    :returns: A dictionary of landmark lengths for each sign type containing minimum, maximum, mean, median & standard deviation
+    :returns: A dictionary of landmark lengths for each sign type containing minimum, maximum, mean, median & standard
+    deviation
     :rtype: dict
     """
 
@@ -518,7 +528,8 @@ def calculate_landmark_length_stats():
 def calculate_avg_landmark_positions(dataset):
     """
     Calculate the average landmark positions for left-hand, right-hand, and face landmarks for each sign in the dataset.
-    The purpose of this function is to compute the average positions of landmarks for left-hand, right-hand, and face for each sign in the training dataset.
+    The purpose of this function is to compute the average positions of landmarks for left-hand, right-hand, and face
+    for each sign in the training dataset.
 
     Returns:
     List : Containing a dictionary with average x/y positions with keys
@@ -528,13 +539,16 @@ def calculate_avg_landmark_positions(dataset):
 
     Functionality:
     - The function takes an ASLDataset object as an input, which contains the training data.
-    - It calculates the average landmark positions for left-hand, right-hand, and face landmarks for each sign in the dataset.
-    - The function returns a list containing a dictionary with average x/y positions with keys 'left_hand', 'right_hand', and 'face' for each sign.
+    - It calculates the average landmark positions for left-hand, right-hand, and face landmarks for each sign in the
+    dataset.
+    - The function returns a list containing a dictionary with average x/y positions with keys 'left_hand',
+    'right_hand', and 'face' for each sign.
 
     :param dataset: The ASL dataset object containing the training data.
     :type dataset: ASL_DATASET
 
-    :return: A list containing a dictionary with average x/y positions with keys 'left_hand', 'right_hand', and 'face' for each sign.
+    :return: A list containing a dictionary with average x/y positions with keys 'left_hand', 'right_hand', and 'face'
+    for each sign.
     :rtype: List[Dict[str, np.ndarray]]
     """
     df_train = pd.read_csv(os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, TRAIN_CSV_FILE))
