@@ -70,3 +70,18 @@ def log_metrics(phase, loss, acc, epoch, lr, writer):
         writer.add_scalar(f'Accuracy/{phase}', acc, epoch+1)
         print(f"EPOCH {epoch + 1:>3}: {phase} accuracy: {acc:>3.2f}, {phase} Loss: {loss:>9.8f}, LRate {lr:>9.8f} ",
               flush=True)
+
+
+def get_PT_Dataset(dataloader):
+    return dataloader.dataset
+
+
+def get_TF_Dataset(dataloader):
+    return dataloader.tf_dataset
+
+
+def get_dataset(dataloader):
+    if DL_FRAMEWORK == 'tensorflow':
+        return get_TF_Dataset(dataloader)
+    else:
+        return get_PT_Dataset(dataloader)

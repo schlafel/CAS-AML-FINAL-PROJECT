@@ -2,7 +2,7 @@ import sys
 
 sys.path.insert(0, '..')
 from config import *
-from augmentations import *
+from augmentations import normalize, standardize, random_rotation, random_scaling, frame_dropout, mirror_landmarks, shift_landmarks
 
 import os
 import pandas as pd
@@ -158,6 +158,8 @@ class ASL_DATASET:
 
         padding = np.zeros((pad_len, landmarks.shape[1], landmarks.shape[2]))
         landmarks = np.vstack([landmarks, padding]).astype('float32')
+
+        landmarks = standardize(landmarks)
 
         sample = (landmarks, target)
 

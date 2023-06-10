@@ -8,6 +8,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchmetrics.classification import accuracy
+from torchmetrics.classification import F1
 from torchvision import models
 
 
@@ -19,6 +20,12 @@ class BaseModel(nn.Module):
             task="multiclass",
             num_classes=n_classes
         )
+
+        self.f1_score = F1(
+            num_classes=n_classes,
+            average='macro'
+        )
+
         self.metrics = {"train": [], "val": [], "test": []}
 
         self.learning_rate = learning_rate
@@ -31,6 +38,12 @@ class BaseModel(nn.Module):
         targets = y.view(-1).cpu()
         acc = self.accuracy(preds, targets)
         return acc.cpu()
+
+    def calculate_f1(self, y_hat, y):
+        preds = torch.argmax(y_hat.cpu(), dim=1)
+        targets = y.view(-1).cpu()
+        f1 = self.f1_score(preds, targets)
+        return f1.cpu()
 
     def forward(self, x):
         raise NotImplementedError()
@@ -347,9 +360,9 @@ class HybridEnsembleModel(BaseModel):
 
         # Ensemble
         self.lstms = nn.ModuleList([LSTMClassifier(**lstm_kwargs).to(DEVICE) for i, _ in
-                                     enumerate(range(n_models))])
+                                    enumerate(range(n_models))])
 
-        self.models = nn.ModuleList([TransformerSequenceClassifier(num_layers=i+1,
+        self.models = nn.ModuleList([TransformerSequenceClassifier(num_layers=i + 1,
                                                                    **transformer_params) for i, _ in
                                      enumerate(range(n_models))])
 
@@ -375,29 +388,28 @@ class HybridEnsembleModel(BaseModel):
 
         return output
 
+
 class CVTransferLearningModel(BaseModel):
     DEFAULTS = dict({})
-    def __init__(self, **kwargs):
 
+    def __init__(self, **kwargs):
 
         # Override defaults with passed-in values
         self.settings = {**self.DEFAULTS, **kwargs}
         super().__init__(learning_rate=self.settings['hparams']['learning_rate'])
 
-        #get weights
+        # get weights
         if "weights" not in self.settings['hparams'].keys():
             self.settings['hparams']['weights'] = None
 
-
-
         model = models.get_model(self.settings['hparams']['backbone'],
-                                 weights = self.settings['hparams']['weights'],
-                                      )
+                                 weights=self.settings['hparams']['weights'],
+                                 )
 
-        #Freeze layers
+        # Freeze layers
         # Freeze the parameters....
         for p in model.parameters():
-            if hasattr(p,"requires_grad"):
+            if hasattr(p, "requires_grad"):
                 p.requires_grad = False
 
         # recursively iterate over child modules until we find the last fully connected layer
@@ -406,7 +418,7 @@ class CVTransferLearningModel(BaseModel):
                 last_layer = module
                 last_layer_name = name
             if isinstance(module, nn.Sequential):
-                for name2,module2 in module.named_children():
+                for name2, module2 in module.named_children():
                     if isinstance(module2, nn.Linear):
                         last_layer = module2
                         last_layer_name = name + "." + name2
@@ -418,8 +430,6 @@ class CVTransferLearningModel(BaseModel):
 
         setattr(model, last_layer_name, new_last_layer)
 
-
-
         self.optimizer = torch.optim.Adam(model.parameters(), lr=self.learning_rate)
         self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer,
                                                                 gamma=kwargs['hparams']["gamma"])
@@ -428,11 +438,10 @@ class CVTransferLearningModel(BaseModel):
 
         self.to(DEVICE)
 
-
-    def forward(self,x):
-        #reshape inputs?
-        x_new = F.pad(x,(0,1),value = 0.).reshape(-1,64,48,3).moveaxis(-1,1)
-        #pass it to the model
+    def forward(self, x):
+        # reshape inputs?
+        x_new = F.pad(x, (0, 1), value=0.).reshape(-1, 64, 48, 3).moveaxis(-1, 1)
+        # pass it to the model
         return self.model(x_new.to(DEVICE))
 
 
@@ -572,5 +581,34 @@ class YetAnotherTransformer(BaseModel):
 
     def forward(self, x):
         return self.model(x)
+
+
+class YetAnotherEnsemble(BaseModel):
+    def __init__(self, **kwargs):
+        common_params = kwargs['common_params']
+        transformer_params = kwargs['YetAnotherTransformerClassifier']
+
+        n_models = common_params["n_models"]
+        super().__init__(learning_rate=common_params["learning_rate"], n_classes=common_params["num_classes"])
+
+        self.learning_rate = common_params["learning_rate"]
+
+        # Ensemble
+        self.models = nn.ModuleList([YetAnotherTransformerClassifier(num_layers=2 + i,
+                                                                     **transformer_params) for i, _ in
+                                     enumerate(range(n_models))])
+
+        self.fc = nn.Linear(common_params["num_classes"] * n_models, common_params["num_classes"]).to(DEVICE)
+
+        self.optimizer = torch.optim.AdamW(self.models.parameters(), lr=self.learning_rate, weight_decay=1e-4)
+        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=common_params["gamma"])
+
+        self.to(DEVICE)
+
+    def forward(self, x):
+        model_outputs = [model(x) for model in self.models]
+        combined = torch.cat(model_outputs, dim=1)
+        output = self.fc(combined)
+        return output
 
 

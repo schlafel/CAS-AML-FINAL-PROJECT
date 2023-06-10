@@ -14,11 +14,12 @@ from dl_utils import get_model_params, log_metrics
 from data.data_utils import create_data_loaders
 from data.dataset import ASL_DATASET
 from datetime import datetime
-from callbacks import dropout_callback
+from callbacks import dropout_callback, augmentation_increase_callback
 import yaml
 
 class Trainer:
-    def __init__(self, modelname=MODELNAME, dataset=ASL_DATASET, patience=EARLY_STOP_PATIENCE, enableAugmentationDropout=True):
+    def __init__(self, modelname=MODELNAME, dataset=ASL_DATASET, patience=EARLY_STOP_PATIENCE,
+                 enableAugmentationDropout=True, augmentation_threshold=0.35):
 
         self.model_name = modelname
         module_name = f"models.{DL_FRAMEWORK}.models"
@@ -32,7 +33,7 @@ class Trainer:
         print(f"Using model: {module_name}.{modelname}")
 
         # Get Data
-        asl_dataset = dataset(augment=True, augmentation_threshold=0.35, enableDropout=enableAugmentationDropout)
+        asl_dataset = dataset(augment=True, augmentation_threshold=augmentation_threshold, enableDropout=enableAugmentationDropout)
         self.train_loader, self.valid_loader, self.test_loader = create_data_loaders(
             asl_dataset, batch_size=BATCH_SIZE, dl_framework=DL_FRAMEWORK, num_workers=4)
 
@@ -59,7 +60,7 @@ class Trainer:
     def train(self, n_epochs=EPOCHS):
         for epoch in range(n_epochs):
             print(f"Epoch {epoch + 1}/{n_epochs}", flush=True)
-            time.sleep(0.5)  # time to flush std out
+            time.sleep(0.25)  # time to flush std out
 
             train_losses = []
             train_accuracies = []
@@ -106,7 +107,6 @@ class Trainer:
             else:
                 early_stop_criterion = metric + EARLY_STOP_TOLERENCE > self.best_val_metric
 
-
             # Check for early stopping
             if early_stop_criterion:
                 self.best_val_metric = metric
@@ -136,7 +136,8 @@ class Trainer:
             print("")
 
             for callback in self.callbacks:
-                callback(self.epoch, self.model)
+                callback(self)
+
 
     def evaluate(self):
         self.model.eval_mode()
@@ -206,7 +207,9 @@ class Trainer:
 
 if __name__ == '__main__':
     # Get Data
-    trainer = Trainer(modelname='HybridModel', enableAugmentationDropout=False)
+    trainer = Trainer(modelname='YetAnotherEnsemble', enableAugmentationDropout=False, augmentation_threshold=0.05)
     trainer.add_callback(dropout_callback)
+    trainer.add_callback(augmentation_increase_callback)
     trainer.train()
     trainer.test()
+
