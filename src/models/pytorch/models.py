@@ -8,7 +8,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchmetrics.classification import accuracy
-from torchmetrics.classification import F1
 from torchvision import models
 
 
@@ -19,11 +18,6 @@ class BaseModel(nn.Module):
         self.accuracy = accuracy.Accuracy(
             task="multiclass",
             num_classes=n_classes
-        )
-
-        self.f1_score = F1(
-            num_classes=n_classes,
-            average='macro'
         )
 
         self.metrics = {"train": [], "val": [], "test": []}
@@ -38,12 +32,6 @@ class BaseModel(nn.Module):
         targets = y.view(-1).cpu()
         acc = self.accuracy(preds, targets)
         return acc.cpu()
-
-    def calculate_f1(self, y_hat, y):
-        preds = torch.argmax(y_hat.cpu(), dim=1)
-        targets = y.view(-1).cpu()
-        f1 = self.f1_score(preds, targets)
-        return f1.cpu()
 
     def forward(self, x):
         raise NotImplementedError()
