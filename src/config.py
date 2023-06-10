@@ -6,7 +6,7 @@ import os
 import torch
 import numpy as np
 from matplotlib import style
-style.use("./../styles/CASAML_Style.mplstyle")
+style.use(os.path.join(os.path.dirname(__file__),"..","styles","CASAML_Style.mplstyle"))
 #: Set the device for training
 DEVICE = 'cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu'
 
