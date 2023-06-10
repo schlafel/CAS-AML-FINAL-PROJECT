@@ -1,6 +1,6 @@
 Data Augmentations
 ==================
 
-.. automodule:: data_utils
+.. automodule:: data.data_utils
    :members:
    :special-members:

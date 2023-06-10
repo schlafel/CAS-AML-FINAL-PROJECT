@@ -1,6 +1,6 @@
 Data Augmentations
 ==================
 
-.. automodule:: dataset
+.. automodule:: data.dataset
    :members:
    :special-members:
