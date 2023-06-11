@@ -1,854 +1,616 @@
----
-generator: "Docutils 0.17.1: http://docutils.sourceforge.net/"
-title: American Sign Language Recognition 0.0.1 documentation
-viewport:
-- width=device-width, initial-scale=1.0
-- width=device-width, initial-scale=0.9, maximum-scale=0.9
----
+<div class="document">
 
-::: {.document}
-::: {.documentwrapper}
-::: {.bodywrapper}
-::: {.body role="main"}
-::: {#welcome-to-american-sign-language-recognition-s-documentation .section}
-# Welcome to American Sign Language Recognition's documentation![¶](#welcome-to-american-sign-language-recognition-s-documentation "Permalink to this headline"){.headerlink}
+<div class="documentwrapper">
 
-::: {.toctree-wrapper .compound}
-[]{#document-augmentations}
+<div class="bodywrapper">
 
-::: {#module-augmentations .section}
-[]{#data-augmentations}
+<div class="body" role="main">
 
-## Data Augmentations[¶](#module-augmentations "Permalink to this headline"){.headerlink}
+<div id="welcome-to-american-sign-language-recognition-s-documentation"
+class="section">
 
-[[augmentations.]{.pre}]{.sig-prename .descclassname}[[frame_dropout]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[frames]{.pre}]{.n}*, *[[dropout_rate]{.pre}]{.n}[[=]{.pre}]{.o}[[0.05]{.pre}]{.default_value}*[)]{.sig-paren}[¶](#augmentations.frame_dropout "Permalink to this definition"){.headerlink}
+# [American Sign Language Recognition](#)
 
-:   Randomly drop frames from the input landmark data.
+### Navigation
 
-    Args:
+Contents:
 
-    :   frames (numpy.ndarray): An array of landmarks data. dropout_rate
-        (float): The proportion of frames to drop (default: 0.05).
+-   [Data Augmentations](augmentations.py)
+-   [Training Callbacks](callbacks.py)
+-   [Project Configuration](config.py)
+-   [Data Utilities](data/data_utils.py)
+-   [HyperParameter Search](hparam_search.py)
+-   [Camera Stream Predictions](predict_on_camera.py)
+-   [ASL Dataset](data/dataset.py)
+-   [Data Utilities](dl_utils.py)
+-   [Model Training](trainer.py)
+-   [Data Visualizations](visualizations.py)
+-   [Pytorch Models](pytorch_models.py)
+-   [Tensorflow Models](tensorflow_models.py)
+-   [Torch Lightning Models](lightning_models.py)
 
-    Returns:
+<div class="relations">
 
-    :   numpy.ndarray: An array of landmarks with dropped frames.
+# Welcome to American Sign Language Recognition’s documentation![¶](#welcome-to-american-sign-language-recognition-s-documentation "Permalink to this headline")
 
-```{=html}
-<!-- -->
-```
+This project aims to classify isolated American Sign Language (ASL) signs using deep learning techniques implemented in PyTorch. The dataset used for this project is provided by Google's "Isolated Sign Language Recognition" competition on Kaggle.
 
-[[augmentations.]{.pre}]{.sig-prename .descclassname}[[mirror_landmarks]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[frames]{.pre}]{.n}*[)]{.sig-paren}[¶](#augmentations.mirror_landmarks "Permalink to this definition"){.headerlink}
+# Modules:
+<div class="toctree-wrapper compound">
 
-:   Invert/mirror landmark coordinates along the x-axis.
+<div id="module-augmentations" class="section">
 
-    Args:
+## Data Augmentations[¶](#module-augmentations "Permalink to this headline")
 
-    :   frames (numpy.ndarray): An array of landmarks data.
+augmentations.frame\_dropout(*frames*, *dropout\_rate=0.05*)[¶](#augmentations.frame_dropout "Permalink to this definition")  
+Randomly drop frames from the input landmark data.
 
-    Returns:
+Args:  
+frames (numpy.ndarray): An array of landmarks data. dropout\_rate
+(float): The proportion of frames to drop (default: 0.05).
 
-    :   numpy.ndarray: An array of inverted landmarks.
+Returns:  
+numpy.ndarray: An array of landmarks with dropped frames.
 
-```{=html}
-<!-- -->
-```
+&nbsp;
 
-[[augmentations.]{.pre}]{.sig-prename .descclassname}[[normalize]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[frames]{.pre}]{.n}*, *[[mn]{.pre}]{.n}*, *[[std]{.pre}]{.n}*[)]{.sig-paren}[¶](#augmentations.normalize "Permalink to this definition"){.headerlink}
+augmentations.mirror\_landmarks(*frames*)[¶](#augmentations.mirror_landmarks "Permalink to this definition")  
+Invert/mirror landmark coordinates along the x-axis.
 
-:   Normalize the frames with a given mean and standard deviation.
+Args:  
+frames (numpy.ndarray): An array of landmarks data.
 
-    Args:
+Returns:  
+numpy.ndarray: An array of inverted landmarks.
 
-    :   frames (numpy.ndarray): An array of landmarks data. mn (float):
-        The mean value for normalization. std (float): The standard
-        deviation for normalization.
+&nbsp;
 
-    Returns:
+augmentations.normalize(*frames*, *mn*, *std*)[¶](#augmentations.normalize "Permalink to this definition")  
+Normalize the frames with a given mean and standard deviation.
 
-    :   numpy.ndarray: An array of normalized landmarks.
+Args:  
+frames (numpy.ndarray): An array of landmarks data. mn (float): The mean
+value for normalization. std (float): The standard deviation for
+normalization.
 
-```{=html}
-<!-- -->
-```
+Returns:  
+numpy.ndarray: An array of normalized landmarks.
 
-[[augmentations.]{.pre}]{.sig-prename .descclassname}[[random_rotation]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[frames]{.pre}]{.n}*, *[[max_angle]{.pre}]{.n}[[=]{.pre}]{.o}[[10]{.pre}]{.default_value}*[)]{.sig-paren}[¶](#augmentations.random_rotation "Permalink to this definition"){.headerlink}
+&nbsp;
 
-:   Apply random rotation to landmark coordinates. (on X and Y only)
+augmentations.random\_rotation(*frames*, *max\_angle=10*)[¶](#augmentations.random_rotation "Permalink to this definition")  
+Apply random rotation to landmark coordinates. (on X and Y only)
 
-    Args:
+Args:  
+frames (numpy.ndarray): An array of landmarks data. max\_angle (int):
+The maximum rotation angle in degrees (default: 10).
 
-    :   frames (numpy.ndarray): An array of landmarks data. max_angle
-        (int): The maximum rotation angle in degrees (default: 10).
+Returns:  
+numpy.ndarray: An array of landmarks with randomly rotated coordinates.
 
-    Returns:
+&nbsp;
 
-    :   numpy.ndarray: An array of landmarks with randomly rotated
-        coordinates.
+augmentations.random\_scaling(*frames*, *scale\_range=(0.9, 1.1)*)[¶](#augmentations.random_scaling "Permalink to this definition")  
+Apply random scaling to landmark coordinates.
 
-```{=html}
-<!-- -->
-```
+Args:  
+frames (numpy.ndarray): An array of landmarks data. scale\_range
+(tuple): A tuple containing the minimum and maximum scaling factors
+(default: (0.9, 1.1)).
 
-[[augmentations.]{.pre}]{.sig-prename .descclassname}[[random_scaling]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[frames]{.pre}]{.n}*, *[[scale_range]{.pre}]{.n}[[=]{.pre}]{.o}[[(0.9,]{.pre} [1.1)]{.pre}]{.default_value}*[)]{.sig-paren}[¶](#augmentations.random_scaling "Permalink to this definition"){.headerlink}
+Returns:  
+numpy.ndarray: An array of landmarks with randomly scaled coordinates.
 
-:   Apply random scaling to landmark coordinates.
+&nbsp;
 
-    Args:
+augmentations.shift\_landmarks(*frames*, *max\_shift=0.01*)[¶](#augmentations.shift_landmarks "Permalink to this definition")  
+Shift landmark coordinates randomly by a small amount.
 
-    :   frames (numpy.ndarray): An array of landmarks data. scale_range
-        (tuple): A tuple containing the minimum and maximum scaling
-        factors (default: (0.9, 1.1)).
+Args:  
+frames (numpy.ndarray): An array of landmarks data. max\_shift (float):
+Maximum shift for the random shift (default: 0.01).
 
-    Returns:
+Returns:  
+numpy.ndarray: An array of augmented landmarks.
 
-    :   numpy.ndarray: An array of landmarks with randomly scaled
-        coordinates.
+&nbsp;
 
-```{=html}
-<!-- -->
-```
+augmentations.standardize(*frames*)[¶](#augmentations.standardize "Permalink to this definition")  
+Standardize the frames so that they have mean 0 and standard
+deviation 1.
 
-[[augmentations.]{.pre}]{.sig-prename .descclassname}[[shift_landmarks]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[frames]{.pre}]{.n}*, *[[max_shift]{.pre}]{.n}[[=]{.pre}]{.o}[[0.01]{.pre}]{.default_value}*[)]{.sig-paren}[¶](#augmentations.shift_landmarks "Permalink to this definition"){.headerlink}
+Args:  
+frames (numpy.ndarray): An array of landmarks data.
 
-:   Shift landmark coordinates randomly by a small amount.
+Returns:  
+numpy.ndarray: An array of standardized landmarks.
 
-    Args:
+</div>
 
-    :   frames (numpy.ndarray): An array of landmarks data. max_shift
-        (float): Maximum shift for the random shift (default: 0.01).
+<div id="module-callbacks" class="section">
 
-    Returns:
+## Training Callbacks[¶](#module-callbacks "Permalink to this headline")
 
-    :   numpy.ndarray: An array of augmented landmarks.
+<div id="callbacks-description" class="section">
 
-```{=html}
-<!-- -->
-```
-
-[[augmentations.]{.pre}]{.sig-prename .descclassname}[[standardize]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[frames]{.pre}]{.n}*[)]{.sig-paren}[¶](#augmentations.standardize "Permalink to this definition"){.headerlink}
-
-:   Standardize the frames so that they have mean 0 and standard
-    deviation 1.
-
-    Args:
-
-    :   frames (numpy.ndarray): An array of landmarks data.
-
-    Returns:
-
-    :   numpy.ndarray: An array of standardized landmarks.
-:::
-
-[]{#document-callbacks}
-
-::: {#module-callbacks .section}
-[]{#training-callbacks}
-
-## Training Callbacks[¶](#module-callbacks "Permalink to this headline"){.headerlink}
-
-::: {#callbacks-description .section}
-### Callbacks description[¶](#callbacks-description "Permalink to this headline"){.headerlink}
+### Callbacks description[¶](#callbacks-description "Permalink to this headline")
 
 This module contains callback codes which may be executed during
 training. These callbacks are used to dynamically adjust the dropout
 rate and data augmentation probability during the training process,
 which can be useful techniques to prevent overfitting and increase the
-diversity of the training data, potentially improving the model's
+diversity of the training data, potentially improving the model’s
 performance.
 
-The dropout_callback function is designed to increase the dropout rate
+The dropout\_callback function is designed to increase the dropout rate
 of the model during the training process after a certain number of
 epochs. The dropout rate is a regularization technique used to prevent
 overfitting during the training process. The rate of dropout is
 increased every few epochs based on a specified rate until it reaches a
 specified maximum limit.
 
-The augmentation_increase_callback: function is designed to increase the
-probability of data augmentation applied to the dataset during the
+The augmentation\_increase\_callback: function is designed to increase
+the probability of data augmentation applied to the dataset during the
 training process after a certain number of epochs. Data augmentation is
 a technique that can generate new training samples by applying
 transformations to the existing data. The probability of data
 augmentation is increased every few epochs based on a specified rate
 until it reaches a specified maximum limit.
 
-[[callbacks.]{.pre}]{.sig-prename .descclassname}[[augmentation_increase_callback]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[trainer]{.pre}]{.n}*, *[[aug_increase_rate]{.pre}]{.n}[[=]{.pre}]{.o}[[1.5]{.pre}]{.default_value}*, *[[max_limit]{.pre}]{.n}[[=]{.pre}]{.o}[[0.35]{.pre}]{.default_value}*[)]{.sig-paren}[¶](#callbacks.augmentation_increase_callback "Permalink to this definition"){.headerlink}
+callbacks.augmentation\_increase\_callback(*trainer*, *aug\_increase\_rate=1.5*, *max\_limit=0.35*)[¶](#callbacks.augmentation_increase_callback "Permalink to this definition")  
+A callback function designed to increase the probability of data
+augmentation applied on the dataset during the training process. Data
+augmentation is a technique that can generate new training samples by
+applying transformations to the existing data.
 
-:   A callback function designed to increase the probability of data
-    augmentation applied on the dataset during the training process.
-    Data augmentation is a technique that can generate new training
-    samples by applying transformations to the existing data.
+The increase in data augmentation is performed every few epochs based on
+‘DYNAMIC\_AUG\_INC\_INTERVAL’ until it reaches a specified maximum
+limit.
 
-    The increase in data augmentation is performed every few epochs
-    based on 'DYNAMIC_AUG_INC_INTERVAL' until it reaches a specified
-    maximum limit.
+Args:  
+trainer: The object that contains the model and handles the training
+process. aug\_increase\_rate: The rate at which data augmentation
+probability is increased. Default is value of ‘DYNAMIC\_AUG\_INC\_RATE’
+from config. max\_limit: The maximum limit to which data augmentation
+probability can be increased. Default is value of
+‘DYNAMIC\_AUG\_MAX\_THRESHOLD’ from config.
 
-    Args:
+Returns:  
+None
 
-    :   trainer: The object that contains the model and handles the
-        training process. aug_increase_rate: The rate at which data
-        augmentation probability is increased. Default is value of
-        'DYNAMIC_AUG_INC_RATE' from config. max_limit: The maximum limit
-        to which data augmentation probability can be increased. Default
-        is value of 'DYNAMIC_AUG_MAX_THRESHOLD' from config.
+Functionality:  
+Increases the probability of data augmentation applied on the dataset
+after certain number of epochs defined by ‘DYNAMIC\_AUG\_INC\_INTERVAL’.
 
-    Returns:
+Parameters  
+-   **trainer** – Trainer object handling the training process
 
-    :   None
+-   **aug\_increase\_rate** – Rate at which to increase the data
+    augmentation probability
 
-    Functionality:
+-   **max\_limit** – Maximum allowable data augmentation probability
 
-    :   Increases the probability of data augmentation applied on the
-        dataset after certain number of epochs defined by
-        'DYNAMIC_AUG_INC_INTERVAL'.
+Returns  
+None
 
-    Parameters
+Return type  
+None
 
-    :   -   **trainer** -- Trainer object handling the training process
+&nbsp;
 
-        -   **aug_increase_rate** -- Rate at which to increase the data
-            augmentation probability
+callbacks.dropout\_callback(*trainer*, *dropout\_rate=1.1*, *max\_dropout=0.2*)[¶](#callbacks.dropout_callback "Permalink to this definition")  
+A callback function designed to increase the dropout rate of the model
+in training after a certain number of epochs. The dropout rate is a
+regularization technique which helps in preventing overfitting during
+the training process.
 
-        -   **max_limit** -- Maximum allowable data augmentation
-            probability
+The rate of dropout is increased every few epochs based on the config
+parameter (in config.py) ‘DYNAMIC\_DROP\_OUT\_REDUCTION\_INTERVAL’ until
+a maximum threshold defined by ‘max\_dropout’. This function is usually
+called after each epoch in the training process.
 
-    Returns
+Args:  
+trainer: The object that contains the model and handles the training
+process. dropout\_rate: The rate at which the dropout rate is increased.
+Default is value of ‘DYNAMIC\_DROP\_OUT\_REDUCTION\_RATE’ from config.
+max\_dropout: The maximum limit to which dropout can be increased.
+Default is value of ‘DYNAMIC\_DROP\_OUT\_MAX\_THRESHOLD’ from config.
 
-    :   None
+Returns:  
+None
 
-    Return type
+Functionality:  
+Increases the dropout rate of all nn.Dropout modules in the model after
+certain number of epochs defined by
+‘DYNAMIC\_DROP\_OUT\_REDUCTION\_INTERVAL’.
 
-    :   None
+Parameters  
+-   **trainer** – Trainer object handling the training process
 
-```{=html}
-<!-- -->
-```
+-   **dropout\_rate** – Rate at which to increase the dropout rate
 
-[[callbacks.]{.pre}]{.sig-prename .descclassname}[[dropout_callback]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[trainer]{.pre}]{.n}*, *[[dropout_rate]{.pre}]{.n}[[=]{.pre}]{.o}[[1.1]{.pre}]{.default_value}*, *[[max_dropout]{.pre}]{.n}[[=]{.pre}]{.o}[[0.2]{.pre}]{.default_value}*[)]{.sig-paren}[¶](#callbacks.dropout_callback "Permalink to this definition"){.headerlink}
+-   **max\_dropout** – Maximum allowable dropout rate
 
-:   A callback function designed to increase the dropout rate of the
-    model in training after a certain number of epochs. The dropout rate
-    is a regularization technique which helps in preventing overfitting
-    during the training process.
+Returns  
+None
 
-    The rate of dropout is increased every few epochs based on the
-    config parameter (in config.py)
-    'DYNAMIC_DROP_OUT_REDUCTION_INTERVAL' until a maximum threshold
-    defined by 'max_dropout'. This function is usually called after each
-    epoch in the training process.
+Return type  
+None
 
-    Args:
+</div>
 
-    :   trainer: The object that contains the model and handles the
-        training process. dropout_rate: The rate at which the dropout
-        rate is increased. Default is value of
-        'DYNAMIC_DROP_OUT_REDUCTION_RATE' from config. max_dropout: The
-        maximum limit to which dropout can be increased. Default is
-        value of 'DYNAMIC_DROP_OUT_MAX_THRESHOLD' from config.
+</div>
 
-    Returns:
+<div id="module-config" class="section">
 
-    :   None
+## Project Configuration[¶](#module-config "Permalink to this headline")
 
-    Functionality:
+<div id="project-configuration-description" class="section">
 
-    :   Increases the dropout rate of all nn.Dropout modules in the
-        model after certain number of epochs defined by
-        'DYNAMIC_DROP_OUT_REDUCTION_INTERVAL'.
-
-    Parameters
-
-    :   -   **trainer** -- Trainer object handling the training process
-
-        -   **dropout_rate** -- Rate at which to increase the dropout
-            rate
-
-        -   **max_dropout** -- Maximum allowable dropout rate
-
-    Returns
-
-    :   None
-
-    Return type
-
-    :   None
-:::
-:::
-
-[]{#document-config}
-
-::: {#module-config .section}
-[]{#project-configuration}
-
-## Project Configuration[¶](#module-config "Permalink to this headline"){.headerlink}
-
-::: {#project-configuration-description .section}
-### Project configuration description[¶](#project-configuration-description "Permalink to this headline"){.headerlink}
+### Project configuration description[¶](#project-configuration-description "Permalink to this headline")
 
 This configuration is created allows for easy tuning of your machine
-learning model's parameters and setup. The device on which the model
+learning model’s parameters and setup. The device on which the model
 runs, the paths for various resources, the seed for random number
 generation, hyperparameters for model training, and much more and
 quickly be change and configured. This makes your setup flexible and
 easy to adapt for various experiments and environments
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[BATCH_SIZE]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[128]{.pre}*[¶](#config.BATCH_SIZE "Permalink to this definition"){.headerlink}
+config.BATCH\_SIZE* = 128*[¶](#config.BATCH_SIZE "Permalink to this definition")  
+Training Batch Size
 
-:   Training Batch Size
+&nbsp;
 
-```{=html}
-<!-- -->
-```
+config.CHECKPOINT\_DIR* = 'checkpoints/'*[¶](#config.CHECKPOINT_DIR "Permalink to this definition")  
+Checkpoint files Directory path
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[CHECKPOINT_DIR]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[\'checkpoints/\']{.pre}*[¶](#config.CHECKPOINT_DIR "Permalink to this definition"){.headerlink}
+&nbsp;
 
-:   Checkpoint files Directory path
+config.CLEANED\_FILE* = 'cleansed\_data.marker'*[¶](#config.CLEANED_FILE "Permalink to this definition")  
+File that marks the data cleaning stage.
 
-```{=html}
-<!-- -->
-```
+&nbsp;
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[CLEANED_FILE]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[\'cleansed_data.marker\']{.pre}*[¶](#config.CLEANED_FILE "Permalink to this definition"){.headerlink}
+config.COLUMNS\_TO\_USE* = \['x', 'y'\]*[¶](#config.COLUMNS_TO_USE "Permalink to this definition")  
+Coordinate columns from the data to use for training.
 
-:   File that marks the data cleaning stage.
+&nbsp;
 
-```{=html}
-<!-- -->
-```
+config.DATA\_DIR* = 'data/'*[¶](#config.DATA_DIR "Permalink to this definition")  
+Data files Directory path
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[COLUMNS_TO_USE]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[\[\'x\',]{.pre} [\'y\'\]]{.pre}*[¶](#config.COLUMNS_TO_USE "Permalink to this definition"){.headerlink}
+&nbsp;
 
-:   Coordinate columns from the data to use for training.
+config.DEVICE* = 'cpu'*[¶](#config.DEVICE "Permalink to this definition")  
+Setting the device for training, ‘cuda’ if a CUDA-compatible GPU is
+available, ‘mps’ if multiple processors are available, ‘cpu’ if none of
+the above.
 
-```{=html}
-<!-- -->
-```
+&nbsp;
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[DATA_DIR]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[\'data/\']{.pre}*[¶](#config.DATA_DIR "Permalink to this definition"){.headerlink}
+config.DL\_FRAMEWORK* = 'pytorch'*[¶](#config.DL_FRAMEWORK "Permalink to this definition")  
+Deep learning framework to use for training and inference. Can be either
+‘pytorch’ or ‘tensorflow’.
 
-:   Data files Directory path
+&nbsp;
 
-```{=html}
-<!-- -->
-```
+config.DYNAMIC\_AUG\_INC\_INTERVAL* = 5*[¶](#config.DYNAMIC_AUG_INC_INTERVAL "Permalink to this definition")  
+The number of epochs to wait before increasing the probability of data
+augmentation.
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[DEVICE]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[\'cpu\']{.pre}*[¶](#config.DEVICE "Permalink to this definition"){.headerlink}
+&nbsp;
 
-:   Setting the device for training, 'cuda' if a CUDA-compatible GPU is
-    available, 'mps' if multiple processors are available, 'cpu' if none
-    of the above.
+config.DYNAMIC\_AUG\_INC\_RATE* = 1.5*[¶](#config.DYNAMIC_AUG_INC_RATE "Permalink to this definition")  
+The rate at which the probability of data augmentation is increased.
 
-```{=html}
-<!-- -->
-```
+&nbsp;
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[DL_FRAMEWORK]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[\'pytorch\']{.pre}*[¶](#config.DL_FRAMEWORK "Permalink to this definition"){.headerlink}
+config.DYNAMIC\_AUG\_MAX\_THRESHOLD* = 0.35*[¶](#config.DYNAMIC_AUG_MAX_THRESHOLD "Permalink to this definition")  
+The maximum limit to which the probability of data augmentation can be
+increased.
 
-:   Deep learning framework to use for training and inference. Can be
-    either 'pytorch' or 'tensorflow'.
+&nbsp;
 
-```{=html}
-<!-- -->
-```
+config.DYNAMIC\_DROP\_OUT\_INIT\_RATE* = 0.01*[¶](#config.DYNAMIC_DROP_OUT_INIT_RATE "Permalink to this definition")  
+The value of initial low dropouts rate
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[DYNAMIC_AUG_INC_INTERVAL]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[5]{.pre}*[¶](#config.DYNAMIC_AUG_INC_INTERVAL "Permalink to this definition"){.headerlink}
+&nbsp;
 
-:   The number of epochs to wait before increasing the probability of
-    data augmentation.
+config.DYNAMIC\_DROP\_OUT\_MAX\_THRESHOLD* = 0.2*[¶](#config.DYNAMIC_DROP_OUT_MAX_THRESHOLD "Permalink to this definition")  
+The max value of dynamic dropouts
 
-```{=html}
-<!-- -->
-```
+&nbsp;
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[DYNAMIC_AUG_INC_RATE]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[1.5]{.pre}*[¶](#config.DYNAMIC_AUG_INC_RATE "Permalink to this definition"){.headerlink}
+config.DYNAMIC\_DROP\_OUT\_REDUCTION\_INTERVAL* = 2*[¶](#config.DYNAMIC_DROP_OUT_REDUCTION_INTERVAL "Permalink to this definition")  
+The epoch interval value to gradually change dropout rate
 
-:   The rate at which the probability of data augmentation is increased.
+&nbsp;
 
-```{=html}
-<!-- -->
-```
+config.DYNAMIC\_DROP\_OUT\_REDUCTION\_RATE* = 1.1*[¶](#config.DYNAMIC_DROP_OUT_REDUCTION_RATE "Permalink to this definition")  
+The value to increase dropouts by
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[DYNAMIC_AUG_MAX_THRESHOLD]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[0.35]{.pre}*[¶](#config.DYNAMIC_AUG_MAX_THRESHOLD "Permalink to this definition"){.headerlink}
+&nbsp;
 
-:   The maximum limit to which the probability of data augmentation can
-    be increased.
+config.EARLY\_STOP\_METRIC* = 'accuracy'*[¶](#config.EARLY_STOP_METRIC "Permalink to this definition")  
+Which metric should be used for early stopping loss/accuracy
 
-```{=html}
-<!-- -->
-```
+&nbsp;
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[DYNAMIC_DROP_OUT_INIT_RATE]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[0.01]{.pre}*[¶](#config.DYNAMIC_DROP_OUT_INIT_RATE "Permalink to this definition"){.headerlink}
+config.EARLY\_STOP\_MODE* = 'max'*[¶](#config.EARLY_STOP_MODE "Permalink to this definition")  
+What is the mode? min/max
 
-:   The value of initial low dropouts rate
+&nbsp;
 
-```{=html}
-<!-- -->
-```
+config.EARLY\_STOP\_PATIENCE* = 10*[¶](#config.EARLY_STOP_PATIENCE "Permalink to this definition")  
+The number of epochs to wait for improvement in the validation loss
+before stopping training
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[DYNAMIC_DROP_OUT_MAX_THRESHOLD]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[0.2]{.pre}*[¶](#config.DYNAMIC_DROP_OUT_MAX_THRESHOLD "Permalink to this definition"){.headerlink}
+&nbsp;
 
-:   The max value of dynamic dropouts
+config.EARLY\_STOP\_TOLERENCE* = 0.001*[¶](#config.EARLY_STOP_TOLERENCE "Permalink to this definition")  
+The value of loss as margin to tolerate
 
-```{=html}
-<!-- -->
-```
+&nbsp;
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[DYNAMIC_DROP_OUT_REDUCTION_INTERVAL]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[2]{.pre}*[¶](#config.DYNAMIC_DROP_OUT_REDUCTION_INTERVAL "Permalink to this definition"){.headerlink}
+config.EPOCHS* = 50*[¶](#config.EPOCHS "Permalink to this definition")  
+Training Number of epochs
 
-:   The epoch interval value to gradually change dropout rate
+&nbsp;
 
-```{=html}
-<!-- -->
-```
+config.FACE\_FEATURES* = 468*[¶](#config.FACE_FEATURES "Permalink to this definition")  
+Number of features related to the face in the data.
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[DYNAMIC_DROP_OUT_REDUCTION_RATE]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[1.1]{.pre}*[¶](#config.DYNAMIC_DROP_OUT_REDUCTION_RATE "Permalink to this definition"){.headerlink}
+&nbsp;
 
-:   The value to increase dropouts by
+config.FACE\_FEATURE\_START* = 0*[¶](#config.FACE_FEATURE_START "Permalink to this definition")  
+Start index for face feature in the data.
 
-```{=html}
-<!-- -->
-```
+&nbsp;
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[EARLY_STOP_METRIC]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[\'accuracy\']{.pre}*[¶](#config.EARLY_STOP_METRIC "Permalink to this definition"){.headerlink}
+config.FACE\_INDICES* = array(\[ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16,        17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33,        34, 35, 36, 37, 38, 39\], dtype=int64)*[¶](#config.FACE_INDICES "Permalink to this definition")  
+Indices of face landmarks that are used from the data.
 
-:   Which metric should be used for early stopping loss/accuracy
+&nbsp;
 
-```{=html}
-<!-- -->
-```
+config.FACE\_LANDMARKS* = array(\[ 61, 185,  40,  39,  37,   0, 267, 269, 270, 409, 291, 146,  91,        181,  84,  17, 314, 405, 321, 375,  78, 191,  80,  81,  82,  13,        312, 311, 310, 415,  95,  88, 178,  87,  14, 317, 402, 318, 324,        308\])*[¶](#config.FACE_LANDMARKS "Permalink to this definition")  
+Landmarks for Lips
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[EARLY_STOP_MODE]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[\'max\']{.pre}*[¶](#config.EARLY_STOP_MODE "Permalink to this definition"){.headerlink}
+&nbsp;
 
-:   What is the mode? min/max
+config.HAND\_FEATURES* = 21*[¶](#config.HAND_FEATURES "Permalink to this definition")  
+Number of features related to the hand in the data.
 
-```{=html}
-<!-- -->
-```
+&nbsp;
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[EARLY_STOP_PATIENCE]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[10]{.pre}*[¶](#config.EARLY_STOP_PATIENCE "Permalink to this definition"){.headerlink}
+config.HAND\_INDICES* = array(\[40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56,        57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73,        74, 75, 76, 77, 78, 79, 80, 81\], dtype=int64)*[¶](#config.HAND_INDICES "Permalink to this definition")  
+Indices of hand landmarks that are used from the data.
 
-:   The number of epochs to wait for improvement in the validation loss
-    before stopping training
+&nbsp;
 
-```{=html}
-<!-- -->
-```
+config.INPUT\_SIZE* = 32*[¶](#config.INPUT_SIZE "Permalink to this definition")  
+Size of the input data for the model.
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[EARLY_STOP_TOLERENCE]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[0.001]{.pre}*[¶](#config.EARLY_STOP_TOLERENCE "Permalink to this definition"){.headerlink}
+&nbsp;
 
-:   The value of loss as margin to tolerate
+config.INTEREMOLATE\_MISSING* = 3*[¶](#config.INTEREMOLATE_MISSING "Permalink to this definition")  
+Number of missing values to interpolate in the data.
 
-```{=html}
-<!-- -->
-```
+&nbsp;
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[EPOCHS]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[50]{.pre}*[¶](#config.EPOCHS "Permalink to this definition"){.headerlink}
+config.LANDMARK\_FILES* = 'train\_landmark\_files'*[¶](#config.LANDMARK_FILES "Permalink to this definition")  
+Directory where training landmark files are stored.
 
-:   Training Number of epochs
+&nbsp;
 
-```{=html}
-<!-- -->
-```
+config.LEARNING\_RATE* = 0.001*[¶](#config.LEARNING_RATE "Permalink to this definition")  
+Training Learning rate
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[FACE_FEATURES]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[468]{.pre}*[¶](#config.FACE_FEATURES "Permalink to this definition"){.headerlink}
+&nbsp;
 
-:   Number of features related to the face in the data.
+config.LEFT\_HAND\_FEATURE\_START* = 468*[¶](#config.LEFT_HAND_FEATURE_START "Permalink to this definition")  
+Start index for left hand feature in the data.
 
-```{=html}
-<!-- -->
-```
+&nbsp;
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[FACE_FEATURE_START]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[0]{.pre}*[¶](#config.FACE_FEATURE_START "Permalink to this definition"){.headerlink}
+config.LEFT\_HAND\_INDICES* = array(\[40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56,        57, 58, 59, 60\], dtype=int64)*[¶](#config.LEFT_HAND_INDICES "Permalink to this definition")  
+Indices of left hand landmarks that are used from the data.
 
-:   Start index for face feature in the data.
+&nbsp;
 
-```{=html}
-<!-- -->
-```
+config.MAP\_JSON\_FILE* = 'sign\_to\_prediction\_index\_map.json'*[¶](#config.MAP_JSON_FILE "Permalink to this definition")  
+JSON file that maps sign to prediction index.
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[FACE_INDICES]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[array(\[]{.pre} [0,]{.pre}  [1,]{.pre}  [2,]{.pre}  [3,]{.pre}  [4,]{.pre}  [5,]{.pre}  [6,]{.pre}  [7,]{.pre}  [8,]{.pre}  [9,]{.pre} [10,]{.pre} [11,]{.pre} [12,]{.pre} [13,]{.pre} [14,]{.pre} [15,]{.pre} [16,]{.pre}        [17,]{.pre} [18,]{.pre} [19,]{.pre} [20,]{.pre} [21,]{.pre} [22,]{.pre} [23,]{.pre} [24,]{.pre} [25,]{.pre} [26,]{.pre} [27,]{.pre} [28,]{.pre} [29,]{.pre} [30,]{.pre} [31,]{.pre} [32,]{.pre} [33,]{.pre}        [34,]{.pre} [35,]{.pre} [36,]{.pre} [37,]{.pre} [38,]{.pre} [39\],]{.pre} [dtype=int64)]{.pre}*[¶](#config.FACE_INDICES "Permalink to this definition"){.headerlink}
+&nbsp;
 
-:   Indices of face landmarks that are used from the data.
+config.MARKER\_FILE* = 'preprocessed\_data.marker'*[¶](#config.MARKER_FILE "Permalink to this definition")  
+File that marks the preprocessing stage.
 
-```{=html}
-<!-- -->
-```
+&nbsp;
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[FACE_LANDMARKS]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[array(\[]{.pre} [61,]{.pre} [185,]{.pre}  [40,]{.pre}  [39,]{.pre}  [37,]{.pre}   [0,]{.pre} [267,]{.pre} [269,]{.pre} [270,]{.pre} [409,]{.pre} [291,]{.pre} [146,]{.pre}  [91,]{.pre}        [181,]{.pre}  [84,]{.pre}  [17,]{.pre} [314,]{.pre} [405,]{.pre} [321,]{.pre} [375,]{.pre}  [78,]{.pre} [191,]{.pre}  [80,]{.pre}  [81,]{.pre}  [82,]{.pre}  [13,]{.pre}        [312,]{.pre} [311,]{.pre} [310,]{.pre} [415,]{.pre}  [95,]{.pre}  [88,]{.pre} [178,]{.pre}  [87,]{.pre}  [14,]{.pre} [317,]{.pre} [402,]{.pre} [318,]{.pre} [324,]{.pre}        [308\])]{.pre}*[¶](#config.FACE_LANDMARKS "Permalink to this definition"){.headerlink}
+config.MAX\_SEQUENCES* = 32*[¶](#config.MAX_SEQUENCES "Permalink to this definition")  
+Maximum number of sequences in the input data.
 
-:   Landmarks for Lips
+&nbsp;
 
-```{=html}
-<!-- -->
-```
+config.MIN\_SEQUEENCES* = 8.0*[¶](#config.MIN_SEQUEENCES "Permalink to this definition")  
+Minimum number of sequences in the input data.
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[HAND_FEATURES]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[21]{.pre}*[¶](#config.HAND_FEATURES "Permalink to this definition"){.headerlink}
+&nbsp;
 
-:   Number of features related to the hand in the data.
+config.MODELNAME* = 'YetAnotherTransformerClassifier'*[¶](#config.MODELNAME "Permalink to this definition")  
+Name of the model to be used for training.
 
-```{=html}
-<!-- -->
-```
+&nbsp;
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[HAND_INDICES]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[array(\[40,]{.pre} [41,]{.pre} [42,]{.pre} [43,]{.pre} [44,]{.pre} [45,]{.pre} [46,]{.pre} [47,]{.pre} [48,]{.pre} [49,]{.pre} [50,]{.pre} [51,]{.pre} [52,]{.pre} [53,]{.pre} [54,]{.pre} [55,]{.pre} [56,]{.pre}        [57,]{.pre} [58,]{.pre} [59,]{.pre} [60,]{.pre} [61,]{.pre} [62,]{.pre} [63,]{.pre} [64,]{.pre} [65,]{.pre} [66,]{.pre} [67,]{.pre} [68,]{.pre} [69,]{.pre} [70,]{.pre} [71,]{.pre} [72,]{.pre} [73,]{.pre}        [74,]{.pre} [75,]{.pre} [76,]{.pre} [77,]{.pre} [78,]{.pre} [79,]{.pre} [80,]{.pre} [81\],]{.pre} [dtype=int64)]{.pre}*[¶](#config.HAND_INDICES "Permalink to this definition"){.headerlink}
+config.MODEL\_DIR* = 'models/'*[¶](#config.MODEL_DIR "Permalink to this definition")  
+Model files Directory path
 
-:   Indices of hand landmarks that are used from the data.
+&nbsp;
 
-```{=html}
-<!-- -->
-```
+config.N\_CLASSES* = 250*[¶](#config.N_CLASSES "Permalink to this definition")  
+Number of classes
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[INPUT_SIZE]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[32]{.pre}*[¶](#config.INPUT_SIZE "Permalink to this definition"){.headerlink}
+&nbsp;
 
-:   Size of the input data for the model.
+config.N\_DIMS* = 2*[¶](#config.N_DIMS "Permalink to this definition")  
+Number of dimensions used in training
 
-```{=html}
-<!-- -->
-```
+&nbsp;
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[INTEREMOLATE_MISSING]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[3]{.pre}*[¶](#config.INTEREMOLATE_MISSING "Permalink to this definition"){.headerlink}
+config.N\_LANDMARKS* = 96*[¶](#config.N_LANDMARKS "Permalink to this definition")  
+Total number of used landmarks
 
-:   Number of missing values to interpolate in the data.
+&nbsp;
 
-```{=html}
-<!-- -->
-```
+config.OUT\_DIR* = 'out/'*[¶](#config.OUT_DIR "Permalink to this definition")  
+Output files Directory path
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[LANDMARK_FILES]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[\'train_landmark_files\']{.pre}*[¶](#config.LANDMARK_FILES "Permalink to this definition"){.headerlink}
+&nbsp;
 
-:   Directory where training landmark files are stored.
+config.POSE\_FEATURES* = 33*[¶](#config.POSE_FEATURES "Permalink to this definition")  
+Number of features related to the pose in the data.
 
-```{=html}
-<!-- -->
-```
+&nbsp;
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[LEARNING_RATE]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[0.001]{.pre}*[¶](#config.LEARNING_RATE "Permalink to this definition"){.headerlink}
+config.POSE\_FEATURE\_START* = 489*[¶](#config.POSE_FEATURE_START "Permalink to this definition")  
+Start index for pose feature in the data.
 
-:   Training Learning rate
+&nbsp;
 
-```{=html}
-<!-- -->
-```
+config.POSE\_INDICES* = array(\[82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95\],       dtype=int64)*[¶](#config.POSE_INDICES "Permalink to this definition")  
+Indices of pose landmarks that are used from the data.
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[LEFT_HAND_FEATURE_START]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[468]{.pre}*[¶](#config.LEFT_HAND_FEATURE_START "Permalink to this definition"){.headerlink}
+&nbsp;
 
-:   Start index for left hand feature in the data.
+config.PROCESSED\_DATA\_DIR* = 'data/processed/'*[¶](#config.PROCESSED_DATA_DIR "Permalink to this definition")  
+Processed Data files Directory path
 
-```{=html}
-<!-- -->
-```
+&nbsp;
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[LEFT_HAND_INDICES]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[array(\[40,]{.pre} [41,]{.pre} [42,]{.pre} [43,]{.pre} [44,]{.pre} [45,]{.pre} [46,]{.pre} [47,]{.pre} [48,]{.pre} [49,]{.pre} [50,]{.pre} [51,]{.pre} [52,]{.pre} [53,]{.pre} [54,]{.pre} [55,]{.pre} [56,]{.pre}        [57,]{.pre} [58,]{.pre} [59,]{.pre} [60\],]{.pre} [dtype=int64)]{.pre}*[¶](#config.LEFT_HAND_INDICES "Permalink to this definition"){.headerlink}
+config.RAW\_DATA\_DIR* = 'data/raw/'*[¶](#config.RAW_DATA_DIR "Permalink to this definition")  
+Raw Data files Directory path
 
-:   Indices of left hand landmarks that are used from the data.
+&nbsp;
 
-```{=html}
-<!-- -->
-```
+config.RIGHT\_HAND\_FEATURE\_START* = 522*[¶](#config.RIGHT_HAND_FEATURE_START "Permalink to this definition")  
+Start index for right hand feature in the data.
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[MAP_JSON_FILE]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[\'sign_to_prediction_index_map.json\']{.pre}*[¶](#config.MAP_JSON_FILE "Permalink to this definition"){.headerlink}
+&nbsp;
 
-:   JSON file that maps sign to prediction index.
+config.RIGHT\_HAND\_INDICES* = array(\[61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77,        78, 79, 80, 81\], dtype=int64)*[¶](#config.RIGHT_HAND_INDICES "Permalink to this definition")  
+Indices of right hand landmarks that are used from the data.
 
-```{=html}
-<!-- -->
-```
+&nbsp;
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[MARKER_FILE]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[\'preprocessed_data.marker\']{.pre}*[¶](#config.MARKER_FILE "Permalink to this definition"){.headerlink}
+config.ROOT\_PATH* = 'C:\\\\Users\\\\tgdimas1\\\\git\\\\CAS-AML-FINAL-PROJECT\\\\src\\\\../'*[¶](#config.ROOT_PATH "Permalink to this definition")  
+Root directory
 
-:   File that marks the preprocessing stage.
+&nbsp;
 
-```{=html}
-<!-- -->
-```
+config.ROWS\_PER\_FRAME* = 543*[¶](#config.ROWS_PER_FRAME "Permalink to this definition")  
+Number of rows per frame in the data.
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[MAX_SEQUENCES]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[32]{.pre}*[¶](#config.MAX_SEQUENCES "Permalink to this definition"){.headerlink}
+&nbsp;
 
-:   Maximum number of sequences in the input data.
+config.RUNS\_DIR* = 'runs/'*[¶](#config.RUNS_DIR "Permalink to this definition")  
+Run files Directory path
 
-```{=html}
-<!-- -->
-```
+&nbsp;
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[MIN_SEQUEENCES]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[8.0]{.pre}*[¶](#config.MIN_SEQUEENCES "Permalink to this definition"){.headerlink}
+config.SEED* = 0*[¶](#config.SEED "Permalink to this definition")  
+Set Random Seed
 
-:   Minimum number of sequences in the input data.
+&nbsp;
 
-```{=html}
-<!-- -->
-```
+config.SKIP\_CONSECUTIVE\_ZEROS* = 4*[¶](#config.SKIP_CONSECUTIVE_ZEROS "Permalink to this definition")  
+Skip data if there are this many consecutive zeros.
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[MODELNAME]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[\'YetAnotherTransformerClassifier\']{.pre}*[¶](#config.MODELNAME "Permalink to this definition"){.headerlink}
+&nbsp;
 
-:   Name of the model to be used for training.
+config.SRC\_DIR* = 'src/'*[¶](#config.SRC_DIR "Permalink to this definition")  
+Source files Directory path
 
-```{=html}
-<!-- -->
-```
+&nbsp;
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[MODEL_DIR]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[\'models/\']{.pre}*[¶](#config.MODEL_DIR "Permalink to this definition"){.headerlink}
+config.TEST\_SIZE* = 0.05*[¶](#config.TEST_SIZE "Permalink to this definition")  
+Testing Test set size
 
-:   Model files Directory path
+&nbsp;
 
-```{=html}
-<!-- -->
-```
+config.TRAIN\_CSV\_FILE* = 'train.csv'*[¶](#config.TRAIN_CSV_FILE "Permalink to this definition")  
+CSV file name that contains the training dataset.
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[N_CLASSES]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[250]{.pre}*[¶](#config.N_CLASSES "Permalink to this definition"){.headerlink}
+&nbsp;
 
-:   Number of classes
+config.TRAIN\_SIZE* = 0.9*[¶](#config.TRAIN_SIZE "Permalink to this definition")  
+Training Train set split size
 
-```{=html}
-<!-- -->
-```
+&nbsp;
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[N_DIMS]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[2]{.pre}*[¶](#config.N_DIMS "Permalink to this definition"){.headerlink}
+config.TUNE\_HP* = True*[¶](#config.TUNE_HP "Permalink to this definition")  
+Tune hyperparameters
 
-:   Number of dimensions used in training
+&nbsp;
 
-```{=html}
-<!-- -->
-```
+config.USED\_FACE\_FEATURES* = 40*[¶](#config.USED_FACE_FEATURES "Permalink to this definition")  
+Count of facial features used
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[N_LANDMARKS]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[96]{.pre}*[¶](#config.N_LANDMARKS "Permalink to this definition"){.headerlink}
+&nbsp;
 
-:   Total number of used landmarks
+config.USED\_HAND\_FEATURES* = 21*[¶](#config.USED_HAND_FEATURES "Permalink to this definition")  
+Count of hands features used (single hand only)
 
-```{=html}
-<!-- -->
-```
+&nbsp;
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[OUT_DIR]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[\'out/\']{.pre}*[¶](#config.OUT_DIR "Permalink to this definition"){.headerlink}
+config.USED\_POSE\_FEATURES* = 14*[¶](#config.USED_POSE_FEATURES "Permalink to this definition")  
+Count of body/pose features used
 
-:   Output files Directory path
+&nbsp;
 
-```{=html}
-<!-- -->
-```
+config.USEFUL\_ALL\_LANDMARKS* = array(\[ 61, 185,  40,  39,  37,   0, 267, 269, 270, 409, 291, 146,  91,        181,  84,  17, 314, 405, 321, 375,  78, 191,  80,  81,  82,  13,        312, 311, 310, 415,  95,  88, 178,  87,  14, 317, 402, 318, 324,        308, 468, 469, 470, 471, 472, 473, 474, 475, 476, 477, 478, 479,        480, 481, 482, 483, 484, 485, 486, 487, 488, 522, 523, 524, 525,        526, 527, 528, 529, 530, 531, 532, 533, 534, 535, 536, 537, 538,        539, 540, 541, 542, 500, 501, 502, 503, 504, 505, 506, 507, 508,        509, 510, 511, 512, 513\])*[¶](#config.USEFUL_ALL_LANDMARKS "Permalink to this definition")  
+All Landmarks
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[POSE_FEATURES]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[33]{.pre}*[¶](#config.POSE_FEATURES "Permalink to this definition"){.headerlink}
+&nbsp;
 
-:   Number of features related to the pose in the data.
+config.USEFUL\_FACE\_LANDMARKS* = array(\[ 61, 185,  40,  39,  37,   0, 267, 269, 270, 409, 291, 146,  91,        181,  84,  17, 314, 405, 321, 375,  78, 191,  80,  81,  82,  13,        312, 311, 310, 415,  95,  88, 178,  87,  14, 317, 402, 318, 324,        308\])*[¶](#config.USEFUL_FACE_LANDMARKS "Permalink to this definition")  
+Landmarks for face
 
-```{=html}
-<!-- -->
-```
+&nbsp;
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[POSE_FEATURE_START]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[489]{.pre}*[¶](#config.POSE_FEATURE_START "Permalink to this definition"){.headerlink}
+config.USEFUL\_HAND\_LANDMARKS* = array(\[468, 469, 470, 471, 472, 473, 474, 475, 476, 477, 478, 479, 480,        481, 482, 483, 484, 485, 486, 487, 488, 522, 523, 524, 525, 526,        527, 528, 529, 530, 531, 532, 533, 534, 535, 536, 537, 538, 539,        540, 541, 542\])*[¶](#config.USEFUL_HAND_LANDMARKS "Permalink to this definition")  
+Landmarks for both hands
 
-:   Start index for pose feature in the data.
+&nbsp;
 
-```{=html}
-<!-- -->
-```
+config.USEFUL\_LEFT\_HAND\_LANDMARKS* = array(\[468, 469, 470, 471, 472, 473, 474, 475, 476, 477, 478, 479, 480,        481, 482, 483, 484, 485, 486, 487, 488\])*[¶](#config.USEFUL_LEFT_HAND_LANDMARKS "Permalink to this definition")  
+Landmarks for left hand
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[POSE_INDICES]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[array(\[82,]{.pre} [83,]{.pre} [84,]{.pre} [85,]{.pre} [86,]{.pre} [87,]{.pre} [88,]{.pre} [89,]{.pre} [90,]{.pre} [91,]{.pre} [92,]{.pre} [93,]{.pre} [94,]{.pre} [95\],]{.pre}       [dtype=int64)]{.pre}*[¶](#config.POSE_INDICES "Permalink to this definition"){.headerlink}
+&nbsp;
 
-:   Indices of pose landmarks that are used from the data.
+config.USEFUL\_POSE\_LANDMARKS* = array(\[500, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512,        513\])*[¶](#config.USEFUL_POSE_LANDMARKS "Permalink to this definition")  
+Landmarks for pose
 
-```{=html}
-<!-- -->
-```
+&nbsp;
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[PROCESSED_DATA_DIR]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[\'data/processed/\']{.pre}*[¶](#config.PROCESSED_DATA_DIR "Permalink to this definition"){.headerlink}
+config.USEFUL\_RIGHT\_HAND\_LANDMARKS* = array(\[522, 523, 524, 525, 526, 527, 528, 529, 530, 531, 532, 533, 534,        535, 536, 537, 538, 539, 540, 541, 542\])*[¶](#config.USEFUL_RIGHT_HAND_LANDMARKS "Permalink to this definition")  
+Landmarks for right hand
 
-:   Processed Data files Directory path
+&nbsp;
 
-```{=html}
-<!-- -->
-```
+config.VALID\_SIZE* = 0.05*[¶](#config.VALID_SIZE "Permalink to this definition")  
+Training Validation set size
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[RAW_DATA_DIR]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[\'data/raw/\']{.pre}*[¶](#config.RAW_DATA_DIR "Permalink to this definition"){.headerlink}
+</div>
 
-:   Raw Data files Directory path
+</div>
 
-```{=html}
-<!-- -->
-```
+<div id="module-data.data_utils" class="section">
 
-[[config.]{.pre}]{.sig-prename .descclassname}[[RIGHT_HAND_FEATURE_START]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[522]{.pre}*[¶](#config.RIGHT_HAND_FEATURE_START "Permalink to this definition"){.headerlink}
+## Data Utilities[¶](#module-data.data_utils "Permalink to this headline")
 
-:   Start index for right hand feature in the data.
+<div id="data-processing-utils-description" class="section">
 
-```{=html}
-<!-- -->
-```
-
-[[config.]{.pre}]{.sig-prename .descclassname}[[RIGHT_HAND_INDICES]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[array(\[61,]{.pre} [62,]{.pre} [63,]{.pre} [64,]{.pre} [65,]{.pre} [66,]{.pre} [67,]{.pre} [68,]{.pre} [69,]{.pre} [70,]{.pre} [71,]{.pre} [72,]{.pre} [73,]{.pre} [74,]{.pre} [75,]{.pre} [76,]{.pre} [77,]{.pre}        [78,]{.pre} [79,]{.pre} [80,]{.pre} [81\],]{.pre} [dtype=int64)]{.pre}*[¶](#config.RIGHT_HAND_INDICES "Permalink to this definition"){.headerlink}
-
-:   Indices of right hand landmarks that are used from the data.
-
-```{=html}
-<!-- -->
-```
-
-[[config.]{.pre}]{.sig-prename .descclassname}[[ROOT_PATH]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[\'C:\\\\Users\\\\tgdimas1\\\\git\\\\CAS-AML-FINAL-PROJECT\\\\src\\\\../\']{.pre}*[¶](#config.ROOT_PATH "Permalink to this definition"){.headerlink}
-
-:   Root directory
-
-```{=html}
-<!-- -->
-```
-
-[[config.]{.pre}]{.sig-prename .descclassname}[[ROWS_PER_FRAME]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[543]{.pre}*[¶](#config.ROWS_PER_FRAME "Permalink to this definition"){.headerlink}
-
-:   Number of rows per frame in the data.
-
-```{=html}
-<!-- -->
-```
-
-[[config.]{.pre}]{.sig-prename .descclassname}[[RUNS_DIR]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[\'runs/\']{.pre}*[¶](#config.RUNS_DIR "Permalink to this definition"){.headerlink}
-
-:   Run files Directory path
-
-```{=html}
-<!-- -->
-```
-
-[[config.]{.pre}]{.sig-prename .descclassname}[[SEED]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[0]{.pre}*[¶](#config.SEED "Permalink to this definition"){.headerlink}
-
-:   Set Random Seed
-
-```{=html}
-<!-- -->
-```
-
-[[config.]{.pre}]{.sig-prename .descclassname}[[SKIP_CONSECUTIVE_ZEROS]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[4]{.pre}*[¶](#config.SKIP_CONSECUTIVE_ZEROS "Permalink to this definition"){.headerlink}
-
-:   Skip data if there are this many consecutive zeros.
-
-```{=html}
-<!-- -->
-```
-
-[[config.]{.pre}]{.sig-prename .descclassname}[[SRC_DIR]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[\'src/\']{.pre}*[¶](#config.SRC_DIR "Permalink to this definition"){.headerlink}
-
-:   Source files Directory path
-
-```{=html}
-<!-- -->
-```
-
-[[config.]{.pre}]{.sig-prename .descclassname}[[TEST_SIZE]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[0.05]{.pre}*[¶](#config.TEST_SIZE "Permalink to this definition"){.headerlink}
-
-:   Testing Test set size
-
-```{=html}
-<!-- -->
-```
-
-[[config.]{.pre}]{.sig-prename .descclassname}[[TRAIN_CSV_FILE]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[\'train.csv\']{.pre}*[¶](#config.TRAIN_CSV_FILE "Permalink to this definition"){.headerlink}
-
-:   CSV file name that contains the training dataset.
-
-```{=html}
-<!-- -->
-```
-
-[[config.]{.pre}]{.sig-prename .descclassname}[[TRAIN_SIZE]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[0.9]{.pre}*[¶](#config.TRAIN_SIZE "Permalink to this definition"){.headerlink}
-
-:   Training Train set split size
-
-```{=html}
-<!-- -->
-```
-
-[[config.]{.pre}]{.sig-prename .descclassname}[[TUNE_HP]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[True]{.pre}*[¶](#config.TUNE_HP "Permalink to this definition"){.headerlink}
-
-:   Tune hyperparameters
-
-```{=html}
-<!-- -->
-```
-
-[[config.]{.pre}]{.sig-prename .descclassname}[[USED_FACE_FEATURES]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[40]{.pre}*[¶](#config.USED_FACE_FEATURES "Permalink to this definition"){.headerlink}
-
-:   Count of facial features used
-
-```{=html}
-<!-- -->
-```
-
-[[config.]{.pre}]{.sig-prename .descclassname}[[USED_HAND_FEATURES]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[21]{.pre}*[¶](#config.USED_HAND_FEATURES "Permalink to this definition"){.headerlink}
-
-:   Count of hands features used (single hand only)
-
-```{=html}
-<!-- -->
-```
-
-[[config.]{.pre}]{.sig-prename .descclassname}[[USED_POSE_FEATURES]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[14]{.pre}*[¶](#config.USED_POSE_FEATURES "Permalink to this definition"){.headerlink}
-
-:   Count of body/pose features used
-
-```{=html}
-<!-- -->
-```
-
-[[config.]{.pre}]{.sig-prename .descclassname}[[USEFUL_ALL_LANDMARKS]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[array(\[]{.pre} [61,]{.pre} [185,]{.pre}  [40,]{.pre}  [39,]{.pre}  [37,]{.pre}   [0,]{.pre} [267,]{.pre} [269,]{.pre} [270,]{.pre} [409,]{.pre} [291,]{.pre} [146,]{.pre}  [91,]{.pre}        [181,]{.pre}  [84,]{.pre}  [17,]{.pre} [314,]{.pre} [405,]{.pre} [321,]{.pre} [375,]{.pre}  [78,]{.pre} [191,]{.pre}  [80,]{.pre}  [81,]{.pre}  [82,]{.pre}  [13,]{.pre}        [312,]{.pre} [311,]{.pre} [310,]{.pre} [415,]{.pre}  [95,]{.pre}  [88,]{.pre} [178,]{.pre}  [87,]{.pre}  [14,]{.pre} [317,]{.pre} [402,]{.pre} [318,]{.pre} [324,]{.pre}        [308,]{.pre} [468,]{.pre} [469,]{.pre} [470,]{.pre} [471,]{.pre} [472,]{.pre} [473,]{.pre} [474,]{.pre} [475,]{.pre} [476,]{.pre} [477,]{.pre} [478,]{.pre} [479,]{.pre}        [480,]{.pre} [481,]{.pre} [482,]{.pre} [483,]{.pre} [484,]{.pre} [485,]{.pre} [486,]{.pre} [487,]{.pre} [488,]{.pre} [522,]{.pre} [523,]{.pre} [524,]{.pre} [525,]{.pre}        [526,]{.pre} [527,]{.pre} [528,]{.pre} [529,]{.pre} [530,]{.pre} [531,]{.pre} [532,]{.pre} [533,]{.pre} [534,]{.pre} [535,]{.pre} [536,]{.pre} [537,]{.pre} [538,]{.pre}        [539,]{.pre} [540,]{.pre} [541,]{.pre} [542,]{.pre} [500,]{.pre} [501,]{.pre} [502,]{.pre} [503,]{.pre} [504,]{.pre} [505,]{.pre} [506,]{.pre} [507,]{.pre} [508,]{.pre}        [509,]{.pre} [510,]{.pre} [511,]{.pre} [512,]{.pre} [513\])]{.pre}*[¶](#config.USEFUL_ALL_LANDMARKS "Permalink to this definition"){.headerlink}
-
-:   All Landmarks
-
-```{=html}
-<!-- -->
-```
-
-[[config.]{.pre}]{.sig-prename .descclassname}[[USEFUL_FACE_LANDMARKS]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[array(\[]{.pre} [61,]{.pre} [185,]{.pre}  [40,]{.pre}  [39,]{.pre}  [37,]{.pre}   [0,]{.pre} [267,]{.pre} [269,]{.pre} [270,]{.pre} [409,]{.pre} [291,]{.pre} [146,]{.pre}  [91,]{.pre}        [181,]{.pre}  [84,]{.pre}  [17,]{.pre} [314,]{.pre} [405,]{.pre} [321,]{.pre} [375,]{.pre}  [78,]{.pre} [191,]{.pre}  [80,]{.pre}  [81,]{.pre}  [82,]{.pre}  [13,]{.pre}        [312,]{.pre} [311,]{.pre} [310,]{.pre} [415,]{.pre}  [95,]{.pre}  [88,]{.pre} [178,]{.pre}  [87,]{.pre}  [14,]{.pre} [317,]{.pre} [402,]{.pre} [318,]{.pre} [324,]{.pre}        [308\])]{.pre}*[¶](#config.USEFUL_FACE_LANDMARKS "Permalink to this definition"){.headerlink}
-
-:   Landmarks for face
-
-```{=html}
-<!-- -->
-```
-
-[[config.]{.pre}]{.sig-prename .descclassname}[[USEFUL_HAND_LANDMARKS]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[array(\[468,]{.pre} [469,]{.pre} [470,]{.pre} [471,]{.pre} [472,]{.pre} [473,]{.pre} [474,]{.pre} [475,]{.pre} [476,]{.pre} [477,]{.pre} [478,]{.pre} [479,]{.pre} [480,]{.pre}        [481,]{.pre} [482,]{.pre} [483,]{.pre} [484,]{.pre} [485,]{.pre} [486,]{.pre} [487,]{.pre} [488,]{.pre} [522,]{.pre} [523,]{.pre} [524,]{.pre} [525,]{.pre} [526,]{.pre}        [527,]{.pre} [528,]{.pre} [529,]{.pre} [530,]{.pre} [531,]{.pre} [532,]{.pre} [533,]{.pre} [534,]{.pre} [535,]{.pre} [536,]{.pre} [537,]{.pre} [538,]{.pre} [539,]{.pre}        [540,]{.pre} [541,]{.pre} [542\])]{.pre}*[¶](#config.USEFUL_HAND_LANDMARKS "Permalink to this definition"){.headerlink}
-
-:   Landmarks for both hands
-
-```{=html}
-<!-- -->
-```
-
-[[config.]{.pre}]{.sig-prename .descclassname}[[USEFUL_LEFT_HAND_LANDMARKS]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[array(\[468,]{.pre} [469,]{.pre} [470,]{.pre} [471,]{.pre} [472,]{.pre} [473,]{.pre} [474,]{.pre} [475,]{.pre} [476,]{.pre} [477,]{.pre} [478,]{.pre} [479,]{.pre} [480,]{.pre}        [481,]{.pre} [482,]{.pre} [483,]{.pre} [484,]{.pre} [485,]{.pre} [486,]{.pre} [487,]{.pre} [488\])]{.pre}*[¶](#config.USEFUL_LEFT_HAND_LANDMARKS "Permalink to this definition"){.headerlink}
-
-:   Landmarks for left hand
-
-```{=html}
-<!-- -->
-```
-
-[[config.]{.pre}]{.sig-prename .descclassname}[[USEFUL_POSE_LANDMARKS]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[array(\[500,]{.pre} [501,]{.pre} [502,]{.pre} [503,]{.pre} [504,]{.pre} [505,]{.pre} [506,]{.pre} [507,]{.pre} [508,]{.pre} [509,]{.pre} [510,]{.pre} [511,]{.pre} [512,]{.pre}        [513\])]{.pre}*[¶](#config.USEFUL_POSE_LANDMARKS "Permalink to this definition"){.headerlink}
-
-:   Landmarks for pose
-
-```{=html}
-<!-- -->
-```
-
-[[config.]{.pre}]{.sig-prename .descclassname}[[USEFUL_RIGHT_HAND_LANDMARKS]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[array(\[522,]{.pre} [523,]{.pre} [524,]{.pre} [525,]{.pre} [526,]{.pre} [527,]{.pre} [528,]{.pre} [529,]{.pre} [530,]{.pre} [531,]{.pre} [532,]{.pre} [533,]{.pre} [534,]{.pre}        [535,]{.pre} [536,]{.pre} [537,]{.pre} [538,]{.pre} [539,]{.pre} [540,]{.pre} [541,]{.pre} [542\])]{.pre}*[¶](#config.USEFUL_RIGHT_HAND_LANDMARKS "Permalink to this definition"){.headerlink}
-
-:   Landmarks for right hand
-
-```{=html}
-<!-- -->
-```
-
-[[config.]{.pre}]{.sig-prename .descclassname}[[VALID_SIZE]{.pre}]{.sig-name .descname}*[ ]{.w}[[=]{.pre}]{.p}[ ]{.w}[0.05]{.pre}*[¶](#config.VALID_SIZE "Permalink to this definition"){.headerlink}
-
-:   Training Validation set size
-:::
-:::
-
-[]{#document-data_utils}
-
-::: {#module-data.data_utils .section}
-[]{#data-utilities}
-
-## Data Utilities[¶](#module-data.data_utils "Permalink to this headline"){.headerlink}
-
-::: {#data-processing-utils-description .section}
-### Data processing Utils description[¶](#data-processing-utils-description "Permalink to this headline"){.headerlink}
+### Data processing Utils description[¶](#data-processing-utils-description "Permalink to this headline")
 
 This module handles the loading and preprocessing of data. It is
 specifically tailored for loading ASL sign language dataset where the
@@ -860,7 +622,7 @@ by individuals who are deaf or hard of hearing to communicate through
 hand gestures and facial expressions.
 
 The dataset consists of sequences of frames, where each frame contains
-multiple "landmarks". Each of these landmarks has multiple features,
+multiple “landmarks”. Each of these landmarks has multiple features,
 such as coordinates. The landmarks may represent various aspects of
 human body, such as facial features, hand positions, and body pose.
 
@@ -870,878 +632,730 @@ been handled in a way that maintains the integrity of the data. This
 involves steps like detecting and removing empty frames, selecting
 specific landmarks, resizing sequences and handling NaN values.
 
-[[data.data_utils.]{.pre}]{.sig-prename .descclassname}[[calculate_avg_landmark_positions]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[dataset]{.pre}]{.n}*[)]{.sig-paren}[¶](#data.data_utils.calculate_avg_landmark_positions "Permalink to this definition"){.headerlink}
+data.data\_utils.calculate\_avg\_landmark\_positions(*dataset*)[¶](#data.data_utils.calculate_avg_landmark_positions "Permalink to this definition")  
+Calculate the average landmark positions for left-hand, right-hand, and
+face landmarks for each sign in the dataset. The purpose of this
+function is to compute the average positions of landmarks for left-hand,
+right-hand, and face for each sign in the training dataset.
+
+Returns: List : Containing a dictionary with average x/y positions with
+keys - ‘left\_hand’ - ‘right\_hand’ - ‘face’
+
+Functionality: - The function takes an ASLDataset object as an input,
+which contains the training data. - It calculates the average landmark
+positions for left-hand, right-hand, and face landmarks for each sign in
+the dataset. - The function returns a list containing a dictionary with
+average x/y positions with keys ‘left\_hand’, ‘right\_hand’, and ‘face’
+for each sign.
+
+Parameters  
+**dataset**
+([*ASL\_DATASET*](index.html#data.dataset.ASL_DATASET "data.dataset.ASL_DATASET"))
+– The ASL dataset object containing the training data.
+
+Returns  
+A list containing a dictionary with average x/y positions with keys
+‘left\_hand’, ‘right\_hand’, and ‘face’
+
+for each sign. :rtype: List\[Dict\[str, np.ndarray\]\]
+
+&nbsp;
+
+data.data\_utils.calculate\_landmark\_length\_stats()[¶](#data.data_utils.calculate_landmark_length_stats "Permalink to this definition")  
+Calculate statistics of landmark lengths for each sign type.
+
+Returns: dict: A dictionary of landmark lengths for each sign type
+containing: - minimum - maximum - mean - median - standard deviation
+
+Functionality: - The function reads the CSV file. - It groups the
+DataFrame by sign. - An empty dictionary is created to store average
+landmarks for each sign type. - The function loops through each unique
+sign and its corresponding rows in the grouped DataFrame. - For each
+sign, it initializes a list to store the length of landmarks for each
+example of the current sign. - It loops through each row of the current
+sign type, loads the data, and adds the length of landmarks of the
+current example to the list of current sign data. - The function
+calculates the minimum, maximum, mean, standard deviation, and median of
+the landmarks for the current sign and updates the dictionary. - The
+resulting dictionary containing average landmarks for each sign type is
+returned.
+
+Returns  
+A dictionary of landmark lengths for each sign type containing minimum,
+maximum, mean, median & standard
+
+deviation :rtype: dict
+
+&nbsp;
+
+data.data\_utils.create\_data\_loaders(*asl\_dataset*, *train\_size=0.9*, *valid\_size=0.05*, *test\_size=0.05*, *batch\_size=128*, *random\_state=0*, *dl\_framework='pytorch'*, *num\_workers=8*)[¶](#data.data_utils.create_data_loaders "Permalink to this definition")  
+Split the ASL dataset into training, validation, and testing sets and
+create data loaders for each set.
+
+Args: asl\_dataset (ASLDataset): The ASL dataset to load data from.
+train\_size (float, optional): The proportion of the dataset to include
+in the training set. Defaults to 0.8. valid\_size (float, optional): The
+proportion of the dataset to include in the validation set. Defaults to
+0.1. test\_size (float, optional): The proportion of the dataset to
+include in the testing set. Defaults to 0.1. batch\_size (int,
+optional): The number of samples per batch to load. Defaults to
+BATCH\_SIZE. random\_state (int, optional): The seed used by the random
+number generator for shuffling the data. Defaults to SEED.
+
+Returns: tuple of DataLoader: A tuple containing the data loaders for
+training, validation, and testing sets.
+
+Parameters  
+-   **asl\_dataset** (*ASLDataset*) – The ASL dataset to load data from.
+
+-   **train\_size** (*float*) – The proportion of the dataset to include
+    in the training set.
+
+-   **valid\_size** (*float*) – The proportion of the dataset to include
+    in the validation set.
+
+-   **test\_size** (*float*) – The proportion of the dataset to include
+    in the testing set.
+
+-   **batch\_size** (*int*) – The number of samples per batch to load.
+
+-   **random\_state** (*int*) – The seed used by the random number
+    generator for shuffling the data.
+
+Returns  
+A tuple containing the data loaders for training, validation, and
+testing sets.
+
+Return type  
+tuple of DataLoader
+
+&nbsp;
+
+data.data\_utils.interpolate\_missing\_values(*arr*, *max\_gap=3*)[¶](#data.data_utils.interpolate_missing_values "Permalink to this definition")  
+This function provides a solution for handling missing values in the
+data array. It interpolates these missing values, filling them with
+plausible values that maintain the overall data integrity. The function
+uses a linear interpolation method that assumes a straight line between
+the two points on either side of the gap. The maximum gap size for which
+interpolation should be performed is also configurable.
+
+AThe function takes two arguments - an array with missing values, and a
+maximum gap size for interpolation. If the size of the gap (i.e., number
+of consecutive missing values) is less than or equal to this specified
+maximum gap size, the function will fill it with interpolated values.
+This ensures that the data maintains its continuity without making too
+far-fetched estimations for larger gaps.
+
+Args:  
+arr (np.ndarray): Input array with missing values. max\_gap (int,
+optional): Maximum gap to fill. Defaults to INTEREMOLATE\_MISSING.
+
+Returns:  
+np.ndarray: Array with missing values interpolated.
+
+Functionality:  
+Interpolates missing values in the array. The function fills gaps of up
+to a maximum size with interpolated values, maintaining data integrity
+and continuity.
+
+Returns  
+Array with missing values interpolated.
+
+Return type  
+np.ndarray
+
+Parameters  
+-   **arr** (*np.ndarray*) – Input array with missing values.
+
+-   **max\_gap** (*int*) – Maximum gap to fill.
+
+This function uses linear interpolation to fill the missing values.
+Other forms of interpolation such as polynomial or spline may provide
+better results for specific types of data. It is also worth noting that
+no imputation method can fully recover original data, and as such,
+results should be interpreted with caution when working with imputed
+data.
+
+&nbsp;
+
+data.data\_utils.load\_relevant\_data\_subset(*pq\_path*)[¶](#data.data_utils.load_relevant_data_subset "Permalink to this definition")  
+This function serves a key role in handling data in our pipeline by
+loading only a subset of the relevant data from a given path. The
+primary purpose of this is to reduce memory overhead when working with
+large datasets. The implementation relies on efficient data loading
+strategies, leveraging the speed of Parquet file format and the ability
+to read in only necessary chunks of data instead of the whole dataset.
+
+The function takes as input a string which represents the path to the
+data file. It makes use of pandas’ parquet read function to read the
+data file. This function is particularly suited for reading large
+datasets as it allows for efficient on-disk storage and fast query
+capabilities. The function uses PyArrow library as the engine for
+reading the parquet files which ensures efficient and fast reading of
+data. After reading the data, the function selects the relevant subset
+based on certain criteria, which is task specific.
+
+Args:  
+pq\_path (str): Path to the data file.
+
+Returns:  
+np.ndarray: Subset of the relevant data as a NumPy array.
+
+Functionality:  
+Loads a subset of the relevant data from a given path.
+
+Returns  
+Subset of the relevant data.
+
+Return type  
+np.ndarray
+
+Parameters  
+**pq\_path** (*str*) – Path to the data file.
+
+The function assumes that the data file is in parquet format and the
+necessary libraries for reading parquet files are installed. It also
+assumes that the path provided is a valid path to the data file.
+
+&nbsp;
+
+data.data\_utils.preprocess\_data(*landmarks*)[¶](#data.data_utils.preprocess_data "Permalink to this definition")  
+This function preprocesses the input data by applying similar steps as
+the preprocess\_data\_to\_same\_size function, but with the difference
+that it does not interpolate missing values. The function again targets
+to adjust the size of the input data to align with the INPUT\_SIZE. It
+selects only non-empty frames and follows similar strategies of padding,
+repeating, and pooling the data for size alignment.
+
+Args:  
+landmarks (np.ndarray): The input array with landmarks data.
+
+Returns:  
+Tuple\[np.ndarray, int\]: A tuple containing processed landmark data and
+the final size of the data.
+
+Parameters  
+**landmarks** (*np.ndarray*) – The input array with landmarks data.
+
+Returns  
+A tuple containing processed landmark data and the final size of the
+data.
+
+Return type  
+Tuple\[np.ndarray, int\]
+
+&nbsp;
+
+data.data\_utils.preprocess\_data\_item(*raw\_landmark\_path*, *targets\_sign*)[¶](#data.data_utils.preprocess_data_item "Permalink to this definition")  
+The function preprocesses landmark data for a single file. The process
+involves applying transformations to raw landmark data to convert it
+into a form more suitable for machine learning models. The
+transformations may include normalization, scaling, etc. The target sign
+associated with the landmark data is also taken as input.
+
+This function is a handy function to process all landmark aequences on a
+particular location. This will come in handy while testing where
+individual sequences may be provided
+
+Args:  
+raw\_landmark\_path: Path to the raw landmark file targets\_sign: The
+target sign for the given landmark data
+
+Returns: dict: A dictionary containing the preprocessed landmarks,
+target, and size.
+
+Functionality: - The function reads the parquet file and processes the
+data. - It filters columns to include only frame, type, landmark\_index,
+x, and y. - The function then filters face mesh landmarks and pose
+landmarks based on the predefined useful landmarks. - Landmarks data is
+pivoted to have a multi-level column structure on landmark type and
+frame sequence ids. - Missing values are interpolated using linear
+interpolation, and any remaining missing values are filled with 0. - The
+function rearranges columns and calculates the number of frames in the
+data. - X and Y coordinates are brought together, and a dictionary with
+the processed data is created and returned.
+
+Parameters  
+-   **raw\_landmark\_path** (*str*) – Path to the raw landmark file.
+
+-   **targets\_sign** (*int*) – The target sign for the given landmark
+    data.
+
+Returns  
+A dictionary containing the preprocessed landmarks, target, and size.
+
+Return type  
+dict
+
+&nbsp;
+
+data.data\_utils.preprocess\_data\_to\_same\_size(*landmarks*)[¶](#data.data_utils.preprocess_data_to_same_size "Permalink to this definition")  
+This function preprocesses the input data to ensure all data arrays have
+the same size, specified by the global INPUT\_SIZE variable. This
+uniform size is necessary for subsequent processing and analysis stages,
+particularly those involving machine learning models which often require
+consistent input sizes. The preprocessing involves several steps,
+including handling missing values, upsampling, and reshaping arrays. It
+begins by interpolating any missing values, and then it subsets the data
+by selecting only non-empty frames. Various strategies are applied to
+align the data size to the desired INPUT\_SIZE, including padding,
+repeating, and pooling the data.
+
+Args:  
+landmarks (np.ndarray): The input array with landmarks data.
+
+Returns:  
+Tuple\[np.ndarray, int, int, int\]: A tuple containing processed
+landmark data, the set input size, the number of original frames, and
+the number of frames after preprocessing.
+
+Parameters  
+**landmarks** (*np.ndarray*) – The input array with landmarks data.
+
+Returns  
+A tuple containing processed landmark data, the set input size, the
+number of original frames, and the
+
+number of frames after preprocessing. :rtype: Tuple\[np.ndarray, int,
+int, int\]
+
+&nbsp;
+
+data.data\_utils.preprocess\_raw\_data(*sample=100000*)[¶](#data.data_utils.preprocess_raw_data "Permalink to this definition")  
+Preprocesses the raw data, saves it as numpy arrays into processed data
+directory and updates the metadata CSV file.
+
+This method preprocess\_data preprocesses the data for easier and faster
+loading during training time. The data is processed and stored in
+PROCESSED\_DATA\_DIR if not already done.
+
+This function is responsible for preprocessing raw data. The primary
+functionality involves converting raw data into a format more suitable
+for the machine learning pipeline, namely NumPy arrays. The function
+operates on a sample of data, allowing for efficient processing of large
+datasets in manageable chunks. Additionally, this function also takes
+care of persisting the preprocessed data for future use and updates the
+metadata accordingly.
+
+Args: sample (int): Number of samples to preprocess. Default is 100000.
+
+Functionality: - The function reads the metadata CSV file for training
+data to obtain a dictionary that maps target values to integer
+indices. - It then reads the training data CSV file and generates the
+absolute path to locate landmark files. - Next, it keeps text signs and
+their respective indices and initializes a list to store the processed
+data. - The data is then processed and stored in the list by iterating
+over each file path in the training data and reading in the parquet file
+for that file path. - The landmark data is then processed and padded to
+have a length of max\_seq\_length. - Finally, a dictionary with the
+processed data is created and added to the list. - The processed data is
+saved to disk using the np.save method and the saved file is printed.
+
+Parameters  
+**sample** (*int,* *optional,* *default: 100000*) – Number of samples to
+preprocess.
+
+Returns  
+None
+
+<div class="admonition note">
+
+Note
+
+If the preprocessed data already exists, the function prints
+“Preprocessed data found. Skipping…” and exits.
+
+</div>
+
+&nbsp;
+
+data.data\_utils.remove\_outlier\_or\_missing\_data(*landmark\_len\_dict*)[¶](#data.data_utils.remove_outlier_or_missing_data "Permalink to this definition")  
+This function removes rows from the training data that contain missing
+or outlier landmark data. It takes as input a dictionary containing the
+statistics of landmark lengths for each sign type. The function
+processes the training data and removes rows with missing or outlier
+landmark data. The function also includes a nested function
+‘has\_consecutive\_zeros’ which checks for consecutive frames where X
+and Y coordinates are both zero. If a cleansing marker file exists, it
+skips the process, indicating that the data is already cleaned.
+
+Functionality:  
+This function takes a dictionary with the statistics of landmark lengths
+per sign type and uses it to identify outlier sequences. It removes any
+rows with missing or outlier landmark data. An outlier sequence is
+defined as one that is either less than a third of the median length or
+more than two standard deviations away from the mean length. A row is
+also marked for deletion if the corresponding landmark file is missing
+or if the sign’s left-hand or right-hand landmarks contain more than a
+specified number of consecutive zeros.
+
+Args:  
+landmark\_len\_dict (dict): A dictionary containing the statistics of
+landmark lengths for each sign type.
+
+Returns:  
+None
+
+Parameters  
+**landmark\_len\_dict** (*dict*) – A dictionary containing the
+statistics of landmark lengths for each sign type.
 
-:   Calculate the average landmark positions for left-hand, right-hand,
-    and face landmarks for each sign in the dataset. The purpose of this
-    function is to compute the average positions of landmarks for
-    left-hand, right-hand, and face for each sign in the training
-    dataset.
+Returns  
+None, the function doesn’t return anything. It modifies data in-place.
 
-    Returns: List : Containing a dictionary with average x/y positions
-    with keys - 'left_hand' - 'right_hand' - 'face'
+&nbsp;
 
-    Functionality: - The function takes an ASLDataset object as an
-    input, which contains the training data. - It calculates the average
-    landmark positions for left-hand, right-hand, and face landmarks for
-    each sign in the dataset. - The function returns a list containing a
-    dictionary with average x/y positions with keys 'left_hand',
-    'right_hand', and 'face' for each sign.
+data.data\_utils.remove\_unusable\_data()[¶](#data.data_utils.remove_unusable_data "Permalink to this definition")  
+This function checks the existing training data for unusable instances,
+like missing files or data that is smaller than the set minimum sequence
+length. If unusable data is found, it is removed from the system, both
+in terms of files and entries in the training dataframe. The dataframe
+is updated and saved back to the disk. If a cleansing marker file
+exists, it skips the process, indicating that the data is already
+cleaned.
 
-    Parameters
+Functionality:  
+The function iterates through the DataFrame rows, attempting to load and
+check each landmark file specified in the row’s path. If the file is
+missing or if the file’s usable size is less than a predefined
+threshold, the function deletes the corresponding landmark file and
+marks the row for deletion in the DataFrame. At the end, the function
+removes all marked rows from the DataFrame, updates it and saves it to
+the disk.
+
+Returns:  
+None
+
+Returns  
+None, the function doesn’t return anything. It modifies data in-place.
 
-    :   **dataset**
-        ([*ASL_DATASET*](index.html#data.dataset.ASL_DATASET "data.dataset.ASL_DATASET"){.reference
-        .internal}) -- The ASL dataset object containing the training
-        data.
+</div>
 
-    Returns
+</div>
 
-    :   A list containing a dictionary with average x/y positions with
-        keys 'left_hand', 'right_hand', and 'face'
+<div id="module-hparam_search" class="section">
 
-    for each sign. :rtype: List\[Dict\[str, np.ndarray\]\]
+## HyperParameter Search[¶](#module-hparam_search "Permalink to this headline")
 
-```{=html}
-<!-- -->
-```
+Examples using MLfowLoggerCallback and setup\_mlflow.
 
-[[data.data_utils.]{.pre}]{.sig-prename .descclassname}[[calculate_landmark_length_stats]{.pre}]{.sig-name .descname}[(]{.sig-paren}[)]{.sig-paren}[¶](#data.data_utils.calculate_landmark_length_stats "Permalink to this definition"){.headerlink}
+*class *hparam\_search.Trainer\_HparamSearch(*modelname='YetAnotherTransformerClassifier'*, *dataset=&lt;class 'data.dataset.ASL\_DATASET'&gt;*, *patience=10*)[¶](#hparam_search.Trainer_HparamSearch "Permalink to this definition")  
+\_\_init\_\_(*modelname='YetAnotherTransformerClassifier'*, *dataset=&lt;class 'data.dataset.ASL\_DATASET'&gt;*, *patience=10*)[¶](#hparam_search.Trainer_HparamSearch.__init__ "Permalink to this definition")  
+Initializes the Trainer class with the specified parameters.
 
-:   Calculate statistics of landmark lengths for each sign type.
+This method initializes various components needed for the training
+process. This includes the model specified by the model name, the
+dataset with optional data augmentation and dropout, data loaders for
+the training, validation, and test sets, a SummaryWriter for logging,
+and a path for saving model checkpoints.
 
-    Returns: dict: A dictionary of landmark lengths for each sign type
-    containing: - minimum - maximum - mean - median - standard deviation
+1.  The method first retrieves the specified model and its parameters.
 
-    Functionality: - The function reads the CSV file. - It groups the
-    DataFrame by sign. - An empty dictionary is created to store average
-    landmarks for each sign type. - The function loops through each
-    unique sign and its corresponding rows in the grouped DataFrame. -
-    For each sign, it initializes a list to store the length of
-    landmarks for each example of the current sign. - It loops through
-    each row of the current sign type, loads the data, and adds the
-    length of landmarks of the current example to the list of current
-    sign data. - The function calculates the minimum, maximum, mean,
-    standard deviation, and median of the landmarks for the current sign
-    and updates the dictionary. - The resulting dictionary containing
-    average landmarks for each sign type is returned.
+2.  It then initializes the dataset and the data loaders.
 
-    Returns
+3.  It sets up metrics for early stopping and a writer for logging.
 
-    :   A dictionary of landmark lengths for each sign type containing
-        minimum, maximum, mean, median & standard
+4.  Finally, it prepares a directory for saving model checkpoints.
 
-    deviation :rtype: dict
+Args:  
+modelname (str): The name of the model to be used for training. dataset
+(Dataset): The dataset to be used. patience (int): The number of epochs
+with no improvement after which training will be stopped.
+enableAugmentationDropout (bool): If True, enable data augmentation
+dropout. augmentation\_threshold (float): The threshold for data
+augmentation.
 
-```{=html}
-<!-- -->
-```
+Functionality:  
+This method initializes various components, such as the model, dataset,
+data loaders, logging writer, and checkpoint path, required for the
+training process.
 
-[[data.data_utils.]{.pre}]{.sig-prename .descclassname}[[create_data_loaders]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[asl_dataset]{.pre}]{.n}*, *[[train_size]{.pre}]{.n}[[=]{.pre}]{.o}[[0.9]{.pre}]{.default_value}*, *[[valid_size]{.pre}]{.n}[[=]{.pre}]{.o}[[0.05]{.pre}]{.default_value}*, *[[test_size]{.pre}]{.n}[[=]{.pre}]{.o}[[0.05]{.pre}]{.default_value}*, *[[batch_size]{.pre}]{.n}[[=]{.pre}]{.o}[[128]{.pre}]{.default_value}*, *[[random_state]{.pre}]{.n}[[=]{.pre}]{.o}[[0]{.pre}]{.default_value}*, *[[dl_framework]{.pre}]{.n}[[=]{.pre}]{.o}[[\'pytorch\']{.pre}]{.default_value}*, *[[num_workers]{.pre}]{.n}[[=]{.pre}]{.o}[[8]{.pre}]{.default_value}*[)]{.sig-paren}[¶](#data.data_utils.create_data_loaders "Permalink to this definition"){.headerlink}
+Parameters  
+-   **modelname** (*str*) – The name of the model for training.
 
-:   Split the ASL dataset into training, validation, and testing sets
-    and create data loaders for each set.
+-   **dataset** (*Dataset*) – The dataset for training.
 
-    Args: asl_dataset (ASLDataset): The ASL dataset to load data from.
-    train_size (float, optional): The proportion of the dataset to
-    include in the training set. Defaults to 0.8. valid_size (float,
-    optional): The proportion of the dataset to include in the
-    validation set. Defaults to 0.1. test_size (float, optional): The
-    proportion of the dataset to include in the testing set. Defaults to
-    0.1. batch_size (int, optional): The number of samples per batch to
-    load. Defaults to BATCH_SIZE. random_state (int, optional): The seed
-    used by the random number generator for shuffling the data. Defaults
-    to SEED.
+-   **patience** (*int*) – The number of epochs with no improvement
+    after which training will be stopped.
 
-    Returns: tuple of DataLoader: A tuple containing the data loaders
-    for training, validation, and testing sets.
+-   **enableAugmentationDropout** (*bool*) – If True, enable data
+    augmentation dropout.
 
-    Parameters
+-   **augmentation\_threshold** (*float*) – The threshold for data
+    augmentation.
 
-    :   -   **asl_dataset** (*ASLDataset*) -- The ASL dataset to load
-            data from.
+Return type  
+None
 
-        -   **train_size** (*float*) -- The proportion of the dataset to
-            include in the training set.
+<div class="admonition note">
 
-        -   **valid_size** (*float*) -- The proportion of the dataset to
-            include in the validation set.
+Note
 
-        -   **test_size** (*float*) -- The proportion of the dataset to
-            include in the testing set.
+This method only initializes the Trainer class. The actual training is
+done by calling the train() method.
 
-        -   **batch_size** (*int*) -- The number of samples per batch to
-            load.
+</div>
 
-        -   **random_state** (*int*) -- The seed used by the random
-            number generator for shuffling the data.
+<div class="admonition warning">
 
-    Returns
+Warning
 
-    :   A tuple containing the data loaders for training, validation,
-        and testing sets.
+Make sure the specified model name corresponds to an actual model in
+your project’s models directory.
 
-    Return type
+</div>
 
-    :   tuple of DataLoader
+train(*n\_epochs=50*)[¶](#hparam_search.Trainer_HparamSearch.train "Permalink to this definition")  
+Trains the model for a specified number of epochs.
 
-```{=html}
-<!-- -->
-```
+This method manages the main training loop of the model. For each epoch,
+it performs several steps. It first puts the model into training mode
+and loops over the training dataset, calculating the loss and accuracy
+for each batch and optimizing the model parameters. It logs these
+metrics and updates a progress bar. At the end of each epoch, it
+evaluates the model on the validation set and checks whether early
+stopping criteria have been met. If the early stopping metric has
+improved, it saves the current model and its parameters. If not, it
+increments a counter and potentially stops training if the counter
+exceeds the allowed patience. Finally, it steps the learning rate
+scheduler and calls any registered callbacks.
 
-[[data.data_utils.]{.pre}]{.sig-prename .descclassname}[[interpolate_missing_values]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[arr]{.pre}]{.n}*, *[[max_gap]{.pre}]{.n}[[=]{.pre}]{.o}[[3]{.pre}]{.default_value}*[)]{.sig-paren}[¶](#data.data_utils.interpolate_missing_values "Permalink to this definition"){.headerlink}
+1.  The method first puts the model into training mode and initializes
+    some lists and counters.
 
-:   This function provides a solution for handling missing values in the
-    data array. It interpolates these missing values, filling them with
-    plausible values that maintain the overall data integrity. The
-    function uses a linear interpolation method that assumes a straight
-    line between the two points on either side of the gap. The maximum
-    gap size for which interpolation should be performed is also
-    configurable.
+2.  Then it enters the main loop over the training data, updating the
+    model and logging metrics.
 
-    AThe function takes two arguments - an array with missing values,
-    and a maximum gap size for interpolation. If the size of the gap
-    (i.e., number of consecutive missing values) is less than or equal
-    to this specified maximum gap size, the function will fill it with
-    interpolated values. This ensures that the data maintains its
-    continuity without making too far-fetched estimations for larger
-    gaps.
+3.  It evaluates the model on the validation set and checks the early
+    stopping criteria.
 
-    Args:
+4.  If the criteria are met, it saves the model and its parameters; if
+    not, it increments a patience counter.
 
-    :   arr (np.ndarray): Input array with missing values. max_gap (int,
-        optional): Maximum gap to fill. Defaults to
-        INTEREMOLATE_MISSING.
+5.  It steps the learning rate scheduler and calls any callbacks.
 
-    Returns:
+Args:  
+n\_epochs (int): The number of epochs for which the model should be
+trained.
 
-    :   np.ndarray: Array with missing values interpolated.
+Functionality:  
+This method coordinates the training of the model over a series of
+epochs, handling batch-wise loss computation, backpropagation,
+optimization, validation, early stopping, and model checkpoint saving.
 
-    Functionality:
+Parameters  
+**n\_epochs** (*int*) – Number of epochs for training.
 
-    :   Interpolates missing values in the array. The function fills
-        gaps of up to a maximum size with interpolated values,
-        maintaining data integrity and continuity.
+Returns  
+None
 
-    Returns
+Return type  
+None
 
-    :   Array with missing values interpolated.
+<div class="admonition note">
 
-    Return type
+Note
 
-    :   np.ndarray
+This method modifies the state of the model and its optimizer, as well
+as various attributes of the Trainer instance itself.
 
-    Parameters
+</div>
 
-    :   -   **arr** (*np.ndarray*) -- Input array with missing values.
+<div class="admonition warning">
 
-        -   **max_gap** (*int*) -- Maximum gap to fill.
+Warning
 
-    This function uses linear interpolation to fill the missing values.
-    Other forms of interpolation such as polynomial or spline may
-    provide better results for specific types of data. It is also worth
-    noting that no imputation method can fully recover original data,
-    and as such, results should be interpreted with caution when working
-    with imputed data.
+If you set the patience value too low in the constructor, the model
+might stop training prematurely.
 
-```{=html}
-<!-- -->
-```
+</div>
 
-[[data.data_utils.]{.pre}]{.sig-prename .descclassname}[[load_relevant_data_subset]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[pq_path]{.pre}]{.n}*[)]{.sig-paren}[¶](#data.data_utils.load_relevant_data_subset "Permalink to this definition"){.headerlink}
+</div>
 
-:   This function serves a key role in handling data in our pipeline by
-    loading only a subset of the relevant data from a given path. The
-    primary purpose of this is to reduce memory overhead when working
-    with large datasets. The implementation relies on efficient data
-    loading strategies, leveraging the speed of Parquet file format and
-    the ability to read in only necessary chunks of data instead of the
-    whole dataset.
+<div id="module-predict_on_camera" class="section">
 
-    The function takes as input a string which represents the path to
-    the data file. It makes use of pandas' parquet read function to read
-    the data file. This function is particularly suited for reading
-    large datasets as it allows for efficient on-disk storage and fast
-    query capabilities. The function uses PyArrow library as the engine
-    for reading the parquet files which ensures efficient and fast
-    reading of data. After reading the data, the function selects the
-    relevant subset based on certain criteria, which is task specific.
+## Camera Stream Predictions[¶](#module-predict_on_camera "Permalink to this headline")
 
-    Args:
+predict\_on\_camera.convert\_mp\_to\_df(*results*)[¶](#predict_on_camera.convert_mp_to_df "Permalink to this definition")  
 
-    :   pq_path (str): Path to the data file.
+&nbsp;
 
-    Returns:
+predict\_on\_camera.show\_camera\_feed(*model*, *LAST\_FRAMES=32*)[¶](#predict_on_camera.show_camera_feed "Permalink to this definition")  
 
-    :   np.ndarray: Subset of the relevant data as a NumPy array.
+</div>
 
-    Functionality:
+<div id="module-data.dataset" class="section">
 
-    :   Loads a subset of the relevant data from a given path.
+## ASL Dataset[¶](#module-data.dataset "Permalink to this headline")
 
-    Returns
+<div id="asl-dataset-description" class="section">
 
-    :   Subset of the relevant data.
+### ASL Dataset description[¶](#asl-dataset-description "Permalink to this headline")
 
-    Return type
-
-    :   np.ndarray
-
-    Parameters
-
-    :   **pq_path** (*str*) -- Path to the data file.
-
-    The function assumes that the data file is in parquet format and the
-    necessary libraries for reading parquet files are installed. It also
-    assumes that the path provided is a valid path to the data file.
-
-```{=html}
-<!-- -->
-```
-
-[[data.data_utils.]{.pre}]{.sig-prename .descclassname}[[preprocess_data]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[landmarks]{.pre}]{.n}*[)]{.sig-paren}[¶](#data.data_utils.preprocess_data "Permalink to this definition"){.headerlink}
-
-:   This function preprocesses the input data by applying similar steps
-    as the preprocess_data_to_same_size function, but with the
-    difference that it does not interpolate missing values. The function
-    again targets to adjust the size of the input data to align with the
-    INPUT_SIZE. It selects only non-empty frames and follows similar
-    strategies of padding, repeating, and pooling the data for size
-    alignment.
-
-    Args:
-
-    :   landmarks (np.ndarray): The input array with landmarks data.
-
-    Returns:
-
-    :   Tuple\[np.ndarray, int\]: A tuple containing processed landmark
-        data and the final size of the data.
-
-    Parameters
-
-    :   **landmarks** (*np.ndarray*) -- The input array with landmarks
-        data.
-
-    Returns
-
-    :   A tuple containing processed landmark data and the final size of
-        the data.
-
-    Return type
-
-    :   Tuple\[np.ndarray, int\]
-
-```{=html}
-<!-- -->
-```
-
-[[data.data_utils.]{.pre}]{.sig-prename .descclassname}[[preprocess_data_item]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[raw_landmark_path]{.pre}]{.n}*, *[[targets_sign]{.pre}]{.n}*[)]{.sig-paren}[¶](#data.data_utils.preprocess_data_item "Permalink to this definition"){.headerlink}
-
-:   The function preprocesses landmark data for a single file. The
-    process involves applying transformations to raw landmark data to
-    convert it into a form more suitable for machine learning models.
-    The transformations may include normalization, scaling, etc. The
-    target sign associated with the landmark data is also taken as
-    input.
-
-    This function is a handy function to process all landmark aequences
-    on a particular location. This will come in handy while testing
-    where individual sequences may be provided
-
-    Args:
-
-    :   raw_landmark_path: Path to the raw landmark file targets_sign:
-        The target sign for the given landmark data
-
-    Returns: dict: A dictionary containing the preprocessed landmarks,
-    target, and size.
-
-    Functionality: - The function reads the parquet file and processes
-    the data. - It filters columns to include only frame, type,
-    landmark_index, x, and y. - The function then filters face mesh
-    landmarks and pose landmarks based on the predefined useful
-    landmarks. - Landmarks data is pivoted to have a multi-level column
-    structure on landmark type and frame sequence ids. - Missing values
-    are interpolated using linear interpolation, and any remaining
-    missing values are filled with 0. - The function rearranges columns
-    and calculates the number of frames in the data. - X and Y
-    coordinates are brought together, and a dictionary with the
-    processed data is created and returned.
-
-    Parameters
-
-    :   -   **raw_landmark_path** (*str*) -- Path to the raw landmark
-            file.
-
-        -   **targets_sign** (*int*) -- The target sign for the given
-            landmark data.
-
-    Returns
-
-    :   A dictionary containing the preprocessed landmarks, target, and
-        size.
-
-    Return type
-
-    :   dict
-
-```{=html}
-<!-- -->
-```
-
-[[data.data_utils.]{.pre}]{.sig-prename .descclassname}[[preprocess_data_to_same_size]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[landmarks]{.pre}]{.n}*[)]{.sig-paren}[¶](#data.data_utils.preprocess_data_to_same_size "Permalink to this definition"){.headerlink}
-
-:   This function preprocesses the input data to ensure all data arrays
-    have the same size, specified by the global INPUT_SIZE variable.
-    This uniform size is necessary for subsequent processing and
-    analysis stages, particularly those involving machine learning
-    models which often require consistent input sizes. The preprocessing
-    involves several steps, including handling missing values,
-    upsampling, and reshaping arrays. It begins by interpolating any
-    missing values, and then it subsets the data by selecting only
-    non-empty frames. Various strategies are applied to align the data
-    size to the desired INPUT_SIZE, including padding, repeating, and
-    pooling the data.
-
-    Args:
-
-    :   landmarks (np.ndarray): The input array with landmarks data.
-
-    Returns:
-
-    :   Tuple\[np.ndarray, int, int, int\]: A tuple containing processed
-        landmark data, the set input size, the number of original
-        frames, and the number of frames after preprocessing.
-
-    Parameters
-
-    :   **landmarks** (*np.ndarray*) -- The input array with landmarks
-        data.
-
-    Returns
-
-    :   A tuple containing processed landmark data, the set input size,
-        the number of original frames, and the
-
-    number of frames after preprocessing. :rtype: Tuple\[np.ndarray,
-    int, int, int\]
-
-```{=html}
-<!-- -->
-```
-
-[[data.data_utils.]{.pre}]{.sig-prename .descclassname}[[preprocess_raw_data]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[sample]{.pre}]{.n}[[=]{.pre}]{.o}[[100000]{.pre}]{.default_value}*[)]{.sig-paren}[¶](#data.data_utils.preprocess_raw_data "Permalink to this definition"){.headerlink}
-
-:   Preprocesses the raw data, saves it as numpy arrays into processed
-    data directory and updates the metadata CSV file.
-
-    This method preprocess_data preprocesses the data for easier and
-    faster loading during training time. The data is processed and
-    stored in PROCESSED_DATA_DIR if not already done.
-
-    This function is responsible for preprocessing raw data. The primary
-    functionality involves converting raw data into a format more
-    suitable for the machine learning pipeline, namely NumPy arrays. The
-    function operates on a sample of data, allowing for efficient
-    processing of large datasets in manageable chunks. Additionally,
-    this function also takes care of persisting the preprocessed data
-    for future use and updates the metadata accordingly.
-
-    Args: sample (int): Number of samples to preprocess. Default
-    is 100000.
-
-    Functionality: - The function reads the metadata CSV file for
-    training data to obtain a dictionary that maps target values to
-    integer indices. - It then reads the training data CSV file and
-    generates the absolute path to locate landmark files. - Next, it
-    keeps text signs and their respective indices and initializes a list
-    to store the processed data. - The data is then processed and stored
-    in the list by iterating over each file path in the training data
-    and reading in the parquet file for that file path. - The landmark
-    data is then processed and padded to have a length of
-    max_seq_length. - Finally, a dictionary with the processed data is
-    created and added to the list. - The processed data is saved to disk
-    using the np.save method and the saved file is printed.
-
-    Parameters
-
-    :   **sample** (*int,* *optional,* *default: 100000*) -- Number of
-        samples to preprocess.
-
-    Returns
-
-    :   None
-
-    ::: {.admonition .note}
-    Note
-
-    If the preprocessed data already exists, the function prints
-    "Preprocessed data found. Skipping..." and exits.
-    :::
-
-```{=html}
-<!-- -->
-```
-
-[[data.data_utils.]{.pre}]{.sig-prename .descclassname}[[remove_outlier_or_missing_data]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[landmark_len_dict]{.pre}]{.n}*[)]{.sig-paren}[¶](#data.data_utils.remove_outlier_or_missing_data "Permalink to this definition"){.headerlink}
-
-:   This function removes rows from the training data that contain
-    missing or outlier landmark data. It takes as input a dictionary
-    containing the statistics of landmark lengths for each sign type.
-    The function processes the training data and removes rows with
-    missing or outlier landmark data. The function also includes a
-    nested function 'has_consecutive_zeros' which checks for consecutive
-    frames where X and Y coordinates are both zero. If a cleansing
-    marker file exists, it skips the process, indicating that the data
-    is already cleaned.
-
-    Functionality:
-
-    :   This function takes a dictionary with the statistics of landmark
-        lengths per sign type and uses it to identify outlier sequences.
-        It removes any rows with missing or outlier landmark data. An
-        outlier sequence is defined as one that is either less than a
-        third of the median length or more than two standard deviations
-        away from the mean length. A row is also marked for deletion if
-        the corresponding landmark file is missing or if the sign's
-        left-hand or right-hand landmarks contain more than a specified
-        number of consecutive zeros.
-
-    Args:
-
-    :   landmark_len_dict (dict): A dictionary containing the statistics
-        of landmark lengths for each sign type.
-
-    Returns:
-
-    :   None
-
-    Parameters
-
-    :   **landmark_len_dict** (*dict*) -- A dictionary containing the
-        statistics of landmark lengths for each sign type.
-
-    Returns
-
-    :   None, the function doesn't return anything. It modifies data
-        in-place.
-
-```{=html}
-<!-- -->
-```
-
-[[data.data_utils.]{.pre}]{.sig-prename .descclassname}[[remove_unusable_data]{.pre}]{.sig-name .descname}[(]{.sig-paren}[)]{.sig-paren}[¶](#data.data_utils.remove_unusable_data "Permalink to this definition"){.headerlink}
-
-:   This function checks the existing training data for unusable
-    instances, like missing files or data that is smaller than the set
-    minimum sequence length. If unusable data is found, it is removed
-    from the system, both in terms of files and entries in the training
-    dataframe. The dataframe is updated and saved back to the disk. If a
-    cleansing marker file exists, it skips the process, indicating that
-    the data is already cleaned.
-
-    Functionality:
-
-    :   The function iterates through the DataFrame rows, attempting to
-        load and check each landmark file specified in the row's path.
-        If the file is missing or if the file's usable size is less than
-        a predefined threshold, the function deletes the corresponding
-        landmark file and marks the row for deletion in the DataFrame.
-        At the end, the function removes all marked rows from the
-        DataFrame, updates it and saves it to the disk.
-
-    Returns:
-
-    :   None
-
-    Returns
-
-    :   None, the function doesn't return anything. It modifies data
-        in-place.
-:::
-:::
-
-[]{#document-hparam_search}
-
-::: {#module-hparam_search .section}
-[]{#hyperparameter-search}
-
-## HyperParameter Search[¶](#module-hparam_search "Permalink to this headline"){.headerlink}
-
-Examples using MLfowLoggerCallback and setup_mlflow.
-
-*[class]{.pre}[ ]{.w}*[[hparam_search.]{.pre}]{.sig-prename .descclassname}[[Trainer_HparamSearch]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[modelname=\'YetAnotherTransformerClassifier\']{.pre}]{.n}*, *[[dataset=\<class]{.pre} [\'data.dataset.ASL_DATASET\'\>]{.pre}]{.n}*, *[[patience=10]{.pre}]{.n}*[)]{.sig-paren}[¶](#hparam_search.Trainer_HparamSearch "Permalink to this definition"){.headerlink}
-
-:   
-
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[modelname=\'YetAnotherTransformerClassifier\']{.pre}]{.n}*, *[[dataset=\<class]{.pre} [\'data.dataset.ASL_DATASET\'\>]{.pre}]{.n}*, *[[patience=10]{.pre}]{.n}*[)]{.sig-paren}[¶](#hparam_search.Trainer_HparamSearch.__init__ "Permalink to this definition"){.headerlink}
-
-    :   Initializes the Trainer class with the specified parameters.
-
-        This method initializes various components needed for the
-        training process. This includes the model specified by the model
-        name, the dataset with optional data augmentation and dropout,
-        data loaders for the training, validation, and test sets, a
-        SummaryWriter for logging, and a path for saving model
-        checkpoints.
-
-        1.  The method first retrieves the specified model and its
-            parameters.
-
-        2.  It then initializes the dataset and the data loaders.
-
-        3.  It sets up metrics for early stopping and a writer for
-            logging.
-
-        4.  Finally, it prepares a directory for saving model
-            checkpoints.
-
-        Args:
-
-        :   modelname (str): The name of the model to be used for
-            training. dataset (Dataset): The dataset to be used.
-            patience (int): The number of epochs with no improvement
-            after which training will be stopped.
-            enableAugmentationDropout (bool): If True, enable data
-            augmentation dropout. augmentation_threshold (float): The
-            threshold for data augmentation.
-
-        Functionality:
-
-        :   This method initializes various components, such as the
-            model, dataset, data loaders, logging writer, and checkpoint
-            path, required for the training process.
-
-        Parameters
-
-        :   -   **modelname** (*str*) -- The name of the model for
-                training.
-
-            -   **dataset** (*Dataset*) -- The dataset for training.
-
-            -   **patience** (*int*) -- The number of epochs with no
-                improvement after which training will be stopped.
-
-            -   **enableAugmentationDropout** (*bool*) -- If True,
-                enable data augmentation dropout.
-
-            -   **augmentation_threshold** (*float*) -- The threshold
-                for data augmentation.
-
-        Return type
-
-        :   None
-
-        ::: {.admonition .note}
-        Note
-
-        This method only initializes the Trainer class. The actual
-        training is done by calling the train() method.
-        :::
-
-        ::: {.admonition .warning}
-        Warning
-
-        Make sure the specified model name corresponds to an actual
-        model in your project's models directory.
-        :::
-
-    [[train]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[n_epochs]{.pre}]{.n}[[=]{.pre}]{.o}[[50]{.pre}]{.default_value}*[)]{.sig-paren}[¶](#hparam_search.Trainer_HparamSearch.train "Permalink to this definition"){.headerlink}
-
-    :   Trains the model for a specified number of epochs.
-
-        This method manages the main training loop of the model. For
-        each epoch, it performs several steps. It first puts the model
-        into training mode and loops over the training dataset,
-        calculating the loss and accuracy for each batch and optimizing
-        the model parameters. It logs these metrics and updates a
-        progress bar. At the end of each epoch, it evaluates the model
-        on the validation set and checks whether early stopping criteria
-        have been met. If the early stopping metric has improved, it
-        saves the current model and its parameters. If not, it
-        increments a counter and potentially stops training if the
-        counter exceeds the allowed patience. Finally, it steps the
-        learning rate scheduler and calls any registered callbacks.
-
-        1.  The method first puts the model into training mode and
-            initializes some lists and counters.
-
-        2.  Then it enters the main loop over the training data,
-            updating the model and logging metrics.
-
-        3.  It evaluates the model on the validation set and checks the
-            early stopping criteria.
-
-        4.  If the criteria are met, it saves the model and its
-            parameters; if not, it increments a patience counter.
-
-        5.  It steps the learning rate scheduler and calls any
-            callbacks.
-
-        Args:
-
-        :   n_epochs (int): The number of epochs for which the model
-            should be trained.
-
-        Functionality:
-
-        :   This method coordinates the training of the model over a
-            series of epochs, handling batch-wise loss computation,
-            backpropagation, optimization, validation, early stopping,
-            and model checkpoint saving.
-
-        Parameters
-
-        :   **n_epochs** (*int*) -- Number of epochs for training.
-
-        Returns
-
-        :   None
-
-        Return type
-
-        :   None
-
-        ::: {.admonition .note}
-        Note
-
-        This method modifies the state of the model and its optimizer,
-        as well as various attributes of the Trainer instance itself.
-        :::
-
-        ::: {.admonition .warning}
-        Warning
-
-        If you set the patience value too low in the constructor, the
-        model might stop training prematurely.
-        :::
-:::
-
-[]{#document-predict_on_camera}
-
-::: {#module-predict_on_camera .section}
-[]{#camera-stream-predictions}
-
-## Camera Stream Predictions[¶](#module-predict_on_camera "Permalink to this headline"){.headerlink}
-
-[[predict_on_camera.]{.pre}]{.sig-prename .descclassname}[[convert_mp_to_df]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[results]{.pre}]{.n}*[)]{.sig-paren}[¶](#predict_on_camera.convert_mp_to_df "Permalink to this definition"){.headerlink}
-
-:   
-
-```{=html}
-<!-- -->
-```
-
-[[predict_on_camera.]{.pre}]{.sig-prename .descclassname}[[show_camera_feed]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[model]{.pre}]{.n}*, *[[LAST_FRAMES]{.pre}]{.n}[[=]{.pre}]{.o}[[32]{.pre}]{.default_value}*[)]{.sig-paren}[¶](#predict_on_camera.show_camera_feed "Permalink to this definition"){.headerlink}
-
-:   
-:::
-
-[]{#document-dataset}
-
-::: {#module-data.dataset .section}
-[]{#asl-dataset}
-
-## ASL Dataset[¶](#module-data.dataset "Permalink to this headline"){.headerlink}
-
-::: {#asl-dataset-description .section}
-### ASL Dataset description[¶](#asl-dataset-description "Permalink to this headline"){.headerlink}
-
-This file contains the ASL_DATASET class which serves as the dataset
-module for American Sign Language (ASL) data. The ASL_DATASET is
+This file contains the ASL\_DATASET class which serves as the dataset
+module for American Sign Language (ASL) data. The ASL\_DATASET is
 designed to load, preprocess, augment, and serve the dataset for model
 training and validation. This class provides functionalities such as
 loading the dataset from disk, applying transformations, data
 augmentation techniques, and an interface to access individual data
 samples.
 
-::: {.admonition .note}
+<div class="admonition note">
+
 Note
 
 This dataset class expects data in a specific format. Detailed
 explanations and expectations about input data are provided in
 respective method docstrings.
-:::
 
-*[class]{.pre}[ ]{.w}*[[data.dataset.]{.pre}]{.sig-prename .descclassname}[[ASL_DATASET]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[metadata_df]{.pre}]{.n}[[=]{.pre}]{.o}[[None]{.pre}]{.default_value}*, *[[transform]{.pre}]{.n}[[=]{.pre}]{.o}[[None]{.pre}]{.default_value}*, *[[max_seq_length]{.pre}]{.n}[[=]{.pre}]{.o}[[32]{.pre}]{.default_value}*, *[[augment]{.pre}]{.n}[[=]{.pre}]{.o}[[False]{.pre}]{.default_value}*, *[[augmentation_threshold]{.pre}]{.n}[[=]{.pre}]{.o}[[0.1]{.pre}]{.default_value}*, *[[enableDropout]{.pre}]{.n}[[=]{.pre}]{.o}[[True]{.pre}]{.default_value}*[)]{.sig-paren}[¶](#data.dataset.ASL_DATASET "Permalink to this definition"){.headerlink}
+</div>
 
-:   A dataset class for the ASL dataset.
+*class *data.dataset.ASL\_DATASET(*metadata\_df=None*, *transform=None*, *max\_seq\_length=32*, *augment=False*, *augmentation\_threshold=0.1*, *enableDropout=True*)[¶](#data.dataset.ASL_DATASET "Permalink to this definition")  
+A dataset class for the ASL dataset.
 
-    The ASL_DATASET class represents a dataset of American Sign Language
-    (ASL) gestures, where each gesture corresponds to a word or phrase.
-    This class provides functionalities to load the dataset, apply
-    transformations, augment the data, and yield individual data samples
-    for model training and validation.
+The ASL\_DATASET class represents a dataset of American Sign Language
+(ASL) gestures, where each gesture corresponds to a word or phrase. This
+class provides functionalities to load the dataset, apply
+transformations, augment the data, and yield individual data samples for
+model training and validation.
 
-    [[\_\_getitem\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[idx]{.pre}]{.n}*[)]{.sig-paren}[¶](#data.dataset.ASL_DATASET.__getitem__ "Permalink to this definition"){.headerlink}
+\_\_getitem\_\_(*idx*)[¶](#data.dataset.ASL_DATASET.__getitem__ "Permalink to this definition")  
+Get an item from the dataset by index.
 
-    :   Get an item from the dataset by index.
+This method returns a data sample from the dataset based on a provided
+index. It handles reading of the processed data file, applies
+transformations and augmentations (if set), and pads the data to match
+the maximum sequence length. It returns the preprocessed landmarks and
+corresponding target as a tuple.
 
-        This method returns a data sample from the dataset based on a
-        provided index. It handles reading of the processed data file,
-        applies transformations and augmentations (if set), and pads the
-        data to match the maximum sequence length. It returns the
-        preprocessed landmarks and corresponding target as a tuple.
+Args:  
+idx (int): The index of the item to retrieve.
 
-        Args:
+Returns:  
+tuple: A tuple containing the landmarks and target for the item.
 
-        :   idx (int): The index of the item to retrieve.
+Functionality:  
+Get a single item from the dataset.
 
-        Returns:
+Parameters  
+**idx** (*int*) – The index of the item to retrieve.
 
-        :   tuple: A tuple containing the landmarks and target for the
-            item.
+Returns  
+A tuple containing the landmarks and target for the item.
 
-        Functionality:
+Return type  
+tuple
 
-        :   Get a single item from the dataset.
+\_\_init\_\_(*metadata\_df=None*, *transform=None*, *max\_seq\_length=32*, *augment=False*, *augmentation\_threshold=0.1*, *enableDropout=True*)[¶](#data.dataset.ASL_DATASET.__init__ "Permalink to this definition")  
+Initialize the ASL dataset.
 
-        Parameters
+This method initializes the dataset and loads the metadata necessary for
+the dataset processing. If no metadata is provided, it will load the
+default processed dataset. It also sets the transformation functions,
+data augmentation parameters, and maximum sequence length.
 
-        :   **idx** (*int*) -- The index of the item to retrieve.
+Args:  
+metadata\_df (pd.DataFrame, optional): A dataframe containing the
+metadata for the dataset. Defaults to None. transform (callable,
+optional): A function/transform to apply to the data. Defaults to None.
+max\_seq\_length (int, optional): The maximum sequence length for the
+data. Defaults to INPUT\_SIZE. augment (bool, optional): Whether to
+apply data augmentation. Defaults to False. augmentation\_threshold
+(float, optional): Probability of augmentation happening. Only if
+augment == True. Defaults to 0.1. enableDropout (bool, optional):
+Whether to enable the frame dropout augmentation. Defaults to True.
 
-        Returns
+Functionality:  
+Initializes the dataset with necessary configurations and loads the
+data.
 
-        :   A tuple containing the landmarks and target for the item.
+Parameters  
+-   **metadata\_df** (*pd.DataFrame,* *optional*) – A dataframe
+    containing the metadata for the dataset.
 
-        Return type
+-   **transform** (*callable,* *optional*) – A function/transform to
+    apply to the data.
 
-        :   tuple
+-   **max\_seq\_length** (*int*) – The maximum sequence length for the
+    data.
 
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[metadata_df]{.pre}]{.n}[[=]{.pre}]{.o}[[None]{.pre}]{.default_value}*, *[[transform]{.pre}]{.n}[[=]{.pre}]{.o}[[None]{.pre}]{.default_value}*, *[[max_seq_length]{.pre}]{.n}[[=]{.pre}]{.o}[[32]{.pre}]{.default_value}*, *[[augment]{.pre}]{.n}[[=]{.pre}]{.o}[[False]{.pre}]{.default_value}*, *[[augmentation_threshold]{.pre}]{.n}[[=]{.pre}]{.o}[[0.1]{.pre}]{.default_value}*, *[[enableDropout]{.pre}]{.n}[[=]{.pre}]{.o}[[True]{.pre}]{.default_value}*[)]{.sig-paren}[¶](#data.dataset.ASL_DATASET.__init__ "Permalink to this definition"){.headerlink}
+-   **augment** (*bool*) – Whether to apply data augmentation.
 
-    :   Initialize the ASL dataset.
+-   **augmentation\_threshold** (*float*) – Probability of augmentation
+    happening. Only if augment == True.
 
-        This method initializes the dataset and loads the metadata
-        necessary for the dataset processing. If no metadata is
-        provided, it will load the default processed dataset. It also
-        sets the transformation functions, data augmentation parameters,
-        and maximum sequence length.
+-   **enableDropout** (*bool*) – Whether to enable the frame dropout
+    augmentation.
 
-        Args:
+\_\_len\_\_()[¶](#data.dataset.ASL_DATASET.__len__ "Permalink to this definition")  
+Get the length of the dataset.
 
-        :   metadata_df (pd.DataFrame, optional): A dataframe containing
-            the metadata for the dataset. Defaults to None. transform
-            (callable, optional): A function/transform to apply to the
-            data. Defaults to None. max_seq_length (int, optional): The
-            maximum sequence length for the data. Defaults to
-            INPUT_SIZE. augment (bool, optional): Whether to apply data
-            augmentation. Defaults to False. augmentation_threshold
-            (float, optional): Probability of augmentation happening.
-            Only if augment == True. Defaults to 0.1. enableDropout
-            (bool, optional): Whether to enable the frame dropout
-            augmentation. Defaults to True.
+This method returns the total number of data samples present in the
+dataset. It’s an implementation of the special method \_\_len\_\_ in
+Python, providing a way to use the Python built-in function len() on the
+dataset object.
 
-        Functionality:
+Functionality:  
+Get the length of the dataset.
 
-        :   Initializes the dataset with necessary configurations and
-            loads the data.
+Returns:  
+int: The length of the dataset.
 
-        Parameters
+Returns  
+The length of the dataset.
 
-        :   -   **metadata_df** (*pd.DataFrame,* *optional*) -- A
-                dataframe containing the metadata for the dataset.
+Return type  
+int
 
-            -   **transform** (*callable,* *optional*) -- A
-                function/transform to apply to the data.
+\_\_repr\_\_()[¶](#data.dataset.ASL_DATASET.__repr__ "Permalink to this definition")  
+Return a string representation of the ASL dataset.
 
-            -   **max_seq_length** (*int*) -- The maximum sequence
-                length for the data.
+This method returns a string that provides an overview of the dataset,
+including the number of participants and total data samples. It’s an
+implementation of the special method \_\_repr\_\_ in Python, providing a
+human-readable representation of the dataset object.
 
-            -   **augment** (*bool*) -- Whether to apply data
-                augmentation.
+Returns:  
+str: A string representation of the dataset.
 
-            -   **augmentation_threshold** (*float*) -- Probability of
-                augmentation happening. Only if augment == True.
+Functionality:  
+Return a string representation of the dataset.
 
-            -   **enableDropout** (*bool*) -- Whether to enable the
-                frame dropout augmentation.
+Returns  
+A string representation of the dataset.
 
-    [[\_\_len\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}[)]{.sig-paren}[¶](#data.dataset.ASL_DATASET.__len__ "Permalink to this definition"){.headerlink}
+Return type  
+str
 
-    :   Get the length of the dataset.
+\_\_weakref\_\_[¶](#data.dataset.ASL_DATASET.__weakref__ "Permalink to this definition")  
+list of weak references to the object (if defined)
 
-        This method returns the total number of data samples present in
-        the dataset. It's an implementation of the special method
-        \_\_len\_\_ in Python, providing a way to use the Python
-        built-in function len() on the dataset object.
+load\_data()[¶](#data.dataset.ASL_DATASET.load_data "Permalink to this definition")  
+Load the data for the ASL dataset.
 
-        Functionality:
+This method loads the actual ASL data based on the metadata provided
+during initialization. If no metadata was provided, it loads the default
+processed data. It generates absolute paths to locate landmark files,
+and stores individual metadata lists for easy access during data
+retrieval.
 
-        :   Get the length of the dataset.
+Functionality:  
+Loads the data for the dataset.
 
-        Returns:
+Return type  
+None
 
-        :   int: The length of the dataset.
+</div>
 
-        Returns
+</div>
 
-        :   The length of the dataset.
+<div id="module-dl_utils" class="section">
 
-        Return type
+## Data Utilities[¶](#module-dl_utils "Permalink to this headline")
 
-        :   int
+<div id="deep-learning-utils" class="section">
 
-    [[\_\_repr\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}[)]{.sig-paren}[¶](#data.dataset.ASL_DATASET.__repr__ "Permalink to this definition"){.headerlink}
-
-    :   Return a string representation of the ASL dataset.
-
-        This method returns a string that provides an overview of the
-        dataset, including the number of participants and total data
-        samples. It's an implementation of the special method
-        \_\_repr\_\_ in Python, providing a human-readable
-        representation of the dataset object.
-
-        Returns:
-
-        :   str: A string representation of the dataset.
-
-        Functionality:
-
-        :   Return a string representation of the dataset.
-
-        Returns
-
-        :   A string representation of the dataset.
-
-        Return type
-
-        :   str
-
-    [[\_\_weakref\_\_]{.pre}]{.sig-name .descname}[¶](#data.dataset.ASL_DATASET.__weakref__ "Permalink to this definition"){.headerlink}
-
-    :   list of weak references to the object (if defined)
-
-    [[load_data]{.pre}]{.sig-name .descname}[(]{.sig-paren}[)]{.sig-paren}[¶](#data.dataset.ASL_DATASET.load_data "Permalink to this definition"){.headerlink}
-
-    :   Load the data for the ASL dataset.
-
-        This method loads the actual ASL data based on the metadata
-        provided during initialization. If no metadata was provided, it
-        loads the default processed data. It generates absolute paths to
-        locate landmark files, and stores individual metadata lists for
-        easy access during data retrieval.
-
-        Functionality:
-
-        :   Loads the data for the dataset.
-
-        Return type
-
-        :   None
-:::
-:::
-
-[]{#document-dl_utils}
-
-::: {#module-dl_utils .section}
-[]{#data-utilities}
-
-## Data Utilities[¶](#module-dl_utils "Permalink to this headline"){.headerlink}
-
-::: {#deep-learning-utils .section}
-### Deep Learning Utils[¶](#deep-learning-utils "Permalink to this headline"){.headerlink}
+### Deep Learning Utils[¶](#deep-learning-utils "Permalink to this headline")
 
 This module provides a set of helper functions that abstract away
 specific details of different deep learning frameworks (such as
@@ -1749,355 +1363,280 @@ TensorFlow and PyTorch). These functions allow the main code to run in a
 framework-agnostic manner, thus improving code portability and
 flexibility.
 
-*[class]{.pre}[ ]{.w}*[[dl_utils.]{.pre}]{.sig-prename .descclassname}[[DatasetWithLen]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[tf_dataset]{.pre}]{.n}*, *[[length]{.pre}]{.n}*[)]{.sig-paren}[¶](#dl_utils.DatasetWithLen "Permalink to this definition"){.headerlink}
+*class *dl\_utils.DatasetWithLen(*tf\_dataset*, *length*)[¶](#dl_utils.DatasetWithLen "Permalink to this definition")  
+The DatasetWithLen class serves as a wrapper around TensorFlow’s Dataset
+object. Its primary purpose is to add a length method to the TensorFlow
+Dataset. This is useful in contexts where it’s necessary to know the
+number of batches that a DataLoader will create from a dataset, which is
+a common requirement in many machine learning training loops. It also
+provides an iterator over the dataset, which facilitates traversing the
+dataset for operations such as batch creation.
 
-:   The DatasetWithLen class serves as a wrapper around TensorFlow's
-    Dataset object. Its primary purpose is to add a length method to the
-    TensorFlow Dataset. This is useful in contexts where it's necessary
-    to know the number of batches that a DataLoader will create from a
-    dataset, which is a common requirement in many machine learning
-    training loops. It also provides an iterator over the dataset, which
-    facilitates traversing the dataset for operations such as batch
-    creation.
+For instance, this might be used in conjunction with a progress bar
+during training to display the total number of batches. Since
+TensorFlow’s Dataset objects don’t inherently have a \_\_len\_\_ method,
+this wrapper class provides that functionality, augmenting the dataset
+with additional features that facilitate the training process.
 
-    For instance, this might be used in conjunction with a progress bar
-    during training to display the total number of batches. Since
-    TensorFlow's Dataset objects don't inherently have a \_\_len\_\_
-    method, this wrapper class provides that functionality, augmenting
-    the dataset with additional features that facilitate the training
-    process.
+Args:  
+tf\_dataset: The TensorFlow dataset to be wrapped. length: The length of
+the dataset.
 
-    Args:
+Functionality:  
+Provides a length method and an iterator for a TensorFlow dataset.
 
-    :   tf_dataset: The TensorFlow dataset to be wrapped. length: The
-        length of the dataset.
+Return type  
+DatasetWithLen object
 
-    Functionality:
+Parameters  
+-   **tf\_dataset** – The TensorFlow dataset to be wrapped.
 
-    :   Provides a length method and an iterator for a TensorFlow
-        dataset.
+-   **length** – The length of the dataset.
 
-    Return type
+\_\_init\_\_(*tf\_dataset*, *length*)[¶](#dl_utils.DatasetWithLen.__init__ "Permalink to this definition")  
 
-    :   DatasetWithLen object
+\_\_iter\_\_()[¶](#dl_utils.DatasetWithLen.__iter__ "Permalink to this definition")  
+Returns an iterator for the dataset.
 
-    Parameters
+Returns  
+iterator for the dataset
 
-    :   -   **tf_dataset** -- The TensorFlow dataset to be wrapped.
+\_\_len\_\_()[¶](#dl_utils.DatasetWithLen.__len__ "Permalink to this definition")  
+Returns the length of the dataset.
 
-        -   **length** -- The length of the dataset.
+Returns  
+length of the dataset
 
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[tf_dataset]{.pre}]{.n}*, *[[length]{.pre}]{.n}*[)]{.sig-paren}[¶](#dl_utils.DatasetWithLen.__init__ "Permalink to this definition"){.headerlink}
+\_\_weakref\_\_[¶](#dl_utils.DatasetWithLen.__weakref__ "Permalink to this definition")  
+list of weak references to the object (if defined)
 
-    :   
+&nbsp;
 
-    [[\_\_iter\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}[)]{.sig-paren}[¶](#dl_utils.DatasetWithLen.__iter__ "Permalink to this definition"){.headerlink}
+dl\_utils.get\_PT\_Dataset(*dataloader*)[¶](#dl_utils.get_PT_Dataset "Permalink to this definition")  
+Retrieve the underlying dataset from a PyTorch data loader.
 
-    :   Returns an iterator for the dataset.
+Parameters  
+**dataloader** – DataLoader object.
 
-        Returns
+Returns  
+Dataset object.
 
-        :   iterator for the dataset
+&nbsp;
 
-    [[\_\_len\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}[)]{.sig-paren}[¶](#dl_utils.DatasetWithLen.__len__ "Permalink to this definition"){.headerlink}
+dl\_utils.get\_TF\_Dataset(*dataloader*)[¶](#dl_utils.get_TF_Dataset "Permalink to this definition")  
+Retrieve the underlying dataset from a TensorFlow data loader.
 
-    :   Returns the length of the dataset.
+Parameters  
+**dataloader** – DatasetWithLen object.
 
-        Returns
+Returns  
+Dataset object.
 
-        :   length of the dataset
+&nbsp;
 
-    [[\_\_weakref\_\_]{.pre}]{.sig-name .descname}[¶](#dl_utils.DatasetWithLen.__weakref__ "Permalink to this definition"){.headerlink}
+dl\_utils.get\_dataloader(*dataset*, *batch\_size=128*, *shuffle=True*, *dl\_framework='pytorch'*, *num\_workers=8*)[¶](#dl_utils.get_dataloader "Permalink to this definition")  
+The get\_dataloader function is responsible for creating a DataLoader
+object given a dataset and a few other parameters. A DataLoader is an
+essential component in machine learning projects as it controls how data
+is fed into the model during training. However, different deep learning
+frameworks have their own ways of creating and handling DataLoader
+objects.
 
-    :   list of weak references to the object (if defined)
+To improve the portability and reusability of the code, this function
+abstracts away these specifics, allowing the user to create a DataLoader
+object without having to worry about the details of the underlying
+framework (TensorFlow or PyTorch). This approach can save development
+time and reduce the risk of bugs or errors.
 
-```{=html}
-<!-- -->
-```
+Args:  
+dataset: The dataset to be loaded. batch\_size: The size of the batches
+that the DataLoader should create. shuffle: Whether to shuffle the data
+before creating batches. dl\_framework: The name of the deep learning
+framework. num\_workers: The number of worker threads to use for loading
+data.
 
-[[dl_utils.]{.pre}]{.sig-prename .descclassname}[[get_PT_Dataset]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[dataloader]{.pre}]{.n}*[)]{.sig-paren}[¶](#dl_utils.get_PT_Dataset "Permalink to this definition"){.headerlink}
+Functionality:  
+Creates and returns a DataLoader object that is compatible with the
+specified deep learning framework.
 
-:   Retrieve the underlying dataset from a PyTorch data loader.
+Return type  
+DataLoader or DatasetWithLen object
 
-    Parameters
+Parameters  
+-   **dataset** – The dataset to be loaded.
 
-    :   **dataloader** -- DataLoader object.
+-   **batch\_size** – The size of the batches that the DataLoader should
+    create.
 
-    Returns
+-   **shuffle** – Whether to shuffle the data before creating batches.
 
-    :   Dataset object.
+-   **dl\_framework** – The name of the deep learning framework.
 
-```{=html}
-<!-- -->
-```
+-   **num\_workers** – The number of worker threads to use for loading
+    data.
 
-[[dl_utils.]{.pre}]{.sig-prename .descclassname}[[get_TF_Dataset]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[dataloader]{.pre}]{.n}*[)]{.sig-paren}[¶](#dl_utils.get_TF_Dataset "Permalink to this definition"){.headerlink}
+&nbsp;
 
-:   Retrieve the underlying dataset from a TensorFlow data loader.
+dl\_utils.get\_dataset(*dataloader*)[¶](#dl_utils.get_dataset "Permalink to this definition")  
+The get\_dataset function is an interface to extract the underlying
+dataset from a dataloader, irrespective of the deep learning framework
+being used, i.e., TensorFlow or PyTorch. The versatility of this
+function makes it integral to any pipeline designed to be flexible
+across both TensorFlow and PyTorch frameworks.
 
-    Parameters
+Given a dataloader object, this function first determines the deep
+learning framework currently in use by referring to the DL\_FRAMEWORK
+config parameter variable. If the framework is TensorFlow, it invokes
+the get\_TF\_Dataset function to retrieve the dataset. Alternatively, if
+PyTorch is being used, the get\_PT\_Dataset function is called. This
+abstracts away the intricacies of handling different deep learning
+frameworks, thereby simplifying the process of working with datasets
+across TensorFlow and PyTorch.
 
-    :   **dataloader** -- DatasetWithLen object.
+Args:  
+dataloader: DataLoader from PyTorch or DatasetWithLen from TensorFlow.
 
-    Returns
+Functionality:  
+Extracts the underlying dataset from a dataloader, be it from PyTorch or
+TensorFlow.
 
-    :   Dataset object.
+Return type  
+Dataset object
 
-```{=html}
-<!-- -->
-```
+Parameters  
+**dataloader** – DataLoader in case of PyTorch and DatasetWithLen in
+case of TensorFlow.
 
-[[dl_utils.]{.pre}]{.sig-prename .descclassname}[[get_dataloader]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[dataset]{.pre}]{.n}*, *[[batch_size]{.pre}]{.n}[[=]{.pre}]{.o}[[128]{.pre}]{.default_value}*, *[[shuffle]{.pre}]{.n}[[=]{.pre}]{.o}[[True]{.pre}]{.default_value}*, *[[dl_framework]{.pre}]{.n}[[=]{.pre}]{.o}[[\'pytorch\']{.pre}]{.default_value}*, *[[num_workers]{.pre}]{.n}[[=]{.pre}]{.o}[[8]{.pre}]{.default_value}*[)]{.sig-paren}[¶](#dl_utils.get_dataloader "Permalink to this definition"){.headerlink}
+&nbsp;
 
-:   The get_dataloader function is responsible for creating a DataLoader
-    object given a dataset and a few other parameters. A DataLoader is
-    an essential component in machine learning projects as it controls
-    how data is fed into the model during training. However, different
-    deep learning frameworks have their own ways of creating and
-    handling DataLoader objects.
+dl\_utils.get\_model\_params(*model\_name*)[¶](#dl_utils.get_model_params "Permalink to this definition")  
+The get\_model\_params function is a utility function that serves to
+abstract away the details of reading model configurations from a YAML
+file. In a machine learning project, it is common to have numerous
+models, each with its own set of hyperparameters. These hyperparameters
+can be stored in a YAML file for easy access and modification.
 
-    To improve the portability and reusability of the code, this
-    function abstracts away these specifics, allowing the user to create
-    a DataLoader object without having to worry about the details of the
-    underlying framework (TensorFlow or PyTorch). This approach can save
-    development time and reduce the risk of bugs or errors.
+This function reads the configuration file and retrieves the specific
+parameters associated with the given model. The configurations are
+stored in a dictionary which is then returned. This aids in maintaining
+a cleaner, more organized codebase and simplifies the process of
+updating or modifying model parameters.
 
-    Args:
+Args:  
+model\_name: Name of the model whose parameters are to be retrieved.
 
-    :   dataset: The dataset to be loaded. batch_size: The size of the
-        batches that the DataLoader should create. shuffle: Whether to
-        shuffle the data before creating batches. dl_framework: The name
-        of the deep learning framework. num_workers: The number of
-        worker threads to use for loading data.
+Functionality:  
+Reads a YAML file and retrieves the model parameters as a dictionary.
 
-    Functionality:
+Return type  
+dict
 
-    :   Creates and returns a DataLoader object that is compatible with
-        the specified deep learning framework.
+Parameters  
+**model\_name** – Name of the model whose parameters are to be
+retrieved.
 
-    Return type
+&nbsp;
 
-    :   DataLoader or DatasetWithLen object
+dl\_utils.log\_metrics(*phase*, *loss*, *acc*, *epoch*, *lr*, *writer*)[¶](#dl_utils.log_metrics "Permalink to this definition")  
+Helper function to log metrics to TensorBoard.
 
-    Parameters
+Parameters  
+-   **phase** – String, the phase of the process (‘train’ or
+    ‘validation’).
 
-    :   -   **dataset** -- The dataset to be loaded.
+-   **loss** – Float, the current loss value.
 
-        -   **batch_size** -- The size of the batches that the
-            DataLoader should create.
+-   **acc** – Float, the current accuracy value.
 
-        -   **shuffle** -- Whether to shuffle the data before creating
-            batches.
+-   **epoch** – Integer, the current epoch number.
 
-        -   **dl_framework** -- The name of the deep learning framework.
+-   **lr** – Float, the current learning rate.
 
-        -   **num_workers** -- The number of worker threads to use for
-            loading data.
+-   **writer** – TensorBoard writer object.
 
-```{=html}
-<!-- -->
-```
+&nbsp;
 
-[[dl_utils.]{.pre}]{.sig-prename .descclassname}[[get_dataset]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[dataloader]{.pre}]{.n}*[)]{.sig-paren}[¶](#dl_utils.get_dataset "Permalink to this definition"){.headerlink}
+dl\_utils.to\_PT\_DataLoader(*dataset*, *batch\_size=128*, *shuffle=True*, *num\_workers=8*)[¶](#dl_utils.to_PT_DataLoader "Permalink to this definition")  
+This function is the PyTorch counterpart to ‘to\_TF\_DataLoader’. It
+converts a given dataset into a PyTorch DataLoader. The purpose of this
+function is to streamline the creation of PyTorch DataLoaders, allowing
+for easy utilization in a PyTorch training or inference pipeline.
 
-:   The get_dataset function is an interface to extract the underlying
-    dataset from a dataloader, irrespective of the deep learning
-    framework being used, i.e., TensorFlow or PyTorch. The versatility
-    of this function makes it integral to any pipeline designed to be
-    flexible across both TensorFlow and PyTorch frameworks.
+The PyTorch DataLoader handles the process of drawing batches of data
+from a dataset, which is essential when training models. This function
+further extends this functionality by implementing data shuffling and
+utilizing multiple worker threads for asynchronous data loading, thereby
+optimizing the data loading process during model training.
 
-    Given a dataloader object, this function first determines the deep
-    learning framework currently in use by referring to the DL_FRAMEWORK
-    config parameter variable. If the framework is TensorFlow, it
-    invokes the get_TF_Dataset function to retrieve the dataset.
-    Alternatively, if PyTorch is being used, the get_PT_Dataset function
-    is called. This abstracts away the intricacies of handling different
-    deep learning frameworks, thereby simplifying the process of working
-    with datasets across TensorFlow and PyTorch.
+Args:  
+dataset: The dataset to be loaded. batch\_size: The size of each batch
+the DataLoader will return. shuffle: Whether the data should be shuffled
+before batching. num\_workers: The number of worker threads to use for
+data loading.
 
-    Args:
+Functionality:  
+Converts a given dataset into a PyTorch DataLoader.
 
-    :   dataloader: DataLoader from PyTorch or DatasetWithLen from
-        TensorFlow.
+Return type  
+DataLoader object
 
-    Functionality:
+Parameters  
+-   **dataset** – The dataset to be loaded.
 
-    :   Extracts the underlying dataset from a dataloader, be it from
-        PyTorch or TensorFlow.
+-   **batch\_size** – The size of each batch the DataLoader will return.
 
-    Return type
+-   **shuffle** – Whether the data should be shuffled before batching.
 
-    :   Dataset object
+-   **num\_workers** – The number of worker threads to use for data
+    loading.
 
-    Parameters
+&nbsp;
 
-    :   **dataloader** -- DataLoader in case of PyTorch and
-        DatasetWithLen in case of TensorFlow.
+dl\_utils.to\_TF\_DataLoader(*dataset*, *batch\_size=128*, *shuffle=True*)[¶](#dl_utils.to_TF_DataLoader "Permalink to this definition")  
+This function takes in a dataset and converts it into a TensorFlow
+DataLoader. Its purpose is to provide a streamlined method to generate
+DataLoaders that can be utilized in a TensorFlow training or inference
+pipeline. It not only ensures the dataset is in a format that can be
+ingested by TensorFlow’s pipeline, but also implements optional
+shuffling of data, which is a common practice in model training to
+ensure random distribution of data across batches.
 
-```{=html}
-<!-- -->
-```
+This function first checks whether the data is already in a tensor
+format, if not it converts the data to a tensor. Next, it either
+shuffles the dataset or keeps it as is, based on the ‘shuffle’ flag.
+Lastly, it prepares the TensorFlow DataLoader by batching the dataset
+and applying an automatic optimization strategy for the number of
+parallel calls in mapping functions.
 
-[[dl_utils.]{.pre}]{.sig-prename .descclassname}[[get_model_params]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[model_name]{.pre}]{.n}*[)]{.sig-paren}[¶](#dl_utils.get_model_params "Permalink to this definition"){.headerlink}
+Args:  
+dataset: The dataset to be loaded. batch\_size: The size of each batch
+the DataLoader will return. shuffle: Whether the data should be shuffled
+before batching.
 
-:   The get_model_params function is a utility function that serves to
-    abstract away the details of reading model configurations from a
-    YAML file. In a machine learning project, it is common to have
-    numerous models, each with its own set of hyperparameters. These
-    hyperparameters can be stored in a YAML file for easy access and
-    modification.
+Functionality:  
+Converts a given dataset into a TensorFlow DataLoader.
 
-    This function reads the configuration file and retrieves the
-    specific parameters associated with the given model. The
-    configurations are stored in a dictionary which is then returned.
-    This aids in maintaining a cleaner, more organized codebase and
-    simplifies the process of updating or modifying model parameters.
+Return type  
+DatasetWithLen object
 
-    Args:
+Parameters  
+-   **dataset** – The dataset to be loaded.
 
-    :   model_name: Name of the model whose parameters are to be
-        retrieved.
+-   **batch\_size** – The size of each batch the DataLoader will return.
 
-    Functionality:
+-   **shuffle** – Whether the data should be shuffled before batching.
 
-    :   Reads a YAML file and retrieves the model parameters as a
-        dictionary.
+</div>
 
-    Return type
+</div>
 
-    :   dict
+<div id="module-trainer" class="section">
 
-    Parameters
+## Model Training[¶](#module-trainer "Permalink to this headline")
 
-    :   **model_name** -- Name of the model whose parameters are to be
-        retrieved.
+<div id="generic-trainer-description" class="section">
 
-```{=html}
-<!-- -->
-```
-
-[[dl_utils.]{.pre}]{.sig-prename .descclassname}[[log_metrics]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[phase]{.pre}]{.n}*, *[[loss]{.pre}]{.n}*, *[[acc]{.pre}]{.n}*, *[[epoch]{.pre}]{.n}*, *[[lr]{.pre}]{.n}*, *[[writer]{.pre}]{.n}*[)]{.sig-paren}[¶](#dl_utils.log_metrics "Permalink to this definition"){.headerlink}
-
-:   Helper function to log metrics to TensorBoard.
-
-    Parameters
-
-    :   -   **phase** -- String, the phase of the process ('train' or
-            'validation').
-
-        -   **loss** -- Float, the current loss value.
-
-        -   **acc** -- Float, the current accuracy value.
-
-        -   **epoch** -- Integer, the current epoch number.
-
-        -   **lr** -- Float, the current learning rate.
-
-        -   **writer** -- TensorBoard writer object.
-
-```{=html}
-<!-- -->
-```
-
-[[dl_utils.]{.pre}]{.sig-prename .descclassname}[[to_PT_DataLoader]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[dataset]{.pre}]{.n}*, *[[batch_size]{.pre}]{.n}[[=]{.pre}]{.o}[[128]{.pre}]{.default_value}*, *[[shuffle]{.pre}]{.n}[[=]{.pre}]{.o}[[True]{.pre}]{.default_value}*, *[[num_workers]{.pre}]{.n}[[=]{.pre}]{.o}[[8]{.pre}]{.default_value}*[)]{.sig-paren}[¶](#dl_utils.to_PT_DataLoader "Permalink to this definition"){.headerlink}
-
-:   This function is the PyTorch counterpart to 'to_TF_DataLoader'. It
-    converts a given dataset into a PyTorch DataLoader. The purpose of
-    this function is to streamline the creation of PyTorch DataLoaders,
-    allowing for easy utilization in a PyTorch training or inference
-    pipeline.
-
-    The PyTorch DataLoader handles the process of drawing batches of
-    data from a dataset, which is essential when training models. This
-    function further extends this functionality by implementing data
-    shuffling and utilizing multiple worker threads for asynchronous
-    data loading, thereby optimizing the data loading process during
-    model training.
-
-    Args:
-
-    :   dataset: The dataset to be loaded. batch_size: The size of each
-        batch the DataLoader will return. shuffle: Whether the data
-        should be shuffled before batching. num_workers: The number of
-        worker threads to use for data loading.
-
-    Functionality:
-
-    :   Converts a given dataset into a PyTorch DataLoader.
-
-    Return type
-
-    :   DataLoader object
-
-    Parameters
-
-    :   -   **dataset** -- The dataset to be loaded.
-
-        -   **batch_size** -- The size of each batch the DataLoader will
-            return.
-
-        -   **shuffle** -- Whether the data should be shuffled before
-            batching.
-
-        -   **num_workers** -- The number of worker threads to use for
-            data loading.
-
-```{=html}
-<!-- -->
-```
-
-[[dl_utils.]{.pre}]{.sig-prename .descclassname}[[to_TF_DataLoader]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[dataset]{.pre}]{.n}*, *[[batch_size]{.pre}]{.n}[[=]{.pre}]{.o}[[128]{.pre}]{.default_value}*, *[[shuffle]{.pre}]{.n}[[=]{.pre}]{.o}[[True]{.pre}]{.default_value}*[)]{.sig-paren}[¶](#dl_utils.to_TF_DataLoader "Permalink to this definition"){.headerlink}
-
-:   This function takes in a dataset and converts it into a TensorFlow
-    DataLoader. Its purpose is to provide a streamlined method to
-    generate DataLoaders that can be utilized in a TensorFlow training
-    or inference pipeline. It not only ensures the dataset is in a
-    format that can be ingested by TensorFlow's pipeline, but also
-    implements optional shuffling of data, which is a common practice in
-    model training to ensure random distribution of data across batches.
-
-    This function first checks whether the data is already in a tensor
-    format, if not it converts the data to a tensor. Next, it either
-    shuffles the dataset or keeps it as is, based on the 'shuffle' flag.
-    Lastly, it prepares the TensorFlow DataLoader by batching the
-    dataset and applying an automatic optimization strategy for the
-    number of parallel calls in mapping functions.
-
-    Args:
-
-    :   dataset: The dataset to be loaded. batch_size: The size of each
-        batch the DataLoader will return. shuffle: Whether the data
-        should be shuffled before batching.
-
-    Functionality:
-
-    :   Converts a given dataset into a TensorFlow DataLoader.
-
-    Return type
-
-    :   DatasetWithLen object
-
-    Parameters
-
-    :   -   **dataset** -- The dataset to be loaded.
-
-        -   **batch_size** -- The size of each batch the DataLoader will
-            return.
-
-        -   **shuffle** -- Whether the data should be shuffled before
-            batching.
-:::
-:::
-
-[]{#document-trainer}
-
-::: {#module-trainer .section}
-[]{#model-training}
-
-## Model Training[¶](#module-trainer "Permalink to this headline"){.headerlink}
-
-::: {#generic-trainer-description .section}
-### Generic trainer description[¶](#generic-trainer-description "Permalink to this headline"){.headerlink}
+### Generic trainer description[¶](#generic-trainer-description "Permalink to this headline")
 
 Trainer module handles the training, validation, and testing of
 framework-agnostic deep learning models.
@@ -2112,2308 +1651,1868 @@ callback functions to be executed at the end of each epoch. This makes
 the trainer class flexible and adaptable for various types of deep
 learning models and tasks.
 
-Attributes: model_name (str): The name of the model to be trained.
+Attributes: model\_name (str): The name of the model to be trained.
 params (dict): The parameters required for the model. model (model
 object): The model object built using the given model name and
-parameters. train_loader, valid_loader, test_loader (DataLoader
+parameters. train\_loader, valid\_loader, test\_loader (DataLoader
 objects): PyTorch dataloaders for training, validation, and testing
 datasets. patience (int): The number of epochs to wait before stopping
 training when the validation loss is no longer improving.
-best_val_metric (float): The best validation metric recorded.
-patience_counter (int): A counter that keeps track of the number of
-epochs since the validation loss last improved. model_class (str): The
-class name of the model. train_start_time (str): The starting time of
-the training process. writer (SummaryWriter object): TensorBoard's
-SummaryWriter to log metrics for visualization. checkpoint_path (str):
+best\_val\_metric (float): The best validation metric recorded.
+patience\_counter (int): A counter that keeps track of the number of
+epochs since the validation loss last improved. model\_class (str): The
+class name of the model. train\_start\_time (str): The starting time of
+the training process. writer (SummaryWriter object): TensorBoard’s
+SummaryWriter to log metrics for visualization. checkpoint\_path (str):
 The path where the best model checkpoints will be saved during training.
 epoch (int): The current epoch number. callbacks (list): A list of
 callback functions to be called at the end of each epoch.
 
-Methods: train(n_epochs): Trains the model for a specified number of
+Methods: train(n\_epochs): Trains the model for a specified number of
 epochs. evaluate(): Evaluates the model on the validation set. test():
-Tests the model on the test set. add_callback(callback): Adds a callback
-function to the list of functions to be called at the end of each epoch.
+Tests the model on the test set. add\_callback(callback): Adds a
+callback function to the list of functions to be called at the end of
+each epoch.
 
-*[class]{.pre}[ ]{.w}*[[trainer.]{.pre}]{.sig-prename .descclassname}[[Trainer]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[modelname=\'YetAnotherTransformerClassifier\']{.pre}]{.n}*, *[[dataset=\<class]{.pre} [\'data.dataset.ASL_DATASET\'\>]{.pre}]{.n}*, *[[patience=10]{.pre}]{.n}*, *[[enableAugmentationDropout=True]{.pre}]{.n}*, *[[augmentation_threshold=0.35]{.pre}]{.n}*[)]{.sig-paren}[¶](#trainer.Trainer "Permalink to this definition"){.headerlink}
+*class *trainer.Trainer(*modelname='YetAnotherTransformerClassifier'*, *dataset=&lt;class 'data.dataset.ASL\_DATASET'&gt;*, *patience=10*, *enableAugmentationDropout=True*, *augmentation\_threshold=0.35*)[¶](#trainer.Trainer "Permalink to this definition")  
+A trainer class which acts as a control hub for the model lifecycle,
+including initial setup, executing training epochs, performing
+validation and testing, implementing early stopping, and logging
+results. The module has been designed to be agnostic to the specific
+deep learning framework, enhancing its versatility across various
+projects.
 
-:   A trainer class which acts as a control hub for the model lifecycle,
-    including initial setup, executing training epochs, performing
-    validation and testing, implementing early stopping, and logging
-    results. The module has been designed to be agnostic to the specific
-    deep learning framework, enhancing its versatility across various
-    projects.
+\_\_init\_\_(*modelname='YetAnotherTransformerClassifier'*, *dataset=&lt;class 'data.dataset.ASL\_DATASET'&gt;*, *patience=10*, *enableAugmentationDropout=True*, *augmentation\_threshold=0.35*)[¶](#trainer.Trainer.__init__ "Permalink to this definition")  
+Initializes the Trainer class with the specified parameters.
 
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[modelname=\'YetAnotherTransformerClassifier\']{.pre}]{.n}*, *[[dataset=\<class]{.pre} [\'data.dataset.ASL_DATASET\'\>]{.pre}]{.n}*, *[[patience=10]{.pre}]{.n}*, *[[enableAugmentationDropout=True]{.pre}]{.n}*, *[[augmentation_threshold=0.35]{.pre}]{.n}*[)]{.sig-paren}[¶](#trainer.Trainer.__init__ "Permalink to this definition"){.headerlink}
+This method initializes various components needed for the training
+process. This includes the model specified by the model name, the
+dataset with optional data augmentation and dropout, data loaders for
+the training, validation, and test sets, a SummaryWriter for logging,
+and a path for saving model checkpoints.
 
-    :   Initializes the Trainer class with the specified parameters.
+1.  The method first retrieves the specified model and its parameters.
 
-        This method initializes various components needed for the
-        training process. This includes the model specified by the model
-        name, the dataset with optional data augmentation and dropout,
-        data loaders for the training, validation, and test sets, a
-        SummaryWriter for logging, and a path for saving model
-        checkpoints.
+2.  It then initializes the dataset and the data loaders.
 
-        1.  The method first retrieves the specified model and its
-            parameters.
+3.  It sets up metrics for early stopping and a writer for logging.
 
-        2.  It then initializes the dataset and the data loaders.
+4.  Finally, it prepares a directory for saving model checkpoints.
 
-        3.  It sets up metrics for early stopping and a writer for
-            logging.
+Args:  
+modelname (str): The name of the model to be used for training. dataset
+(Dataset): The dataset to be used. patience (int): The number of epochs
+with no improvement after which training will be stopped.
+enableAugmentationDropout (bool): If True, enable data augmentation
+dropout. augmentation\_threshold (float): The threshold for data
+augmentation.
 
-        4.  Finally, it prepares a directory for saving model
-            checkpoints.
+Functionality:  
+This method initializes various components, such as the model, dataset,
+data loaders, logging writer, and checkpoint path, required for the
+training process.
 
-        Args:
+Parameters  
+-   **modelname** (*str*) – The name of the model for training.
 
-        :   modelname (str): The name of the model to be used for
-            training. dataset (Dataset): The dataset to be used.
-            patience (int): The number of epochs with no improvement
-            after which training will be stopped.
-            enableAugmentationDropout (bool): If True, enable data
-            augmentation dropout. augmentation_threshold (float): The
-            threshold for data augmentation.
+-   **dataset** (*Dataset*) – The dataset for training.
 
-        Functionality:
+-   **patience** (*int*) – The number of epochs with no improvement
+    after which training will be stopped.
 
-        :   This method initializes various components, such as the
-            model, dataset, data loaders, logging writer, and checkpoint
-            path, required for the training process.
+-   **enableAugmentationDropout** (*bool*) – If True, enable data
+    augmentation dropout.
 
-        Parameters
+-   **augmentation\_threshold** (*float*) – The threshold for data
+    augmentation.
 
-        :   -   **modelname** (*str*) -- The name of the model for
-                training.
+Return type  
+None
 
-            -   **dataset** (*Dataset*) -- The dataset for training.
+<div class="admonition note">
 
-            -   **patience** (*int*) -- The number of epochs with no
-                improvement after which training will be stopped.
+Note
 
-            -   **enableAugmentationDropout** (*bool*) -- If True,
-                enable data augmentation dropout.
+This method only initializes the Trainer class. The actual training is
+done by calling the train() method.
 
-            -   **augmentation_threshold** (*float*) -- The threshold
-                for data augmentation.
+</div>
 
-        Return type
+<div class="admonition warning">
 
-        :   None
+Warning
 
-        ::: {.admonition .note}
-        Note
+Make sure the specified model name corresponds to an actual model in
+your project’s models directory.
 
-        This method only initializes the Trainer class. The actual
-        training is done by calling the train() method.
-        :::
+</div>
 
-        ::: {.admonition .warning}
-        Warning
+\_\_weakref\_\_[¶](#trainer.Trainer.__weakref__ "Permalink to this definition")  
+list of weak references to the object (if defined)
 
-        Make sure the specified model name corresponds to an actual
-        model in your project's models directory.
-        :::
+add\_callback(*callback*)[¶](#trainer.Trainer.add_callback "Permalink to this definition")  
+Adds a callback to the Trainer.
 
-    [[\_\_weakref\_\_]{.pre}]{.sig-name .descname}[¶](#trainer.Trainer.__weakref__ "Permalink to this definition"){.headerlink}
+This method simply appends a callback function to the list of callbacks
+stored by the Trainer instance. These callbacks are called at the end of
+each training epoch.
 
-    :   list of weak references to the object (if defined)
+Functionality:  
+It allows the addition of custom callbacks to the training process,
+enhancing its flexibility.
 
-    [[add_callback]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[callback]{.pre}]{.n}*[)]{.sig-paren}[¶](#trainer.Trainer.add_callback "Permalink to this definition"){.headerlink}
+Parameters  
+**callback** (*Callable*) – The callback function to be added.
 
-    :   Adds a callback to the Trainer.
+Returns  
+None
 
-        This method simply appends a callback function to the list of
-        callbacks stored by the Trainer instance. These callbacks are
-        called at the end of each training epoch.
+Return type  
+None
 
-        Functionality:
+<div class="admonition warning">
 
-        :   It allows the addition of custom callbacks to the training
-            process, enhancing its flexibility.
+Warning
 
-        Parameters
+The callback function must be callable and should not modify the
+training process.
 
-        :   **callback** (*Callable*) -- The callback function to be
-            added.
+</div>
 
-        Returns
+evaluate()[¶](#trainer.Trainer.evaluate "Permalink to this definition")  
+Evaluates the model on the validation set.
 
-        :   None
+This method sets the model to evaluation mode and loops over the
+validation dataset, computing the loss and accuracy for each batch. It
+then averages these metrics and logs them. This process provides an
+unbiased estimate of the model’s performance on new data during
+training.
 
-        Return type
+Functionality:  
+It manages the evaluation of the model on the validation set, handling
+batch-wise loss computation and accuracy assessment.
 
-        :   None
+Returns  
+Average validation loss and accuracy
 
-        ::: {.admonition .warning}
-        Warning
+Return type  
+Tuple\[float, float\]
 
-        The callback function must be callable and should not modify the
-        training process.
-        :::
+<div class="admonition warning">
 
-    [[evaluate]{.pre}]{.sig-name .descname}[(]{.sig-paren}[)]{.sig-paren}[¶](#trainer.Trainer.evaluate "Permalink to this definition"){.headerlink}
+Warning
 
-    :   Evaluates the model on the validation set.
+Ensure the model is in evaluation mode to correctly compute the
+validation metrics.
 
-        This method sets the model to evaluation mode and loops over the
-        validation dataset, computing the loss and accuracy for each
-        batch. It then averages these metrics and logs them. This
-        process provides an unbiased estimate of the model's performance
-        on new data during training.
+</div>
 
-        Functionality:
+test()[¶](#trainer.Trainer.test "Permalink to this definition")  
+Tests the model on the test set.
 
-        :   It manages the evaluation of the model on the validation
-            set, handling batch-wise loss computation and accuracy
-            assessment.
+This method loads the best saved model, sets it to evaluation mode, and
+then loops over the test dataset, computing the loss, accuracy, and
+predictions for each batch. It then averages the loss and accuracy and
+logs them. It also collects all the model’s predictions and their
+corresponding labels.
 
-        Returns
+Functionality:  
+It manages the testing of the model on the test set, handling batch-wise
+loss computation, accuracy assessment, and prediction generation.
 
-        :   Average validation loss and accuracy
+Returns  
+List of all predictions and their corresponding labels
 
-        Return type
+Return type  
+Tuple\[List, List\]
 
-        :   Tuple\[float, float\]
+train(*n\_epochs=50*)[¶](#trainer.Trainer.train "Permalink to this definition")  
+Trains the model for a specified number of epochs.
 
-        ::: {.admonition .warning}
-        Warning
+This method manages the main training loop of the model. For each epoch,
+it performs several steps. It first puts the model into training mode
+and loops over the training dataset, calculating the loss and accuracy
+for each batch and optimizing the model parameters. It logs these
+metrics and updates a progress bar. At the end of each epoch, it
+evaluates the model on the validation set and checks whether early
+stopping criteria have been met. If the early stopping metric has
+improved, it saves the current model and its parameters. If not, it
+increments a counter and potentially stops training if the counter
+exceeds the allowed patience. Finally, it steps the learning rate
+scheduler and calls any registered callbacks.
 
-        Ensure the model is in evaluation mode to correctly compute the
-        validation metrics.
-        :::
+1.  The method first puts the model into training mode and initializes
+    some lists and counters.
 
-    [[test]{.pre}]{.sig-name .descname}[(]{.sig-paren}[)]{.sig-paren}[¶](#trainer.Trainer.test "Permalink to this definition"){.headerlink}
+2.  Then it enters the main loop over the training data, updating the
+    model and logging metrics.
 
-    :   Tests the model on the test set.
+3.  It evaluates the model on the validation set and checks the early
+    stopping criteria.
 
-        This method loads the best saved model, sets it to evaluation
-        mode, and then loops over the test dataset, computing the loss,
-        accuracy, and predictions for each batch. It then averages the
-        loss and accuracy and logs them. It also collects all the
-        model's predictions and their corresponding labels.
+4.  If the criteria are met, it saves the model and its parameters; if
+    not, it increments a patience counter.
 
-        Functionality:
+5.  It steps the learning rate scheduler and calls any callbacks.
 
-        :   It manages the testing of the model on the test set,
-            handling batch-wise loss computation, accuracy assessment,
-            and prediction generation.
+Args:  
+n\_epochs (int): The number of epochs for which the model should be
+trained.
 
-        Returns
+Functionality:  
+This method coordinates the training of the model over a series of
+epochs, handling batch-wise loss computation, backpropagation,
+optimization, validation, early stopping, and model checkpoint saving.
 
-        :   List of all predictions and their corresponding labels
+Parameters  
+**n\_epochs** (*int*) – Number of epochs for training.
 
-        Return type
+Returns  
+None
 
-        :   Tuple\[List, List\]
+Return type  
+None
 
-    [[train]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[n_epochs]{.pre}]{.n}[[=]{.pre}]{.o}[[50]{.pre}]{.default_value}*[)]{.sig-paren}[¶](#trainer.Trainer.train "Permalink to this definition"){.headerlink}
+<div class="admonition note">
 
-    :   Trains the model for a specified number of epochs.
+Note
 
-        This method manages the main training loop of the model. For
-        each epoch, it performs several steps. It first puts the model
-        into training mode and loops over the training dataset,
-        calculating the loss and accuracy for each batch and optimizing
-        the model parameters. It logs these metrics and updates a
-        progress bar. At the end of each epoch, it evaluates the model
-        on the validation set and checks whether early stopping criteria
-        have been met. If the early stopping metric has improved, it
-        saves the current model and its parameters. If not, it
-        increments a counter and potentially stops training if the
-        counter exceeds the allowed patience. Finally, it steps the
-        learning rate scheduler and calls any registered callbacks.
+This method modifies the state of the model and its optimizer, as well
+as various attributes of the Trainer instance itself.
 
-        1.  The method first puts the model into training mode and
-            initializes some lists and counters.
+</div>
 
-        2.  Then it enters the main loop over the training data,
-            updating the model and logging metrics.
+<div class="admonition warning">
 
-        3.  It evaluates the model on the validation set and checks the
-            early stopping criteria.
+Warning
 
-        4.  If the criteria are met, it saves the model and its
-            parameters; if not, it increments a patience counter.
+If you set the patience value too low in the constructor, the model
+might stop training prematurely.
 
-        5.  It steps the learning rate scheduler and calls any
-            callbacks.
+</div>
 
-        Args:
+</div>
 
-        :   n_epochs (int): The number of epochs for which the model
-            should be trained.
+</div>
 
-        Functionality:
+<div id="module-visualizations" class="section">
 
-        :   This method coordinates the training of the model over a
-            series of epochs, handling batch-wise loss computation,
-            backpropagation, optimization, validation, early stopping,
-            and model checkpoint saving.
+## Data Visualizations[¶](#module-visualizations "Permalink to this headline")
 
-        Parameters
+visualizations.visualize\_data\_distribution(*dataset*)[¶](#visualizations.visualize_data_distribution "Permalink to this definition")  
+Visualize the distribution of data in terms of the number of samples and
+average sequence length per class.
 
-        :   **n_epochs** (*int*) -- Number of epochs for training.
+This function generates two bar charts: one showing the number of
+samples per class, and the other showing the average sequence length per
+class.
 
-        Returns
+Parameters  
+**dataset** (*ASL\_Dataset*) – The ASL dataset to load data from.
 
-        :   None
+&nbsp;
 
-        Return type
+visualizations.visualize\_target\_sign(*dataset*, *target\_sign*, *n\_samples=6*)[¶](#visualizations.visualize_target_sign "Permalink to this definition")  
+Visualize n\_samples instances of a given target sign from the dataset.
 
-        :   None
+This function generates a visual representation of the landmarks for
+each sample belonging to the specified target\_sign.
 
-        ::: {.admonition .note}
-        Note
+Args:  
+dataset (ASL\_Dataset): The ASL dataset to load data from. target\_sign
+(int): The target sign to visualize. n\_samples (int, optional): The
+number of samples to visualize. Defaults to 6.
 
-        This method modifies the state of the model and its optimizer,
-        as well as various attributes of the Trainer instance itself.
-        :::
+Returns:  
+matplotlib.animation.FuncAnimation: A matplotlib animation object
+displaying the landmarks for each frame.
 
-        ::: {.admonition .warning}
-        Warning
+Parameters  
+-   **dataset** (*ASL\_Dataset*) – The ASL dataset to load data from.
 
-        If you set the patience value too low in the constructor, the
-        model might stop training prematurely.
-        :::
-:::
-:::
+-   **target\_sign** (*int*) – The target sign to visualize.
 
-[]{#document-visualizations}
+-   **n\_samples** (*int,* *optional*) – The number of samples to
+    visualize, defaults to 6.
 
-::: {#module-visualizations .section}
-[]{#data-visualizations}
+Returns  
+A matplotlib animation object displaying the landmarks for each frame.
 
-## Data Visualizations[¶](#module-visualizations "Permalink to this headline"){.headerlink}
+Return type  
+matplotlib.animation.FuncAnimation
 
-[[visualizations.]{.pre}]{.sig-prename .descclassname}[[visualize_data_distribution]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[dataset]{.pre}]{.n}*[)]{.sig-paren}[¶](#visualizations.visualize_data_distribution "Permalink to this definition"){.headerlink}
+</div>
 
-:   Visualize the distribution of data in terms of the number of samples
-    and average sequence length per class.
+<div id="module-models.pytorch.models" class="section">
 
-    This function generates two bar charts: one showing the number of
-    samples per class, and the other showing the average sequence length
-    per class.
-
-    Parameters
-
-    :   **dataset** (*ASL_Dataset*) -- The ASL dataset to load data
-        from.
-
-```{=html}
-<!-- -->
-```
-
-[[visualizations.]{.pre}]{.sig-prename .descclassname}[[visualize_target_sign]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[dataset]{.pre}]{.n}*, *[[target_sign]{.pre}]{.n}*, *[[n_samples]{.pre}]{.n}[[=]{.pre}]{.o}[[6]{.pre}]{.default_value}*[)]{.sig-paren}[¶](#visualizations.visualize_target_sign "Permalink to this definition"){.headerlink}
-
-:   Visualize n_samples instances of a given target sign from the
-    dataset.
-
-    This function generates a visual representation of the landmarks for
-    each sample belonging to the specified target_sign.
-
-    Args:
-
-    :   dataset (ASL_Dataset): The ASL dataset to load data from.
-        target_sign (int): The target sign to visualize. n_samples (int,
-        optional): The number of samples to visualize. Defaults to 6.
-
-    Returns:
-
-    :   matplotlib.animation.FuncAnimation: A matplotlib animation
-        object displaying the landmarks for each frame.
-
-    Parameters
-
-    :   -   **dataset** (*ASL_Dataset*) -- The ASL dataset to load data
-            from.
-
-        -   **target_sign** (*int*) -- The target sign to visualize.
-
-        -   **n_samples** (*int,* *optional*) -- The number of samples
-            to visualize, defaults to 6.
-
-    Returns
-
-    :   A matplotlib animation object displaying the landmarks for each
-        frame.
-
-    Return type
-
-    :   matplotlib.animation.FuncAnimation
-:::
-
-[]{#document-pytorch_models}
-
-::: {#module-models.pytorch.models .section}
-[]{#pytorch-models}
-
-## Pytorch Models[¶](#module-models.pytorch.models "Permalink to this headline"){.headerlink}
+## Pytorch Models[¶](#module-models.pytorch.models "Permalink to this headline")
 
 This kodule defines a PyTorch BaseModel providing a basic framework for
 learning and validating from Trainer module, from which other pytorch
 models are inherited. This module includes several model classes that
-build upon the PyTorch's nn.Module for constructing pytorch LSTM or
+build upon the PyTorch’s nn.Module for constructing pytorch LSTM or
 Transformer based models:
 
-+-----------------+-----------------------------------------------------+
-| Class           | Description                                         |
-+=================+=====================================================+
-| TransformerSeq  | This is a transformer-based sequence classification |
-| uenceClassifier | model. The class constructs a transformer encoder   |
-|                 | based on user-defined parameters or default         |
-|                 | settings. The forward method first checks and       |
-|                 | reshapes the input, then passes it through the      |
-|                 | transformer layers. It then pools the sequence by   |
-|                 | taking the mean over the time dimension, and        |
-|                 | finally applies the output layer to generate the    |
-|                 | class predictions.                                  |
-+-----------------+-----------------------------------------------------+
-| Trans           | A TransformerPredictor model that extends the       |
-| formerPredictor | Pytorch BaseModel. This class wraps                 |
-|                 | TransformerSequenceClassifier model and provides    |
-|                 | functionality to use it for making predictions.     |
-+-----------------+-----------------------------------------------------+
-| MultiHe         | This class applies a multi-head attention           |
-| adSelfAttention | mechanism. It has options for causal masking and    |
-|                 | layer normalization. The input is expected to have  |
-|                 | dimensions \[batch_size, seq_len, features\].       |
-+-----------------+-----------------------------------------------------+
-| T               | This class represents a single block of a           |
-| ransformerBlock | transformer architecture, including multi-head      |
-|                 | self-attention and a feed-forward neural network,   |
-|                 | both with optional layer normalization and dropout. |
-|                 | The input is expected to have dimensions            |
-|                 | \[batch_size, seq_len, features\].                  |
-+-----------------+-----------------------------------------------------+
-| Y               | This class constructs a transformer-based           |
-| etAnotherTransf | classifier with a specified number of               |
-| ormerClassifier | TransformerBlock instances. The output of the model |
-|                 | is a tensor of logits with dimensions \[batch_size, |
-|                 | num_classes\].                                      |
-+-----------------+-----------------------------------------------------+
-| YetAno          | This class is a wrapper for                         |
-| therTransformer | YetAnotherTransformerClassifier which includes      |
-|                 | learning rate, optimizer, and learning rate         |
-|                 | scheduler settings. It extends from the BaseModel   |
-|                 | class.                                              |
-+-----------------+-----------------------------------------------------+
-| Yet             | This class constructs an ensemble of                |
-| AnotherEnsemble | YetAnotherTransformerClassifier instances, where    |
-|                 | the outputs are concatenated and passed through a   |
-|                 | fully connected layer. This class also extends from |
-|                 | the BaseModel class and includes learning rate,     |
-|                 | optimizer, and learning rate scheduler settings.    |
-+-----------------+-----------------------------------------------------+
+| Class                           | Description                                                                                                                                                                                                                                                                                                                                                                                                       |
+|---------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| TransformerSequenceClassifier   | This is a transformer-based sequence classification model. The class constructs a transformer encoder based on user-defined parameters or default settings. The forward method first checks and reshapes the input, then passes it through the transformer layers. It then pools the sequence by taking the mean over the time dimension, and finally applies the output layer to generate the class predictions. |
+| TransformerPredictor            | A TransformerPredictor model that extends the Pytorch BaseModel. This class wraps TransformerSequenceClassifier model and provides functionality to use it for making predictions.                                                                                                                                                                                                                                |
+| MultiHeadSelfAttention          | This class applies a multi-head attention mechanism. It has options for causal masking and layer normalization. The input is expected to have dimensions \[batch\_size, seq\_len, features\].                                                                                                                                                                                                                     |
+| TransformerBlock                | This class represents a single block of a transformer architecture, including multi-head self-attention and a feed-forward neural network, both with optional layer normalization and dropout. The input is expected to have dimensions \[batch\_size, seq\_len, features\].                                                                                                                                      |
+| YetAnotherTransformerClassifier | This class constructs a transformer-based classifier with a specified number of TransformerBlock instances. The output of the model is a tensor of logits with dimensions \[batch\_size, num\_classes\].                                                                                                                                                                                                          |
+| YetAnotherTransformer           | This class is a wrapper for YetAnotherTransformerClassifier which includes learning rate, optimizer, and learning rate scheduler settings. It extends from the BaseModel class.                                                                                                                                                                                                                                   |
+| YetAnotherEnsemble              | This class constructs an ensemble of YetAnotherTransformerClassifier instances, where the outputs are concatenated and passed through a fully connected layer. This class also extends from the BaseModel class and includes learning rate, optimizer, and learning rate scheduler settings.                                                                                                                      |
 
-: [Model
-Classes]{.caption-text}[¶](#id1 "Permalink to this table"){.headerlink}
+Model Classes[¶](#id1 "Permalink to this table")
 
-*[class]{.pre}[ ]{.w}*[[models.pytorch.models.]{.pre}]{.sig-prename .descclassname}[[BaseModel]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*]{.pre}]{.o}[[args]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*, *[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.BaseModel "Permalink to this definition"){.headerlink}
+*class *models.pytorch.models.BaseModel(*\*args: Any*, *\*\*kwargs: Any*)[¶](#models.pytorch.models.BaseModel "Permalink to this definition")  
+A BaseModel that extends the nn.Module from PyTorch.
 
-:   A BaseModel that extends the nn.Module from PyTorch.
+Functionality: \#. The class initializes with a given learning rate and
+number of classes. \#. It sets up the loss criterion, accuracy metric,
+and default states for optimizer and scheduler. \#. It defines an
+abstract method ‘forward’ which should be implemented in the
+subclass. \#. It also defines various utility functions like calculating
+accuracy, training, validation and testing steps, scheduler stepping,
+and model checkpointing.
 
-    Functionality: \#. The class initializes with a given learning rate
-    and number of classes. \#. It sets up the loss criterion, accuracy
-    metric, and default states for optimizer and scheduler. \#. It
-    defines an abstract method 'forward' which should be implemented in
-    the subclass. \#. It also defines various utility functions like
-    calculating accuracy, training, validation and testing steps,
-    scheduler stepping, and model checkpointing.
+Args:  
+learning\_rate (float): The initial learning rate for optimizer.
+n\_classes (int): The number of classes for classification.
 
-    Args:
+Parameters  
+-   **learning\_rate** (*float*) – The initial learning rate for
+    optimizer.
 
-    :   learning_rate (float): The initial learning rate for optimizer.
-        n_classes (int): The number of classes for classification.
+-   **n\_classes** (*int*) – The number of classes for classification.
 
-    Parameters
+Returns  
+None
 
-    :   -   **learning_rate** (*float*) -- The initial learning rate for
-            optimizer.
+Return type  
+None
 
-        -   **n_classes** (*int*) -- The number of classes for
-            classification.
+<div class="admonition note">
 
-    Returns
+Note
 
-    :   None
+The class does not directly initialize the optimizer and scheduler. They
+should be initialized in the subclass if needed.
 
-    Return type
+</div>
 
-    :   None
+<div class="admonition warning">
 
-    ::: {.admonition .note}
-    Note
+Warning
 
-    The class does not directly initialize the optimizer and scheduler.
-    They should be initialized in the subclass if needed.
-    :::
+The ‘forward’ function must be implemented in the subclass, else it will
+raise a NotImplementedError.
 
-    ::: {.admonition .warning}
-    Warning
+</div>
 
-    The 'forward' function must be implemented in the subclass, else it
-    will raise a NotImplementedError.
-    :::
+\_\_init\_\_(*learning\_rate*, *n\_classes=250*)[¶](#models.pytorch.models.BaseModel.__init__ "Permalink to this definition")  
 
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[learning_rate]{.pre}]{.n}*, *[[n_classes]{.pre}]{.n}[[=]{.pre}]{.o}[[250]{.pre}]{.default_value}*[)]{.sig-paren}[¶](#models.pytorch.models.BaseModel.__init__ "Permalink to this definition"){.headerlink}
+calculate\_accuracy(*y\_hat*, *y*)[¶](#models.pytorch.models.BaseModel.calculate_accuracy "Permalink to this definition")  
+Calculates the accuracy of the model’s prediction.
 
-    :   
+Parameters  
+-   **y\_hat** (*Tensor*) – The predicted output from the model.
 
-    [[calculate_accuracy]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[y_hat]{.pre}]{.n}*, *[[y]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.BaseModel.calculate_accuracy "Permalink to this definition"){.headerlink}
+-   **y** (*Tensor*) – The ground truth or actual labels.
 
-    :   Calculates the accuracy of the model's prediction.
+Returns  
+The calculated accuracy.
 
-        Parameters
+Return type  
+Tensor
 
-        :   -   **y_hat** (*Tensor*) -- The predicted output from the
-                model.
+eval\_mode()[¶](#models.pytorch.models.BaseModel.eval_mode "Permalink to this definition")  
+Sets the model to evaluation mode.
 
-            -   **y** (*Tensor*) -- The ground truth or actual labels.
+forward(*x*)[¶](#models.pytorch.models.BaseModel.forward "Permalink to this definition")  
+The forward function for the BaseModel.
 
-        Returns
+Parameters  
+**x** (*Tensor*) – The inputs to the model.
 
-        :   The calculated accuracy.
+Returns  
+None
 
-        Return type
+<div class="admonition warning">
 
-        :   Tensor
+Warning
 
-    [[eval_mode]{.pre}]{.sig-name .descname}[(]{.sig-paren}[)]{.sig-paren}[¶](#models.pytorch.models.BaseModel.eval_mode "Permalink to this definition"){.headerlink}
+This function must be implemented in the subclass, else it raises a
+NotImplementedError.
 
-    :   Sets the model to evaluation mode.
+</div>
 
-    [[forward]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[x]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.BaseModel.forward "Permalink to this definition"){.headerlink}
+get\_lr()[¶](#models.pytorch.models.BaseModel.get_lr "Permalink to this definition")  
+Gets the current learning rate of the model.
 
-    :   The forward function for the BaseModel.
+Returns  
+The current learning rate.
 
-        Parameters
+Return type  
+float
 
-        :   **x** (*Tensor*) -- The inputs to the model.
+load\_checkpoint(*filepath*)[¶](#models.pytorch.models.BaseModel.load_checkpoint "Permalink to this definition")  
+Loads the model and optimizer states from a checkpoint.
 
-        Returns
+Parameters  
+**filepath** (*str*) – The file path where to load the model checkpoint
+from.
 
-        :   None
+optimize()[¶](#models.pytorch.models.BaseModel.optimize "Permalink to this definition")  
+Steps the optimizer and sets the gradients of all optimized
+`torch.Tensor` s to zero.
 
-        ::: {.admonition .warning}
-        Warning
+save\_checkpoint(*filepath*)[¶](#models.pytorch.models.BaseModel.save_checkpoint "Permalink to this definition")  
+Saves the model and optimizer states to a checkpoint.
 
-        This function must be implemented in the subclass, else it
-        raises a NotImplementedError.
-        :::
+Parameters  
+**filepath** (*str*) – The file path where to save the model checkpoint.
 
-    [[get_lr]{.pre}]{.sig-name .descname}[(]{.sig-paren}[)]{.sig-paren}[¶](#models.pytorch.models.BaseModel.get_lr "Permalink to this definition"){.headerlink}
+step\_scheduler()[¶](#models.pytorch.models.BaseModel.step_scheduler "Permalink to this definition")  
+Steps the learning rate scheduler, adjusting the optimizer’s learning
+rate as necessary.
 
-    :   Gets the current learning rate of the model.
+test\_step(*batch*)[¶](#models.pytorch.models.BaseModel.test_step "Permalink to this definition")  
+Performs a test step using the input batch data.
 
-        Returns
+Parameters  
+**batch** (*tuple*) – A tuple containing input data and labels.
 
-        :   The current learning rate.
+Returns  
+The calculated loss, accuracy, and model predictions.
 
-        Return type
+Return type  
+tuple
 
-        :   float
+train\_mode()[¶](#models.pytorch.models.BaseModel.train_mode "Permalink to this definition")  
+Sets the model to training mode.
 
-    [[load_checkpoint]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[filepath]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.BaseModel.load_checkpoint "Permalink to this definition"){.headerlink}
+training\_step(*batch*)[¶](#models.pytorch.models.BaseModel.training_step "Permalink to this definition")  
+Performs a training step using the input batch data.
 
-    :   Loads the model and optimizer states from a checkpoint.
+Parameters  
+**batch** (*tuple*) – A tuple containing input data and labels.
 
-        Parameters
+Returns  
+The calculated loss and accuracy.
 
-        :   **filepath** (*str*) -- The file path where to load the
-            model checkpoint from.
+Return type  
+tuple
 
-    [[optimize]{.pre}]{.sig-name .descname}[(]{.sig-paren}[)]{.sig-paren}[¶](#models.pytorch.models.BaseModel.optimize "Permalink to this definition"){.headerlink}
+validation\_step(*batch*)[¶](#models.pytorch.models.BaseModel.validation_step "Permalink to this definition")  
+Performs a validation step using the input batch data.
 
-    :   Steps the optimizer and sets the gradients of all optimized
-        `torch.Tensor`{.xref .py .py-class .docutils .literal
-        .notranslate} s to zero.
+Parameters  
+**batch** (*tuple*) – A tuple containing input data and labels.
 
-    [[save_checkpoint]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[filepath]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.BaseModel.save_checkpoint "Permalink to this definition"){.headerlink}
+Returns  
+The calculated loss and accuracy.
 
-    :   Saves the model and optimizer states to a checkpoint.
+Return type  
+tuple
 
-        Parameters
+&nbsp;
 
-        :   **filepath** (*str*) -- The file path where to save the
-            model checkpoint.
+*class *models.pytorch.models.CVTransferLearningModel(*\*args: Any*, *\*\*kwargs: Any*)[¶](#models.pytorch.models.CVTransferLearningModel "Permalink to this definition")  
+A CVTransferLearningModel that extends the Pytorch BaseModel.
 
-    [[step_scheduler]{.pre}]{.sig-name .descname}[(]{.sig-paren}[)]{.sig-paren}[¶](#models.pytorch.models.BaseModel.step_scheduler "Permalink to this definition"){.headerlink}
+This class applies transfer learning for computer vision tasks using
+pretrained models. It also provides a forward method to pass an input
+through the model.
 
-    :   Steps the learning rate scheduler, adjusting the optimizer's
-        learning rate as necessary.
+learning\_ratefloat  
+The learning rate for the optimizer.
 
-    [[test_step]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[batch]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.BaseModel.test_step "Permalink to this definition"){.headerlink}
+modelnn.Module  
+The base model for transfer learning.
 
-    :   Performs a test step using the input batch data.
+optimizertorch.optim.Adam  
+The optimizer used for updating the model parameters.
 
-        Parameters
+schedulertorch.optim.lr\_scheduler.ExponentialLR  
+The learning rate scheduler used for adapting the learning rate during
+training.
 
-        :   **batch** (*tuple*) -- A tuple containing input data and
-            labels.
+forward(x)  
+Performs a forward pass through the model.
 
-        Returns
+\_\_init\_\_(*\*\*kwargs*)[¶](#models.pytorch.models.CVTransferLearningModel.__init__ "Permalink to this definition")  
 
-        :   The calculated loss, accuracy, and model predictions.
+forward(*x*)[¶](#models.pytorch.models.CVTransferLearningModel.forward "Permalink to this definition")  
+The forward function for the BaseModel.
 
-        Return type
+Parameters  
+**x** (*Tensor*) – The inputs to the model.
 
-        :   tuple
+Returns  
+None
 
-    [[train_mode]{.pre}]{.sig-name .descname}[(]{.sig-paren}[)]{.sig-paren}[¶](#models.pytorch.models.BaseModel.train_mode "Permalink to this definition"){.headerlink}
+<div class="admonition warning">
 
-    :   Sets the model to training mode.
+Warning
 
-    [[training_step]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[batch]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.BaseModel.training_step "Permalink to this definition"){.headerlink}
+This function must be implemented in the subclass, else it raises a
+NotImplementedError.
 
-    :   Performs a training step using the input batch data.
+</div>
 
-        Parameters
+&nbsp;
 
-        :   **batch** (*tuple*) -- A tuple containing input data and
-            labels.
+*class *models.pytorch.models.HybridEnsembleModel(*\*args: Any*, *\*\*kwargs: Any*)[¶](#models.pytorch.models.HybridEnsembleModel "Permalink to this definition")  
+A HybridEnsembleModel that extends the Pytorch BaseModel.
 
-        Returns
+This class creates an ensemble of LSTM and Transformer models and
+provides functionality to use the ensemble for making predictions.
 
-        :   The calculated loss and accuracy.
+learning\_ratefloat  
+The learning rate for the optimizer.
 
-        Return type
+lstmsnn.ModuleList  
+The list of LSTM models.
 
-        :   tuple
+modelsnn.ModuleList  
+The list of Transformer models.
 
-    [[validation_step]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[batch]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.BaseModel.validation_step "Permalink to this definition"){.headerlink}
+fcnn.Linear  
+The final fully-connected layer.
 
-    :   Performs a validation step using the input batch data.
+optimizertorch.optim.Adam  
+The optimizer used for updating the model parameters.
 
-        Parameters
+schedulertorch.optim.lr\_scheduler.ExponentialLR  
+The learning rate scheduler used for adapting the learning rate during
+training.
 
-        :   **batch** (*tuple*) -- A tuple containing input data and
-            labels.
+forward(x)  
+Performs a forward pass through the model.
 
-        Returns
+\_\_init\_\_(*\*\*kwargs*)[¶](#models.pytorch.models.HybridEnsembleModel.__init__ "Permalink to this definition")  
 
-        :   The calculated loss and accuracy.
+forward(*x*)[¶](#models.pytorch.models.HybridEnsembleModel.forward "Permalink to this definition")  
+The forward function for the BaseModel.
 
-        Return type
+Parameters  
+**x** (*Tensor*) – The inputs to the model.
 
-        :   tuple
+Returns  
+None
 
-```{=html}
-<!-- -->
-```
+<div class="admonition warning">
 
-*[class]{.pre}[ ]{.w}*[[models.pytorch.models.]{.pre}]{.sig-prename .descclassname}[[CVTransferLearningModel]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*]{.pre}]{.o}[[args]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*, *[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.CVTransferLearningModel "Permalink to this definition"){.headerlink}
+Warning
 
-:   A CVTransferLearningModel that extends the Pytorch BaseModel.
+This function must be implemented in the subclass, else it raises a
+NotImplementedError.
 
-    This class applies transfer learning for computer vision tasks using
-    pretrained models. It also provides a forward method to pass an
-    input through the model.
+</div>
 
-    learning_rate[float]{.classifier}
+&nbsp;
 
-    :   The learning rate for the optimizer.
+*class *models.pytorch.models.HybridModel(*\*args: Any*, *\*\*kwargs: Any*)[¶](#models.pytorch.models.HybridModel "Permalink to this definition")  
+A HybridModel that extends the Pytorch BaseModel.
 
-    model[nn.Module]{.classifier}
+This class combines the LSTMClassifier and TransformerSequenceClassifier
+models and provides functionality to use the combined model for making
+predictions.
 
-    :   The base model for transfer learning.
+lstmLSTMClassifier  
+The LSTM classifier used for making predictions.
 
-    optimizer[torch.optim.Adam]{.classifier}
+transformerTransformerSequenceClassifier  
+The transformer sequence classifier used for making predictions.
 
-    :   The optimizer used for updating the model parameters.
+fcnn.Linear  
+The final fully-connected layer.
 
-    scheduler[torch.optim.lr_scheduler.ExponentialLR]{.classifier}
+optimizertorch.optim.Adam  
+The optimizer used for updating the model parameters.
 
-    :   The learning rate scheduler used for adapting the learning rate
-        during training.
+schedulertorch.optim.lr\_scheduler.ExponentialLR  
+The learning rate scheduler used for adapting the learning rate during
+training.
 
-    forward(x)
+forward(x)  
+Performs a forward pass through the model.
 
-    :   Performs a forward pass through the model.
+\_\_init\_\_(*\*\*kwargs*)[¶](#models.pytorch.models.HybridModel.__init__ "Permalink to this definition")  
 
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.CVTransferLearningModel.__init__ "Permalink to this definition"){.headerlink}
+forward(*x*)[¶](#models.pytorch.models.HybridModel.forward "Permalink to this definition")  
+The forward function for the BaseModel.
 
-    :   
+Parameters  
+**x** (*Tensor*) – The inputs to the model.
 
-    [[forward]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[x]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.CVTransferLearningModel.forward "Permalink to this definition"){.headerlink}
+Returns  
+None
 
-    :   The forward function for the BaseModel.
+<div class="admonition warning">
 
-        Parameters
+Warning
 
-        :   **x** (*Tensor*) -- The inputs to the model.
+This function must be implemented in the subclass, else it raises a
+NotImplementedError.
 
-        Returns
+</div>
 
-        :   None
+&nbsp;
 
-        ::: {.admonition .warning}
-        Warning
+*class *models.pytorch.models.LSTMClassifier(*\*args: Any*, *\*\*kwargs: Any*)[¶](#models.pytorch.models.LSTMClassifier "Permalink to this definition")  
+A LSTM-based Sequence Classifier. This class utilizes a LSTM network for
+sequence classification tasks.
 
-        This function must be implemented in the subclass, else it
-        raises a NotImplementedError.
-        :::
+DEFAULTSdict  
+Default settings for the LSTM and classifier. These can be overridden by
+passing values in the constructor.
 
-```{=html}
-<!-- -->
-```
+lstmnn.LSTM  
+The LSTM network used for processing the input sequence.
 
-*[class]{.pre}[ ]{.w}*[[models.pytorch.models.]{.pre}]{.sig-prename .descclassname}[[HybridEnsembleModel]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*]{.pre}]{.o}[[args]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*, *[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.HybridEnsembleModel "Permalink to this definition"){.headerlink}
+dropoutnn.Dropout  
+The dropout layer applied after LSTM network.
 
-:   A HybridEnsembleModel that extends the Pytorch BaseModel.
+output\_layernn.Linear  
+The output layer used to generate class predictions.
 
-    This class creates an ensemble of LSTM and Transformer models and
-    provides functionality to use the ensemble for making predictions.
+forward(x)  
+Performs a forward pass through the model.
 
-    learning_rate[float]{.classifier}
+\_\_init\_\_(*\*\*kwargs*)[¶](#models.pytorch.models.LSTMClassifier.__init__ "Permalink to this definition")  
 
-    :   The learning rate for the optimizer.
+forward(*x*)[¶](#models.pytorch.models.LSTMClassifier.forward "Permalink to this definition")  
+Forward pass through the model
 
-    lstms[nn.ModuleList]{.classifier}
+&nbsp;
 
-    :   The list of LSTM models.
+*class *models.pytorch.models.LSTMPredictor(*\*args: Any*, *\*\*kwargs: Any*)[¶](#models.pytorch.models.LSTMPredictor "Permalink to this definition")  
+A LSTMPredictor model that extends the Pytorch BaseModel.
 
-    models[nn.ModuleList]{.classifier}
+This class wraps the LSTMClassifier model and provides functionality to
+use it for making predictions.
 
-    :   The list of Transformer models.
+learning\_ratefloat  
+The learning rate for the optimizer.
 
-    fc[nn.Linear]{.classifier}
+modelLSTMClassifier  
+The LSTM classifier used for making predictions.
 
-    :   The final fully-connected layer.
+optimizertorch.optim.Adam  
+The optimizer used for updating the model parameters.
 
-    optimizer[torch.optim.Adam]{.classifier}
+schedulertorch.optim.lr\_scheduler.ExponentialLR  
+The learning rate scheduler used for adapting the learning rate during
+training.
 
-    :   The optimizer used for updating the model parameters.
+forward(x)  
+Performs a forward pass through the model.
 
-    scheduler[torch.optim.lr_scheduler.ExponentialLR]{.classifier}
+\_\_init\_\_(*\*\*kwargs*)[¶](#models.pytorch.models.LSTMPredictor.__init__ "Permalink to this definition")  
 
-    :   The learning rate scheduler used for adapting the learning rate
-        during training.
+forward(*x*)[¶](#models.pytorch.models.LSTMPredictor.forward "Permalink to this definition")  
+The forward function for the BaseModel.
 
-    forward(x)
+Parameters  
+**x** (*Tensor*) – The inputs to the model.
 
-    :   Performs a forward pass through the model.
+Returns  
+None
 
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.HybridEnsembleModel.__init__ "Permalink to this definition"){.headerlink}
+<div class="admonition warning">
 
-    :   
+Warning
 
-    [[forward]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[x]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.HybridEnsembleModel.forward "Permalink to this definition"){.headerlink}
+This function must be implemented in the subclass, else it raises a
+NotImplementedError.
 
-    :   The forward function for the BaseModel.
+</div>
 
-        Parameters
+&nbsp;
 
-        :   **x** (*Tensor*) -- The inputs to the model.
+*class *models.pytorch.models.MultiHeadSelfAttention(*\*args: Any*, *\*\*kwargs: Any*)[¶](#models.pytorch.models.MultiHeadSelfAttention "Permalink to this definition")  
+A MultiHeadSelfAttention module that extends the nn.Module from PyTorch.
 
-        Returns
+Functionality: \#. The class initializes with a given dimension size,
+number of attention heads, dropout rate, layer normalization and
+causality. \#. It sets up the multihead attention module and layer
+normalization. \#. It also defines a forward method that applies the
+multihead attention, causal masking if requested, and layer
+normalization if requested.
 
-        :   None
+multihead\_attnnn.MultiheadAttention  
+The multihead attention module.
 
-        ::: {.admonition .warning}
-        Warning
+layer\_normnn.LayerNorm or None  
+The layer normalization module. If it is not applied, set to None.
 
-        This function must be implemented in the subclass, else it
-        raises a NotImplementedError.
-        :::
+causalbool  
+If True, applies causal masking.
 
-```{=html}
-<!-- -->
-```
+forward(x)  
+Performs a forward pass through the model.
 
-*[class]{.pre}[ ]{.w}*[[models.pytorch.models.]{.pre}]{.sig-prename .descclassname}[[HybridModel]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*]{.pre}]{.o}[[args]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*, *[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.HybridModel "Permalink to this definition"){.headerlink}
+Args:  
+dim (int): The dimension size of the input data. num\_heads (int): The
+number of attention heads. dropout (float): The dropout rate.
+layer\_norm (bool): Whether to apply layer normalization. causal (bool):
+Whether to apply causal masking.
 
-:   A HybridModel that extends the Pytorch BaseModel.
+Returns: None
 
-    This class combines the LSTMClassifier and
-    TransformerSequenceClassifier models and provides functionality to
-    use the combined model for making predictions.
+\_\_init\_\_(*dim*, *num\_heads=8*, *dropout=0.1*, *layer\_norm=True*, *causal=True*)[¶](#models.pytorch.models.MultiHeadSelfAttention.__init__ "Permalink to this definition")  
 
-    lstm[LSTMClassifier]{.classifier}
+&nbsp;
 
-    :   The LSTM classifier used for making predictions.
+*class *models.pytorch.models.TransformerBlock(*\*args: Any*, *\*\*kwargs: Any*)[¶](#models.pytorch.models.TransformerBlock "Permalink to this definition")  
+A TransformerBlock module that extends the nn.Module from PyTorch.
 
-    transformer[TransformerSequenceClassifier]{.classifier}
+Functionality: \#. The class initializes with a given dimension size,
+number of attention heads, expansion factor, attention dropout rate, and
+dropout rate. \#. It sets up the multihead self-attention module, layer
+normalization and feed-forward network. \#. It also defines a forward
+method that applies the multihead self-attention, dropout, layer
+normalization and feed-forward network.
 
-    :   The transformer sequence classifier used for making predictions.
+norm1, norm2, norm3nn.LayerNorm  
+The layer normalization modules.
 
-    fc[nn.Linear]{.classifier}
+attnMultiHeadSelfAttention  
+The multihead self-attention module.
 
-    :   The final fully-connected layer.
+feed\_forwardnn.Sequential  
+The feed-forward network.
 
-    optimizer[torch.optim.Adam]{.classifier}
+dropoutnn.Dropout  
+The dropout module.
 
-    :   The optimizer used for updating the model parameters.
+forward(x)  
+Performs a forward pass through the model.
 
-    scheduler[torch.optim.lr_scheduler.ExponentialLR]{.classifier}
+Args:  
+dim (int): The dimension size of the input data. num\_heads (int): The
+number of attention heads. expansion\_factor (int): The expansion factor
+for the hidden layer size in the feed-forward network. attn\_dropout
+(float): The dropout rate for the attention module. drop\_rate (float):
+The dropout rate for the module.
 
-    :   The learning rate scheduler used for adapting the learning rate
-        during training.
+Returns: None
 
-    forward(x)
+\_\_init\_\_(*dim=192*, *num\_heads=4*, *expansion\_factor=4*, *attn\_dropout=0.2*, *drop\_rate=0.2*)[¶](#models.pytorch.models.TransformerBlock.__init__ "Permalink to this definition")  
 
-    :   Performs a forward pass through the model.
+&nbsp;
 
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.HybridModel.__init__ "Permalink to this definition"){.headerlink}
+*class *models.pytorch.models.TransformerEnsemble(*\*args: Any*, *\*\*kwargs: Any*)[¶](#models.pytorch.models.TransformerEnsemble "Permalink to this definition")  
+A TransformerEnsemble that extends the Pytorch BaseModel.
 
-    :   
+This class creates an ensemble of TransformerSequenceClassifier models
+and provides functionality to use the ensemble for making predictions.
 
-    [[forward]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[x]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.HybridModel.forward "Permalink to this definition"){.headerlink}
+learning\_ratefloat  
+The learning rate for the optimizer.
 
-    :   The forward function for the BaseModel.
+modelsnn.ModuleList  
+The list of transformer sequence classifiers used for making
+predictions.
 
-        Parameters
+fcnn.Linear  
+The final fully-connected layer.
 
-        :   **x** (*Tensor*) -- The inputs to the model.
+optimizertorch.optim.Adam  
+The optimizer used for updating the model parameters.
 
-        Returns
+schedulertorch.optim.lr\_scheduler.ExponentialLR  
+The learning rate scheduler used for adapting the learning rate during
+training.
 
-        :   None
+forward(x)  
+Performs a forward pass through the model.
 
-        ::: {.admonition .warning}
-        Warning
+\_\_init\_\_(*\*\*kwargs*)[¶](#models.pytorch.models.TransformerEnsemble.__init__ "Permalink to this definition")  
 
-        This function must be implemented in the subclass, else it
-        raises a NotImplementedError.
-        :::
+forward(*x*)[¶](#models.pytorch.models.TransformerEnsemble.forward "Permalink to this definition")  
+The forward function for the BaseModel.
 
-```{=html}
-<!-- -->
-```
+Parameters  
+**x** (*Tensor*) – The inputs to the model.
 
-*[class]{.pre}[ ]{.w}*[[models.pytorch.models.]{.pre}]{.sig-prename .descclassname}[[LSTMClassifier]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*]{.pre}]{.o}[[args]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*, *[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.LSTMClassifier "Permalink to this definition"){.headerlink}
+Returns  
+None
 
-:   A LSTM-based Sequence Classifier. This class utilizes a LSTM network
-    for sequence classification tasks.
+<div class="admonition warning">
 
-    DEFAULTS[dict]{.classifier}
+Warning
 
-    :   Default settings for the LSTM and classifier. These can be
-        overridden by passing values in the constructor.
+This function must be implemented in the subclass, else it raises a
+NotImplementedError.
 
-    lstm[nn.LSTM]{.classifier}
+</div>
 
-    :   The LSTM network used for processing the input sequence.
+&nbsp;
 
-    dropout[nn.Dropout]{.classifier}
+*class *models.pytorch.models.TransformerPredictor(*\*args: Any*, *\*\*kwargs: Any*)[¶](#models.pytorch.models.TransformerPredictor "Permalink to this definition")  
+A TransformerPredictor model that extends the Pytorch BaseModel.
 
-    :   The dropout layer applied after LSTM network.
+This class wraps the TransformerSequenceClassifier model and provides
+functionality to use it for making predictions.
 
-    output_layer[nn.Linear]{.classifier}
+learning\_ratefloat  
+The learning rate for the optimizer.
 
-    :   The output layer used to generate class predictions.
+modelTransformerSequenceClassifier  
+The transformer sequence classifier used for making predictions.
 
-    forward(x)
+optimizertorch.optim.Adam  
+The optimizer used for updating the model parameters.
 
-    :   Performs a forward pass through the model.
+schedulertorch.optim.lr\_scheduler.ExponentialLR  
+The learning rate scheduler used for adapting the learning rate during
+training.
 
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.LSTMClassifier.__init__ "Permalink to this definition"){.headerlink}
+forward(x)  
+Performs a forward pass through the model.
 
-    :   
+\_\_init\_\_(*\*\*kwargs*)[¶](#models.pytorch.models.TransformerPredictor.__init__ "Permalink to this definition")  
 
-    [[forward]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[x]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.LSTMClassifier.forward "Permalink to this definition"){.headerlink}
+forward(*x*)[¶](#models.pytorch.models.TransformerPredictor.forward "Permalink to this definition")  
+The forward function for the BaseModel.
 
-    :   Forward pass through the model
+Parameters  
+**x** (*Tensor*) – The inputs to the model.
 
-```{=html}
-<!-- -->
-```
+Returns  
+None
 
-*[class]{.pre}[ ]{.w}*[[models.pytorch.models.]{.pre}]{.sig-prename .descclassname}[[LSTMPredictor]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*]{.pre}]{.o}[[args]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*, *[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.LSTMPredictor "Permalink to this definition"){.headerlink}
+<div class="admonition warning">
 
-:   A LSTMPredictor model that extends the Pytorch BaseModel.
+Warning
 
-    This class wraps the LSTMClassifier model and provides functionality
-    to use it for making predictions.
+This function must be implemented in the subclass, else it raises a
+NotImplementedError.
 
-    learning_rate[float]{.classifier}
+</div>
 
-    :   The learning rate for the optimizer.
+&nbsp;
 
-    model[LSTMClassifier]{.classifier}
+*class *models.pytorch.models.TransformerSequenceClassifier(*\*args: Any*, *\*\*kwargs: Any*)[¶](#models.pytorch.models.TransformerSequenceClassifier "Permalink to this definition")  
+A Transformer-based Sequence Classifier. This class utilizes a
+transformer encoder to process the input sequence.
 
-    :   The LSTM classifier used for making predictions.
+The transformer encoder consists of a stack of N transformer layers that
+are applied to the input sequence. The output sequence from the
+transformer encoder is then passed through a linear layer to generate
+class predictions.
 
-    optimizer[torch.optim.Adam]{.classifier}
+DEFAULTSdict  
+Default settings for the transformer encoder and classifier. These can
+be overridden by passing values in the constructor.
 
-    :   The optimizer used for updating the model parameters.
+transformernn.TransformerEncoder  
+The transformer encoder used to process the input sequence.
 
-    scheduler[torch.optim.lr_scheduler.ExponentialLR]{.classifier}
+output\_layernn.Linear  
+The output layer used to generate class predictions.
 
-    :   The learning rate scheduler used for adapting the learning rate
-        during training.
+batch\_firstbool  
+Whether the first dimension of the input tensor represents the batch
+size.
 
-    forward(x)
+forward(inputs)  
+Performs a forward pass through the model.
 
-    :   Performs a forward pass through the model.
+\_\_init\_\_(*\*\*kwargs*)[¶](#models.pytorch.models.TransformerSequenceClassifier.__init__ "Permalink to this definition")  
 
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.LSTMPredictor.__init__ "Permalink to this definition"){.headerlink}
+forward(*inputs*)[¶](#models.pytorch.models.TransformerSequenceClassifier.forward "Permalink to this definition")  
+Forward pass through the model
 
-    :   
+&nbsp;
 
-    [[forward]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[x]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.LSTMPredictor.forward "Permalink to this definition"){.headerlink}
+*class *models.pytorch.models.YetAnotherEnsemble(*\*args: Any*, *\*\*kwargs: Any*)[¶](#models.pytorch.models.YetAnotherEnsemble "Permalink to this definition")  
+A YetAnotherEnsemble model that extends the Pytorch BaseModel.
 
-    :   The forward function for the BaseModel.
+Functionality: \#. The class initializes with a set of parameters for
+the YetAnotherTransformerClassifier. \#. It sets up an ensemble of
+YetAnotherTransformerClassifier models, a fully connected layer, the
+optimizer and the learning rate scheduler. \#. It also defines a forward
+method that applies each YetAnotherTransformerClassifier model in the
+ensemble, concatenates the outputs and applies the fully connected
+layer.
 
-        Parameters
+Args:  
+kwargs (dict): A dictionary containing the parameters for the
+YetAnotherTransformerClassifier models, fully connected layer, optimizer
+and learning rate scheduler.
 
-        :   **x** (*Tensor*) -- The inputs to the model.
+Returns: None
 
-        Returns
+\_\_init\_\_(*\*\*kwargs*)[¶](#models.pytorch.models.YetAnotherEnsemble.__init__ "Permalink to this definition")  
 
-        :   None
+forward(*x*)[¶](#models.pytorch.models.YetAnotherEnsemble.forward "Permalink to this definition")  
+The forward function for the BaseModel.
 
-        ::: {.admonition .warning}
-        Warning
+Parameters  
+**x** (*Tensor*) – The inputs to the model.
 
-        This function must be implemented in the subclass, else it
-        raises a NotImplementedError.
-        :::
+Returns  
+None
 
-```{=html}
-<!-- -->
-```
+<div class="admonition warning">
 
-*[class]{.pre}[ ]{.w}*[[models.pytorch.models.]{.pre}]{.sig-prename .descclassname}[[MultiHeadSelfAttention]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*]{.pre}]{.o}[[args]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*, *[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.MultiHeadSelfAttention "Permalink to this definition"){.headerlink}
+Warning
 
-:   A MultiHeadSelfAttention module that extends the nn.Module from
-    PyTorch.
+This function must be implemented in the subclass, else it raises a
+NotImplementedError.
 
-    Functionality: \#. The class initializes with a given dimension
-    size, number of attention heads, dropout rate, layer normalization
-    and causality. \#. It sets up the multihead attention module and
-    layer normalization. \#. It also defines a forward method that
-    applies the multihead attention, causal masking if requested, and
-    layer normalization if requested.
+</div>
 
-    multihead_attn[nn.MultiheadAttention]{.classifier}
+&nbsp;
 
-    :   The multihead attention module.
+*class *models.pytorch.models.YetAnotherTransformer(*\*args: Any*, *\*\*kwargs: Any*)[¶](#models.pytorch.models.YetAnotherTransformer "Permalink to this definition")  
+A YetAnotherTransformer model that extends the Pytorch BaseModel.
 
-    layer_norm[nn.LayerNorm or None]{.classifier}
+Functionality: \#. The class initializes with a set of parameters for
+the YetAnotherTransformerClassifier. \#. It sets up the
+YetAnotherTransformerClassifier model, the optimizer and the learning
+rate scheduler. \#. It also defines a forward method that applies the
+YetAnotherTransformerClassifier model.
 
-    :   The layer normalization module. If it is not applied, set to
-        None.
+learning\_ratefloat  
+The learning rate for the optimizer.
 
-    causal[bool]{.classifier}
+modelYetAnotherTransformerClassifier  
+The YetAnotherTransformerClassifier model.
 
-    :   If True, applies causal masking.
+optimizertorch.optim.AdamW  
+The AdamW optimizer.
 
-    forward(x)
+schedulertorch.optim.lr\_scheduler.ExponentialLR  
+The learning rate scheduler.
 
-    :   Performs a forward pass through the model.
+forward(x)  
+Performs a forward pass through the model.
 
-    Args:
+Args:  
+kwargs (dict): A dictionary containing the parameters for the
+YetAnotherTransformerClassifier, optimizer and learning rate scheduler.
 
-    :   dim (int): The dimension size of the input data. num_heads
-        (int): The number of attention heads. dropout (float): The
-        dropout rate. layer_norm (bool): Whether to apply layer
-        normalization. causal (bool): Whether to apply causal masking.
+Returns: None
 
-    Returns: None
+\_\_init\_\_(*\*\*kwargs*)[¶](#models.pytorch.models.YetAnotherTransformer.__init__ "Permalink to this definition")  
 
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[dim]{.pre}]{.n}*, *[[num_heads]{.pre}]{.n}[[=]{.pre}]{.o}[[8]{.pre}]{.default_value}*, *[[dropout]{.pre}]{.n}[[=]{.pre}]{.o}[[0.1]{.pre}]{.default_value}*, *[[layer_norm]{.pre}]{.n}[[=]{.pre}]{.o}[[True]{.pre}]{.default_value}*, *[[causal]{.pre}]{.n}[[=]{.pre}]{.o}[[True]{.pre}]{.default_value}*[)]{.sig-paren}[¶](#models.pytorch.models.MultiHeadSelfAttention.__init__ "Permalink to this definition"){.headerlink}
+forward(*x*)[¶](#models.pytorch.models.YetAnotherTransformer.forward "Permalink to this definition")  
+The forward function for the BaseModel.
 
-    :   
+Parameters  
+**x** (*Tensor*) – The inputs to the model.
 
-```{=html}
-<!-- -->
-```
+Returns  
+None
 
-*[class]{.pre}[ ]{.w}*[[models.pytorch.models.]{.pre}]{.sig-prename .descclassname}[[TransformerBlock]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*]{.pre}]{.o}[[args]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*, *[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.TransformerBlock "Permalink to this definition"){.headerlink}
+<div class="admonition warning">
 
-:   A TransformerBlock module that extends the nn.Module from PyTorch.
+Warning
 
-    Functionality: \#. The class initializes with a given dimension
-    size, number of attention heads, expansion factor, attention dropout
-    rate, and dropout rate. \#. It sets up the multihead self-attention
-    module, layer normalization and feed-forward network. \#. It also
-    defines a forward method that applies the multihead self-attention,
-    dropout, layer normalization and feed-forward network.
+This function must be implemented in the subclass, else it raises a
+NotImplementedError.
 
-    norm1, norm2, norm3[nn.LayerNorm]{.classifier}
+</div>
 
-    :   The layer normalization modules.
+&nbsp;
 
-    attn[MultiHeadSelfAttention]{.classifier}
+*class *models.pytorch.models.YetAnotherTransformerClassifier(*\*args: Any*, *\*\*kwargs: Any*)[¶](#models.pytorch.models.YetAnotherTransformerClassifier "Permalink to this definition")  
+A YetAnotherTransformerClassifier module that extends the nn.Module from
+PyTorch.
 
-    :   The multihead self-attention module.
+Functionality: \#. The class initializes with a set of parameters for
+the transformer blocks. \#. It sets up the transformer blocks and the
+output layer. \#. It also defines a forward method that applies the
+transformer blocks, takes the mean over the time dimension of the
+transformed sequence, and applies the output layer.
 
-    feed_forward[nn.Sequential]{.classifier}
+DEFAULTSdict  
+The default settings for the transformer.
 
-    :   The feed-forward network.
+settingsdict  
+The settings for the transformer, with any user-provided values
+overriding the defaults.
 
-    dropout[nn.Dropout]{.classifier}
+transformernn.ModuleList  
+The list of transformer blocks.
 
-    :   The dropout module.
+output\_layernn.Linear  
+The output layer.
 
-    forward(x)
+forward(inputs)  
+Performs a forward pass through the model.
 
-    :   Performs a forward pass through the model.
+Args:  
+kwargs (dict): A dictionary containing the parameters for the
+transformer blocks.
 
-    Args:
+Returns: None
 
-    :   dim (int): The dimension size of the input data. num_heads
-        (int): The number of attention heads. expansion_factor (int):
-        The expansion factor for the hidden layer size in the
-        feed-forward network. attn_dropout (float): The dropout rate for
-        the attention module. drop_rate (float): The dropout rate for
-        the module.
+\_\_init\_\_(*\*\*kwargs*)[¶](#models.pytorch.models.YetAnotherTransformerClassifier.__init__ "Permalink to this definition")  
 
-    Returns: None
+forward(*inputs*)[¶](#models.pytorch.models.YetAnotherTransformerClassifier.forward "Permalink to this definition")  
+Forward pass through the model
 
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[dim]{.pre}]{.n}[[=]{.pre}]{.o}[[192]{.pre}]{.default_value}*, *[[num_heads]{.pre}]{.n}[[=]{.pre}]{.o}[[4]{.pre}]{.default_value}*, *[[expansion_factor]{.pre}]{.n}[[=]{.pre}]{.o}[[4]{.pre}]{.default_value}*, *[[attn_dropout]{.pre}]{.n}[[=]{.pre}]{.o}[[0.2]{.pre}]{.default_value}*, *[[drop_rate]{.pre}]{.n}[[=]{.pre}]{.o}[[0.2]{.pre}]{.default_value}*[)]{.sig-paren}[¶](#models.pytorch.models.TransformerBlock.__init__ "Permalink to this definition"){.headerlink}
+</div>
 
-    :   
+<div id="module-models.tensorflow.models" class="section">
 
-```{=html}
-<!-- -->
-```
-
-*[class]{.pre}[ ]{.w}*[[models.pytorch.models.]{.pre}]{.sig-prename .descclassname}[[TransformerEnsemble]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*]{.pre}]{.o}[[args]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*, *[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.TransformerEnsemble "Permalink to this definition"){.headerlink}
-
-:   A TransformerEnsemble that extends the Pytorch BaseModel.
-
-    This class creates an ensemble of TransformerSequenceClassifier
-    models and provides functionality to use the ensemble for making
-    predictions.
-
-    learning_rate[float]{.classifier}
-
-    :   The learning rate for the optimizer.
-
-    models[nn.ModuleList]{.classifier}
-
-    :   The list of transformer sequence classifiers used for making
-        predictions.
-
-    fc[nn.Linear]{.classifier}
-
-    :   The final fully-connected layer.
-
-    optimizer[torch.optim.Adam]{.classifier}
-
-    :   The optimizer used for updating the model parameters.
-
-    scheduler[torch.optim.lr_scheduler.ExponentialLR]{.classifier}
-
-    :   The learning rate scheduler used for adapting the learning rate
-        during training.
-
-    forward(x)
-
-    :   Performs a forward pass through the model.
-
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.TransformerEnsemble.__init__ "Permalink to this definition"){.headerlink}
-
-    :   
-
-    [[forward]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[x]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.TransformerEnsemble.forward "Permalink to this definition"){.headerlink}
-
-    :   The forward function for the BaseModel.
-
-        Parameters
-
-        :   **x** (*Tensor*) -- The inputs to the model.
-
-        Returns
-
-        :   None
-
-        ::: {.admonition .warning}
-        Warning
-
-        This function must be implemented in the subclass, else it
-        raises a NotImplementedError.
-        :::
-
-```{=html}
-<!-- -->
-```
-
-*[class]{.pre}[ ]{.w}*[[models.pytorch.models.]{.pre}]{.sig-prename .descclassname}[[TransformerPredictor]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*]{.pre}]{.o}[[args]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*, *[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.TransformerPredictor "Permalink to this definition"){.headerlink}
-
-:   A TransformerPredictor model that extends the Pytorch BaseModel.
-
-    This class wraps the TransformerSequenceClassifier model and
-    provides functionality to use it for making predictions.
-
-    learning_rate[float]{.classifier}
-
-    :   The learning rate for the optimizer.
-
-    model[TransformerSequenceClassifier]{.classifier}
-
-    :   The transformer sequence classifier used for making predictions.
-
-    optimizer[torch.optim.Adam]{.classifier}
-
-    :   The optimizer used for updating the model parameters.
-
-    scheduler[torch.optim.lr_scheduler.ExponentialLR]{.classifier}
-
-    :   The learning rate scheduler used for adapting the learning rate
-        during training.
-
-    forward(x)
-
-    :   Performs a forward pass through the model.
-
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.TransformerPredictor.__init__ "Permalink to this definition"){.headerlink}
-
-    :   
-
-    [[forward]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[x]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.TransformerPredictor.forward "Permalink to this definition"){.headerlink}
-
-    :   The forward function for the BaseModel.
-
-        Parameters
-
-        :   **x** (*Tensor*) -- The inputs to the model.
-
-        Returns
-
-        :   None
-
-        ::: {.admonition .warning}
-        Warning
-
-        This function must be implemented in the subclass, else it
-        raises a NotImplementedError.
-        :::
-
-```{=html}
-<!-- -->
-```
-
-*[class]{.pre}[ ]{.w}*[[models.pytorch.models.]{.pre}]{.sig-prename .descclassname}[[TransformerSequenceClassifier]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*]{.pre}]{.o}[[args]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*, *[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.TransformerSequenceClassifier "Permalink to this definition"){.headerlink}
-
-:   A Transformer-based Sequence Classifier. This class utilizes a
-    transformer encoder to process the input sequence.
-
-    The transformer encoder consists of a stack of N transformer layers
-    that are applied to the input sequence. The output sequence from the
-    transformer encoder is then passed through a linear layer to
-    generate class predictions.
-
-    DEFAULTS[dict]{.classifier}
-
-    :   Default settings for the transformer encoder and classifier.
-        These can be overridden by passing values in the constructor.
-
-    transformer[nn.TransformerEncoder]{.classifier}
-
-    :   The transformer encoder used to process the input sequence.
-
-    output_layer[nn.Linear]{.classifier}
-
-    :   The output layer used to generate class predictions.
-
-    batch_first[bool]{.classifier}
-
-    :   Whether the first dimension of the input tensor represents the
-        batch size.
-
-    forward(inputs)
-
-    :   Performs a forward pass through the model.
-
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.TransformerSequenceClassifier.__init__ "Permalink to this definition"){.headerlink}
-
-    :   
-
-    [[forward]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[inputs]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.TransformerSequenceClassifier.forward "Permalink to this definition"){.headerlink}
-
-    :   Forward pass through the model
-
-```{=html}
-<!-- -->
-```
-
-*[class]{.pre}[ ]{.w}*[[models.pytorch.models.]{.pre}]{.sig-prename .descclassname}[[YetAnotherEnsemble]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*]{.pre}]{.o}[[args]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*, *[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.YetAnotherEnsemble "Permalink to this definition"){.headerlink}
-
-:   A YetAnotherEnsemble model that extends the Pytorch BaseModel.
-
-    Functionality: \#. The class initializes with a set of parameters
-    for the YetAnotherTransformerClassifier. \#. It sets up an ensemble
-    of YetAnotherTransformerClassifier models, a fully connected layer,
-    the optimizer and the learning rate scheduler. \#. It also defines a
-    forward method that applies each YetAnotherTransformerClassifier
-    model in the ensemble, concatenates the outputs and applies the
-    fully connected layer.
-
-    Args:
-
-    :   kwargs (dict): A dictionary containing the parameters for the
-        YetAnotherTransformerClassifier models, fully connected layer,
-        optimizer and learning rate scheduler.
-
-    Returns: None
-
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.YetAnotherEnsemble.__init__ "Permalink to this definition"){.headerlink}
-
-    :   
-
-    [[forward]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[x]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.YetAnotherEnsemble.forward "Permalink to this definition"){.headerlink}
-
-    :   The forward function for the BaseModel.
-
-        Parameters
-
-        :   **x** (*Tensor*) -- The inputs to the model.
-
-        Returns
-
-        :   None
-
-        ::: {.admonition .warning}
-        Warning
-
-        This function must be implemented in the subclass, else it
-        raises a NotImplementedError.
-        :::
-
-```{=html}
-<!-- -->
-```
-
-*[class]{.pre}[ ]{.w}*[[models.pytorch.models.]{.pre}]{.sig-prename .descclassname}[[YetAnotherTransformer]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*]{.pre}]{.o}[[args]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*, *[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.YetAnotherTransformer "Permalink to this definition"){.headerlink}
-
-:   A YetAnotherTransformer model that extends the Pytorch BaseModel.
-
-    Functionality: \#. The class initializes with a set of parameters
-    for the YetAnotherTransformerClassifier. \#. It sets up the
-    YetAnotherTransformerClassifier model, the optimizer and the
-    learning rate scheduler. \#. It also defines a forward method that
-    applies the YetAnotherTransformerClassifier model.
-
-    learning_rate[float]{.classifier}
-
-    :   The learning rate for the optimizer.
-
-    model[YetAnotherTransformerClassifier]{.classifier}
-
-    :   The YetAnotherTransformerClassifier model.
-
-    optimizer[torch.optim.AdamW]{.classifier}
-
-    :   The AdamW optimizer.
-
-    scheduler[torch.optim.lr_scheduler.ExponentialLR]{.classifier}
-
-    :   The learning rate scheduler.
-
-    forward(x)
-
-    :   Performs a forward pass through the model.
-
-    Args:
-
-    :   kwargs (dict): A dictionary containing the parameters for the
-        YetAnotherTransformerClassifier, optimizer and learning rate
-        scheduler.
-
-    Returns: None
-
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.YetAnotherTransformer.__init__ "Permalink to this definition"){.headerlink}
-
-    :   
-
-    [[forward]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[x]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.YetAnotherTransformer.forward "Permalink to this definition"){.headerlink}
-
-    :   The forward function for the BaseModel.
-
-        Parameters
-
-        :   **x** (*Tensor*) -- The inputs to the model.
-
-        Returns
-
-        :   None
-
-        ::: {.admonition .warning}
-        Warning
-
-        This function must be implemented in the subclass, else it
-        raises a NotImplementedError.
-        :::
-
-```{=html}
-<!-- -->
-```
-
-*[class]{.pre}[ ]{.w}*[[models.pytorch.models.]{.pre}]{.sig-prename .descclassname}[[YetAnotherTransformerClassifier]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*]{.pre}]{.o}[[args]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*, *[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.YetAnotherTransformerClassifier "Permalink to this definition"){.headerlink}
-
-:   A YetAnotherTransformerClassifier module that extends the nn.Module
-    from PyTorch.
-
-    Functionality: \#. The class initializes with a set of parameters
-    for the transformer blocks. \#. It sets up the transformer blocks
-    and the output layer. \#. It also defines a forward method that
-    applies the transformer blocks, takes the mean over the time
-    dimension of the transformed sequence, and applies the output layer.
-
-    DEFAULTS[dict]{.classifier}
-
-    :   The default settings for the transformer.
-
-    settings[dict]{.classifier}
-
-    :   The settings for the transformer, with any user-provided values
-        overriding the defaults.
-
-    transformer[nn.ModuleList]{.classifier}
-
-    :   The list of transformer blocks.
-
-    output_layer[nn.Linear]{.classifier}
-
-    :   The output layer.
-
-    forward(inputs)
-
-    :   Performs a forward pass through the model.
-
-    Args:
-
-    :   kwargs (dict): A dictionary containing the parameters for the
-        transformer blocks.
-
-    Returns: None
-
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.YetAnotherTransformerClassifier.__init__ "Permalink to this definition"){.headerlink}
-
-    :   
-
-    [[forward]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[inputs]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.models.YetAnotherTransformerClassifier.forward "Permalink to this definition"){.headerlink}
-
-    :   Forward pass through the model
-:::
-
-[]{#document-tensorflow_models}
-
-::: {#module-models.tensorflow.models .section}
-[]{#tensorflow-models}
-
-## Tensorflow Models[¶](#module-models.tensorflow.models "Permalink to this headline"){.headerlink}
+## Tensorflow Models[¶](#module-models.tensorflow.models "Permalink to this headline")
 
 This kodule defines a PyTorch BaseModel providing a basic framework for
 learning and validating from Trainer
 
-*[class]{.pre}[ ]{.w}*[[models.tensorflow.models.]{.pre}]{.sig-prename .descclassname}[[BaseModel]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*]{.pre}]{.o}[[args]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*, *[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.tensorflow.models.BaseModel "Permalink to this definition"){.headerlink}
+*class *models.tensorflow.models.BaseModel(*\*args: Any*, *\*\*kwargs: Any*)[¶](#models.tensorflow.models.BaseModel "Permalink to this definition")  
+A BaseModel that extends the tf.keras.Model.
 
-:   A BaseModel that extends the tf.keras.Model.
+Functionality: \#. The class initializes with a given learning rate. \#.
+It sets up the loss criterion, accuracy metric, and default states for
+optimizer and scheduler. \#. It defines an abstract method ‘call’ which
+should be implemented in the subclass. \#. It also defines various
+utility functions like calculating accuracy, training, validation and
+testing steps, scheduler stepping, and model checkpointing.
 
-    Functionality: \#. The class initializes with a given learning
-    rate. \#. It sets up the loss criterion, accuracy metric, and
-    default states for optimizer and scheduler. \#. It defines an
-    abstract method 'call' which should be implemented in the
-    subclass. \#. It also defines various utility functions like
-    calculating accuracy, training, validation and testing steps,
-    scheduler stepping, and model checkpointing.
+Args:  
+learning\_rate (float): The initial learning rate for optimizer.
 
-    Args:
+Parameters  
+**learning\_rate** (*float*) – The initial learning rate for optimizer.
 
-    :   learning_rate (float): The initial learning rate for optimizer.
+Returns  
+None
 
-    Parameters
+Return type  
+None
 
-    :   **learning_rate** (*float*) -- The initial learning rate for
-        optimizer.
+<div class="admonition note">
 
-    Returns
+Note
 
-    :   None
+The class does not directly initialize the optimizer and scheduler. They
+should be initialized in the subclass if needed.
 
-    Return type
+</div>
 
-    :   None
+<div class="admonition warning">
 
-    ::: {.admonition .note}
-    Note
+Warning
 
-    The class does not directly initialize the optimizer and scheduler.
-    They should be initialized in the subclass if needed.
-    :::
+The ‘call’ function must be implemented in the subclass, else it will
+raise a NotImplementedError.
 
-    ::: {.admonition .warning}
-    Warning
+</div>
 
-    The 'call' function must be implemented in the subclass, else it
-    will raise a NotImplementedError.
-    :::
+\_\_init\_\_(*learning\_rate*)[¶](#models.tensorflow.models.BaseModel.__init__ "Permalink to this definition")  
 
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[learning_rate]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.tensorflow.models.BaseModel.__init__ "Permalink to this definition"){.headerlink}
+calculate\_accuracy(*y\_pred*, *y\_true*)[¶](#models.tensorflow.models.BaseModel.calculate_accuracy "Permalink to this definition")  
+Calculates the accuracy of the model’s prediction.
 
-    :   
+Parameters  
+-   **y\_pred** (*Tensor*) – The predicted output from the model.
 
-    [[calculate_accuracy]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[y_pred]{.pre}]{.n}*, *[[y_true]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.tensorflow.models.BaseModel.calculate_accuracy "Permalink to this definition"){.headerlink}
+-   **y\_true** (*Tensor*) – The ground truth or actual labels.
 
-    :   Calculates the accuracy of the model's prediction.
+Returns  
+The calculated accuracy.
 
-        Parameters
+Return type  
+float
 
-        :   -   **y_pred** (*Tensor*) -- The predicted output from the
-                model.
+call(*inputs*, *training=False*)[¶](#models.tensorflow.models.BaseModel.call "Permalink to this definition")  
+The call function for the BaseModel.
 
-            -   **y_true** (*Tensor*) -- The ground truth or actual
-                labels.
+Parameters  
+-   **inputs** (*Tensor*) – The inputs to the model.
 
-        Returns
+-   **training** (*bool*) – A flag indicating whether the model is in
+    training mode. Default is False.
 
-        :   The calculated accuracy.
+Returns  
+None
 
-        Return type
+<div class="admonition warning">
 
-        :   float
+Warning
 
-    [[call]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[inputs]{.pre}]{.n}*, *[[training]{.pre}]{.n}[[=]{.pre}]{.o}[[False]{.pre}]{.default_value}*[)]{.sig-paren}[¶](#models.tensorflow.models.BaseModel.call "Permalink to this definition"){.headerlink}
+This function must be implemented in the subclass, else it raises a
+NotImplementedError.
 
-    :   The call function for the BaseModel.
+</div>
 
-        Parameters
+eval\_mode()[¶](#models.tensorflow.models.BaseModel.eval_mode "Permalink to this definition")  
+Sets the model to evaluation mode.
 
-        :   -   **inputs** (*Tensor*) -- The inputs to the model.
+get\_lr()[¶](#models.tensorflow.models.BaseModel.get_lr "Permalink to this definition")  
+Gets the current learning rate of the model.
 
-            -   **training** (*bool*) -- A flag indicating whether the
-                model is in training mode. Default is False.
+Returns  
+The current learning rate.
 
-        Returns
+Return type  
+float
 
-        :   None
+load\_checkpoint(*filepath*)[¶](#models.tensorflow.models.BaseModel.load_checkpoint "Permalink to this definition")  
+Loads the model weights from a checkpoint.
 
-        ::: {.admonition .warning}
-        Warning
+Parameters  
+**filepath** (*str*) – The file path where to load the model checkpoint
+from.
 
-        This function must be implemented in the subclass, else it
-        raises a NotImplementedError.
-        :::
+optimize()[¶](#models.tensorflow.models.BaseModel.optimize "Permalink to this definition")  
+Sets the model to training mode.
 
-    [[eval_mode]{.pre}]{.sig-name .descname}[(]{.sig-paren}[)]{.sig-paren}[¶](#models.tensorflow.models.BaseModel.eval_mode "Permalink to this definition"){.headerlink}
+save\_checkpoint(*filepath*)[¶](#models.tensorflow.models.BaseModel.save_checkpoint "Permalink to this definition")  
+Saves the model weights to a checkpoint.
 
-    :   Sets the model to evaluation mode.
+Parameters  
+**filepath** (*str*) – The file path where to save the model checkpoint.
 
-    [[get_lr]{.pre}]{.sig-name .descname}[(]{.sig-paren}[)]{.sig-paren}[¶](#models.tensorflow.models.BaseModel.get_lr "Permalink to this definition"){.headerlink}
+step\_scheduler()[¶](#models.tensorflow.models.BaseModel.step_scheduler "Permalink to this definition")  
+Adjusts the learning rate according to the learning rate scheduler.
 
-    :   Gets the current learning rate of the model.
+test\_step(*batch*)[¶](#models.tensorflow.models.BaseModel.test_step "Permalink to this definition")  
+Performs a test step using the input batch data.
 
-        Returns
+Parameters  
+**batch** (*tuple*) – A tuple containing input data and labels.
 
-        :   The current learning rate.
+Returns  
+The calculated loss, accuracy, and model predictions.
 
-        Return type
+Return type  
+tuple
 
-        :   float
+train\_mode()[¶](#models.tensorflow.models.BaseModel.train_mode "Permalink to this definition")  
+Sets the model to training mode.
 
-    [[load_checkpoint]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[filepath]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.tensorflow.models.BaseModel.load_checkpoint "Permalink to this definition"){.headerlink}
+training\_step(*batch*)[¶](#models.tensorflow.models.BaseModel.training_step "Permalink to this definition")  
+Performs a training step using the input batch data.
 
-    :   Loads the model weights from a checkpoint.
+Parameters  
+**batch** (*tuple*) – A tuple containing input data and labels.
 
-        Parameters
+Returns  
+The calculated loss and accuracy.
 
-        :   **filepath** (*str*) -- The file path where to load the
-            model checkpoint from.
+Return type  
+tuple
 
-    [[optimize]{.pre}]{.sig-name .descname}[(]{.sig-paren}[)]{.sig-paren}[¶](#models.tensorflow.models.BaseModel.optimize "Permalink to this definition"){.headerlink}
+validation\_step(*batch*)[¶](#models.tensorflow.models.BaseModel.validation_step "Permalink to this definition")  
+Performs a validation step using the input batch data.
 
-    :   Sets the model to training mode.
+Parameters  
+**batch** (*tuple*) – A tuple containing input data and labels.
 
-    [[save_checkpoint]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[filepath]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.tensorflow.models.BaseModel.save_checkpoint "Permalink to this definition"){.headerlink}
+Returns  
+The calculated loss and accuracy.
 
-    :   Saves the model weights to a checkpoint.
+Return type  
+tuple
 
-        Parameters
+&nbsp;
 
-        :   **filepath** (*str*) -- The file path where to save the
-            model checkpoint.
+*class *models.tensorflow.models.HybridModel(*\*args: Any*, *\*\*kwargs: Any*)[¶](#models.tensorflow.models.HybridModel "Permalink to this definition")  
+\_\_init\_\_(*\*\*kwargs*)[¶](#models.tensorflow.models.HybridModel.__init__ "Permalink to this definition")  
 
-    [[step_scheduler]{.pre}]{.sig-name .descname}[(]{.sig-paren}[)]{.sig-paren}[¶](#models.tensorflow.models.BaseModel.step_scheduler "Permalink to this definition"){.headerlink}
+call(*inputs*, *training=True*)[¶](#models.tensorflow.models.HybridModel.call "Permalink to this definition")  
+The call function for the BaseModel.
 
-    :   Adjusts the learning rate according to the learning rate
-        scheduler.
+Parameters  
+-   **inputs** (*Tensor*) – The inputs to the model.
 
-    [[test_step]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[batch]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.tensorflow.models.BaseModel.test_step "Permalink to this definition"){.headerlink}
+-   **training** (*bool*) – A flag indicating whether the model is in
+    training mode. Default is False.
 
-    :   Performs a test step using the input batch data.
+Returns  
+None
 
-        Parameters
+<div class="admonition warning">
 
-        :   **batch** (*tuple*) -- A tuple containing input data and
-            labels.
+Warning
 
-        Returns
+This function must be implemented in the subclass, else it raises a
+NotImplementedError.
 
-        :   The calculated loss, accuracy, and model predictions.
+</div>
 
-        Return type
+&nbsp;
 
-        :   tuple
+*class *models.tensorflow.models.LSTMClassifier(*\*args: Any*, *\*\*kwargs: Any*)[¶](#models.tensorflow.models.LSTMClassifier "Permalink to this definition")  
+LSTM-based Sequence Classifier
 
-    [[train_mode]{.pre}]{.sig-name .descname}[(]{.sig-paren}[)]{.sig-paren}[¶](#models.tensorflow.models.BaseModel.train_mode "Permalink to this definition"){.headerlink}
+\_\_init\_\_(*\*\*kwargs*)[¶](#models.tensorflow.models.LSTMClassifier.__init__ "Permalink to this definition")  
 
-    :   Sets the model to training mode.
+call(*inputs*)[¶](#models.tensorflow.models.LSTMClassifier.call "Permalink to this definition")  
+Forward pass through the model
 
-    [[training_step]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[batch]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.tensorflow.models.BaseModel.training_step "Permalink to this definition"){.headerlink}
+&nbsp;
 
-    :   Performs a training step using the input batch data.
+*class *models.tensorflow.models.LSTMPredictor(*\*args: Any*, *\*\*kwargs: Any*)[¶](#models.tensorflow.models.LSTMPredictor "Permalink to this definition")  
+\_\_init\_\_(*\*\*kwargs*)[¶](#models.tensorflow.models.LSTMPredictor.__init__ "Permalink to this definition")  
 
-        Parameters
+call(*inputs*)[¶](#models.tensorflow.models.LSTMPredictor.call "Permalink to this definition")  
+The call function for the BaseModel.
 
-        :   **batch** (*tuple*) -- A tuple containing input data and
-            labels.
+Parameters  
+-   **inputs** (*Tensor*) – The inputs to the model.
 
-        Returns
+-   **training** (*bool*) – A flag indicating whether the model is in
+    training mode. Default is False.
 
-        :   The calculated loss and accuracy.
+Returns  
+None
 
-        Return type
+<div class="admonition warning">
 
-        :   tuple
+Warning
 
-    [[validation_step]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[batch]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.tensorflow.models.BaseModel.validation_step "Permalink to this definition"){.headerlink}
+This function must be implemented in the subclass, else it raises a
+NotImplementedError.
 
-    :   Performs a validation step using the input batch data.
+</div>
 
-        Parameters
+&nbsp;
 
-        :   **batch** (*tuple*) -- A tuple containing input data and
-            labels.
+*class *models.tensorflow.models.TransformerEncoderLayer(*\*args: Any*, *\*\*kwargs: Any*)[¶](#models.tensorflow.models.TransformerEncoderLayer "Permalink to this definition")  
+A Transformer Encoder layer as a subclass of tf.keras.layers.Layer.
 
-        Returns
+Functionality: \#. The class first initializes with key parameters for
+MultiHeadAttention and feedforward network. \#. Then it defines the key
+components like multi-head attention, feedforward network, layer
+normalization, and dropout. \#. In the call function, it takes input and
+performs self-attention, followed by layer normalization and feedforward
+operation.
 
-        :   The calculated loss and accuracy.
+Args:  
+d\_model (int): The dimensionality of the input. n\_head (int): The
+number of heads in the multi-head attention. dim\_feedforward (int): The
+dimensionality of the feedforward network model. dropout (float): The
+dropout value.
 
-        Return type
+Parameters  
+-   **d\_model** (*int*) – The dimensionality of the input.
 
-        :   tuple
+-   **n\_head** (*int*) – The number of heads in the multi-head
+    attention.
 
-```{=html}
-<!-- -->
-```
+-   **dim\_feedforward** (*int*) – The dimensionality of the feedforward
+    network model.
 
-*[class]{.pre}[ ]{.w}*[[models.tensorflow.models.]{.pre}]{.sig-prename .descclassname}[[HybridModel]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*]{.pre}]{.o}[[args]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*, *[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.tensorflow.models.HybridModel "Permalink to this definition"){.headerlink}
+-   **dropout** (*float*) – The dropout value.
 
-:   
+Returns  
+None
 
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.tensorflow.models.HybridModel.__init__ "Permalink to this definition"){.headerlink}
+Return type  
+None
 
-    :   
+<div class="admonition note">
 
-    [[call]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[inputs]{.pre}]{.n}*, *[[training]{.pre}]{.n}[[=]{.pre}]{.o}[[True]{.pre}]{.default_value}*[)]{.sig-paren}[¶](#models.tensorflow.models.HybridModel.call "Permalink to this definition"){.headerlink}
+Note
 
-    :   The call function for the BaseModel.
+The implementation is based on the “Attention is All You Need” paper.
 
-        Parameters
+</div>
 
-        :   -   **inputs** (*Tensor*) -- The inputs to the model.
+<div class="admonition warning">
 
-            -   **training** (*bool*) -- A flag indicating whether the
-                model is in training mode. Default is False.
+Warning
 
-        Returns
+Ensure that the input dimension ‘d\_model’ is divisible by the number of
+attention heads ‘n\_head’.
 
-        :   None
+</div>
 
-        ::: {.admonition .warning}
-        Warning
+\_\_init\_\_(*d\_model*, *n\_head*, *dim\_feedforward*, *dropout*)[¶](#models.tensorflow.models.TransformerEncoderLayer.__init__ "Permalink to this definition")  
 
-        This function must be implemented in the subclass, else it
-        raises a NotImplementedError.
-        :::
+&nbsp;
 
-```{=html}
-<!-- -->
-```
+*class *models.tensorflow.models.TransformerPredictor(*\*args: Any*, *\*\*kwargs: Any*)[¶](#models.tensorflow.models.TransformerPredictor "Permalink to this definition")  
+A Transformer Predictor model that extends the BaseModel.
 
-*[class]{.pre}[ ]{.w}*[[models.tensorflow.models.]{.pre}]{.sig-prename .descclassname}[[LSTMClassifier]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*]{.pre}]{.o}[[args]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*, *[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.tensorflow.models.LSTMClassifier "Permalink to this definition"){.headerlink}
+Functionality: \#. The class first initializes with the learning rate
+and other parameters. \#. It then creates an instance of
+TransformerSequenceClassifier. \#. It also sets up the learning rate
+scheduler and the optimizer. \#. In the call function, it simply runs
+the TransformerSequenceClassifier.
 
-:   LSTM-based Sequence Classifier
+Args:  
+kwargs (dict): A dictionary of arguments.
 
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.tensorflow.models.LSTMClassifier.__init__ "Permalink to this definition"){.headerlink}
+Parameters  
+**kwargs** (*dict*) – A dictionary of arguments.
 
-    :   
+Returns  
+None
 
-    [[call]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[inputs]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.tensorflow.models.LSTMClassifier.call "Permalink to this definition"){.headerlink}
+Return type  
+None
 
-    :   Forward pass through the model
+<div class="admonition note">
 
-```{=html}
-<!-- -->
-```
+Note
 
-*[class]{.pre}[ ]{.w}*[[models.tensorflow.models.]{.pre}]{.sig-prename .descclassname}[[LSTMPredictor]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*]{.pre}]{.o}[[args]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*, *[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.tensorflow.models.LSTMPredictor "Permalink to this definition"){.headerlink}
+The learning rate is set up with an exponential decay schedule.
 
-:   
+</div>
 
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.tensorflow.models.LSTMPredictor.__init__ "Permalink to this definition"){.headerlink}
+<div class="admonition warning">
 
-    :   
+Warning
 
-    [[call]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[inputs]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.tensorflow.models.LSTMPredictor.call "Permalink to this definition"){.headerlink}
+The learning rate and gamma for the decay schedule must be specified in
+the ‘kwargs’.
 
-    :   The call function for the BaseModel.
+</div>
 
-        Parameters
+\_\_init\_\_(*\*\*kwargs*)[¶](#models.tensorflow.models.TransformerPredictor.__init__ "Permalink to this definition")  
 
-        :   -   **inputs** (*Tensor*) -- The inputs to the model.
+call(*inputs*, *training=True*)[¶](#models.tensorflow.models.TransformerPredictor.call "Permalink to this definition")  
+The call function for the BaseModel.
 
-            -   **training** (*bool*) -- A flag indicating whether the
-                model is in training mode. Default is False.
+Parameters  
+-   **inputs** (*Tensor*) – The inputs to the model.
 
-        Returns
+-   **training** (*bool*) – A flag indicating whether the model is in
+    training mode. Default is False.
 
-        :   None
+Returns  
+None
 
-        ::: {.admonition .warning}
-        Warning
+<div class="admonition warning">
 
-        This function must be implemented in the subclass, else it
-        raises a NotImplementedError.
-        :::
+Warning
 
-```{=html}
-<!-- -->
-```
+This function must be implemented in the subclass, else it raises a
+NotImplementedError.
 
-*[class]{.pre}[ ]{.w}*[[models.tensorflow.models.]{.pre}]{.sig-prename .descclassname}[[TransformerEncoderLayer]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*]{.pre}]{.o}[[args]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*, *[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.tensorflow.models.TransformerEncoderLayer "Permalink to this definition"){.headerlink}
+</div>
 
-:   A Transformer Encoder layer as a subclass of tf.keras.layers.Layer.
+&nbsp;
 
-    Functionality: \#. The class first initializes with key parameters
-    for MultiHeadAttention and feedforward network. \#. Then it defines
-    the key components like multi-head attention, feedforward network,
-    layer normalization, and dropout. \#. In the call function, it takes
-    input and performs self-attention, followed by layer normalization
-    and feedforward operation.
+*class *models.tensorflow.models.TransformerSequenceClassifier(*\*args: Any*, *\*\*kwargs: Any*)[¶](#models.tensorflow.models.TransformerSequenceClassifier "Permalink to this definition")  
+A Transformer Sequence Classifier as a subclass of tf.keras.Model.
 
-    Args:
+Functionality: \#. The class first initializes with default or provided
+settings. \#. Then it defines the key components like the transformer
+encoder layers and output layer. \#. In the call function, it takes
+input and passes it through each transformer layer followed by
+normalization and dense layer for final output.
 
-    :   d_model (int): The dimensionality of the input. n_head (int):
-        The number of heads in the multi-head attention. dim_feedforward
-        (int): The dimensionality of the feedforward network model.
-        dropout (float): The dropout value.
+Args:  
+kwargs (dict): Any additional arguments. If not provided, defaults will
+be used.
 
-    Parameters
+Parameters  
+**kwargs** (*dict*) – Any additional arguments.
 
-    :   -   **d_model** (*int*) -- The dimensionality of the input.
+Returns  
+None
 
-        -   **n_head** (*int*) -- The number of heads in the multi-head
-            attention.
+Return type  
+None
 
-        -   **dim_feedforward** (*int*) -- The dimensionality of the
-            feedforward network model.
+<div class="admonition note">
 
-        -   **dropout** (*float*) -- The dropout value.
+Note
 
-    Returns
+The implementation is based on the “Attention is All You Need” paper.
 
-    :   None
+</div>
 
-    Return type
+<div class="admonition warning">
 
-    :   None
+Warning
 
-    ::: {.admonition .note}
-    Note
+The inputs should have a shape of (batch\_size, seq\_length, height,
+width), otherwise, a ValueError will be raised.
 
-    The implementation is based on the "Attention is All You Need"
-    paper.
-    :::
+</div>
 
-    ::: {.admonition .warning}
-    Warning
+\_\_init\_\_(*\*\*kwargs*)[¶](#models.tensorflow.models.TransformerSequenceClassifier.__init__ "Permalink to this definition")  
 
-    Ensure that the input dimension 'd_model' is divisible by the number
-    of attention heads 'n_head'.
-    :::
+</div>
 
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[d_model]{.pre}]{.n}*, *[[n_head]{.pre}]{.n}*, *[[dim_feedforward]{.pre}]{.n}*, *[[dropout]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.tensorflow.models.TransformerEncoderLayer.__init__ "Permalink to this definition"){.headerlink}
+<div id="module-models.pytorch.lightning_models" class="section">
 
-    :   
+## Torch Lightning Models[¶](#module-models.pytorch.lightning_models "Permalink to this headline")
 
-```{=html}
-<!-- -->
-```
+*class *models.pytorch.lightning\_models.LightningBaseModel(*\*args: Any*, *\*\*kwargs: Any*)[¶](#models.pytorch.lightning_models.LightningBaseModel "Permalink to this definition")  
+\_\_init\_\_(*learning\_rate*, *n\_classes=250*)[¶](#models.pytorch.lightning_models.LightningBaseModel.__init__ "Permalink to this definition")  
 
-*[class]{.pre}[ ]{.w}*[[models.tensorflow.models.]{.pre}]{.sig-prename .descclassname}[[TransformerPredictor]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*]{.pre}]{.o}[[args]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*, *[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.tensorflow.models.TransformerPredictor "Permalink to this definition"){.headerlink}
+configure\_optimizers()[¶](#models.pytorch.lightning_models.LightningBaseModel.configure_optimizers "Permalink to this definition")  
+Choose what optimizers and learning-rate schedulers to use in your
+optimization. Normally you’d need one. But in the case of GANs or
+similar you might have multiple. Optimization with multiple optimizers
+only works in the manual optimization mode.
 
-:   A Transformer Predictor model that extends the BaseModel.
+Return:  
+Any of these 6 options.
 
-    Functionality: \#. The class first initializes with the learning
-    rate and other parameters. \#. It then creates an instance of
-    TransformerSequenceClassifier. \#. It also sets up the learning rate
-    scheduler and the optimizer. \#. In the call function, it simply
-    runs the TransformerSequenceClassifier.
+-   **Single optimizer**.
 
-    Args:
+-   **List or Tuple** of optimizers.
 
-    :   kwargs (dict): A dictionary of arguments.
+-   **Two lists** - The first list has multiple optimizers, and the
+    second has multiple LR schedulers (or multiple
+    `lr_scheduler_config`).
 
-    Parameters
+-   **Dictionary**, with an `"optimizer"` key, and (optionally) a
+    `"lr_scheduler"` key whose value is a single LR scheduler or
+    `lr_scheduler_config`.
 
-    :   **kwargs** (*dict*) -- A dictionary of arguments.
+-   **None** - Fit will run without any optimizer.
 
-    Returns
+The `lr_scheduler_config` is a dictionary which contains the scheduler
+and its associated configuration. The default configuration is shown
+below.
 
-    :   None
+<div class="highlight-python notranslate">
 
-    Return type
+<div class="highlight">
 
-    :   None
+    lr_scheduler_config = {
+        # REQUIRED: The scheduler instance
+        "scheduler": lr_scheduler,
+        # The unit of the scheduler's step size, could also be 'step'.
+        # 'epoch' updates the scheduler on epoch end whereas 'step'
+        # updates it after a optimizer update.
+        "interval": "epoch",
+        # How many epochs/steps should pass between calls to
+        # `scheduler.step()`. 1 corresponds to updating the learning
+        # rate after every epoch/step.
+        "frequency": 1,
+        # Metric to to monitor for schedulers like `ReduceLROnPlateau`
+        "monitor": "val_loss",
+        # If set to `True`, will enforce that the value specified 'monitor'
+        # is available when the scheduler is updated, thus stopping
+        # training if not found. If set to `False`, it will only produce a warning
+        "strict": True,
+        # If using the `LearningRateMonitor` callback to monitor the
+        # learning rate progress, this keyword can be used to specify
+        # a custom logged name
+        "name": None,
+    }
 
-    ::: {.admonition .note}
-    Note
+</div>
 
-    The learning rate is set up with an exponential decay schedule.
-    :::
+</div>
 
-    ::: {.admonition .warning}
-    Warning
+When there are schedulers in which the `.step()` method is conditioned
+on a value, such as the `torch.optim.lr_scheduler.ReduceLROnPlateau`
+scheduler, Lightning requires that the `lr_scheduler_config` contains
+the keyword `"monitor"` set to the metric name that the scheduler should
+be conditioned on.
 
-    The learning rate and gamma for the decay schedule must be specified
-    in the 'kwargs'.
-    :::
+Metrics can be made available to monitor by simply logging it using
+`self.log('metric_to_track', metric_val)` in your `LightningModule`.
 
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.tensorflow.models.TransformerPredictor.__init__ "Permalink to this definition"){.headerlink}
+Note:  
+Some things to know:
 
-    :   
+-   Lightning calls `.backward()` and `.step()` automatically in case of
+    automatic optimization.
 
-    [[call]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[inputs]{.pre}]{.n}*, *[[training]{.pre}]{.n}[[=]{.pre}]{.o}[[True]{.pre}]{.default_value}*[)]{.sig-paren}[¶](#models.tensorflow.models.TransformerPredictor.call "Permalink to this definition"){.headerlink}
+-   If a learning rate scheduler is specified in
+    `configure_optimizers()` with key `"interval"` (default “epoch”) in
+    the scheduler configuration, Lightning will call the scheduler’s
+    `.step()` method automatically in case of automatic optimization.
 
-    :   The call function for the BaseModel.
+-   If you use 16-bit precision (`precision=16`), Lightning will
+    automatically handle the optimizer.
 
-        Parameters
+-   If you use `torch.optim.LBFGS`, Lightning handles the closure
+    function automatically for you.
 
-        :   -   **inputs** (*Tensor*) -- The inputs to the model.
+-   If you use multiple optimizers, you will have to switch to ‘manual
+    optimization’ mode and step them yourself.
 
-            -   **training** (*bool*) -- A flag indicating whether the
-                model is in training mode. Default is False.
+-   If you need to control how often the optimizer steps, override the
+    `optimizer_step()` hook.
 
-        Returns
+forward(*x*)[¶](#models.pytorch.lightning_models.LightningBaseModel.forward "Permalink to this definition")  
+Same as `torch.nn.Module.forward()`.
 
-        :   None
+Args:  
+[\*](#id1)args: Whatever you decide to pass into the forward method.
+[\*\*](#id3)kwargs: Keyword arguments are also possible.
 
-        ::: {.admonition .warning}
-        Warning
+Return:  
+Your model’s output
 
-        This function must be implemented in the subclass, else it
-        raises a NotImplementedError.
-        :::
+on\_test\_end() → None[¶](#models.pytorch.lightning_models.LightningBaseModel.on_test_end "Permalink to this definition")  
+Called at the end of testing.
 
-```{=html}
-<!-- -->
-```
+on\_train\_epoch\_end() → None[¶](#models.pytorch.lightning_models.LightningBaseModel.on_train_epoch_end "Permalink to this definition")  
+Called in the training loop at the very end of the epoch.
 
-*[class]{.pre}[ ]{.w}*[[models.tensorflow.models.]{.pre}]{.sig-prename .descclassname}[[TransformerSequenceClassifier]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*]{.pre}]{.o}[[args]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*, *[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.tensorflow.models.TransformerSequenceClassifier "Permalink to this definition"){.headerlink}
+To access all batch outputs at the end of the epoch, you can cache step
+outputs as an attribute of the `LightningModule` and access them in this
+hook:
 
-:   A Transformer Sequence Classifier as a subclass of tf.keras.Model.
+<div class="highlight-python notranslate">
 
-    Functionality: \#. The class first initializes with default or
-    provided settings. \#. Then it defines the key components like the
-    transformer encoder layers and output layer. \#. In the call
-    function, it takes input and passes it through each transformer
-    layer followed by normalization and dense layer for final output.
+<div class="highlight">
 
-    Args:
+    class MyLightningModule(L.LightningModule):
+        def __init__(self):
+            super().__init__()
+            self.training_step_outputs = []
 
-    :   kwargs (dict): Any additional arguments. If not provided,
-        defaults will be used.
+        def training_step(self):
+            loss = ...
+            self.training_step_outputs.append(loss)
+            return loss
 
-    Parameters
+        def on_train_epoch_end(self):
+            # do something with all training_step outputs, for example:
+            epoch_mean = torch.stack(self.training_step_outputs).mean()
+            self.log("training_epoch_mean", epoch_mean)
+            # free up the memory
+            self.training_step_outputs.clear()
 
-    :   **kwargs** (*dict*) -- Any additional arguments.
+</div>
 
-    Returns
+</div>
 
-    :   None
+on\_validation\_end()[¶](#models.pytorch.lightning_models.LightningBaseModel.on_validation_end "Permalink to this definition")  
+Called at the end of validation.
 
-    Return type
+test\_step(*batch*, *batch\_idx*)[¶](#models.pytorch.lightning_models.LightningBaseModel.test_step "Permalink to this definition")  
+Operates on a single batch of data from the test set. In this step you’d
+normally generate examples or calculate anything of interest such as
+accuracy.
 
-    :   None
+Args:  
+batch: The output of your `DataLoader`. batch\_idx: The index of this
+batch. dataloader\_id: The index of the dataloader that produced this
+batch.
 
-    ::: {.admonition .note}
-    Note
+> <div>
+>
+> (only if multiple test dataloaders used).
+>
+> </div>
 
-    The implementation is based on the "Attention is All You Need"
-    paper.
-    :::
+Return:  
+Any of.
 
-    ::: {.admonition .warning}
-    Warning
+> <div>
+>
+> -   Any object or value
+>
+> -   `None` - Testing will skip to the next batch
+>
+> </div>
 
-    The inputs should have a shape of (batch_size, seq_length, height,
-    width), otherwise, a ValueError will be raised.
-    :::
+<div class="highlight-python notranslate">
 
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.tensorflow.models.TransformerSequenceClassifier.__init__ "Permalink to this definition"){.headerlink}
+<div class="highlight">
 
-    :   
-:::
+    # if you have one test dataloader:
+    def test_step(self, batch, batch_idx):
+        ...
 
-[]{#document-lightning_models}
 
-::: {#module-models.pytorch.lightning_models .section}
-[]{#torch-lightning-models}
+    # if you have multiple test dataloaders:
+    def test_step(self, batch, batch_idx, dataloader_idx=0):
+        ...
 
-## Torch Lightning Models[¶](#module-models.pytorch.lightning_models "Permalink to this headline"){.headerlink}
+</div>
 
-*[class]{.pre}[ ]{.w}*[[models.pytorch.lightning_models.]{.pre}]{.sig-prename .descclassname}[[LightningBaseModel]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*]{.pre}]{.o}[[args]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*, *[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.lightning_models.LightningBaseModel "Permalink to this definition"){.headerlink}
+</div>
 
-:   
+Examples:
 
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[learning_rate]{.pre}]{.n}*, *[[n_classes]{.pre}]{.n}[[=]{.pre}]{.o}[[250]{.pre}]{.default_value}*[)]{.sig-paren}[¶](#models.pytorch.lightning_models.LightningBaseModel.__init__ "Permalink to this definition"){.headerlink}
+<div class="highlight-default notranslate">
 
-    :   
+<div class="highlight">
 
-    [[configure_optimizers]{.pre}]{.sig-name .descname}[(]{.sig-paren}[)]{.sig-paren}[¶](#models.pytorch.lightning_models.LightningBaseModel.configure_optimizers "Permalink to this definition"){.headerlink}
+    # CASE 1: A single test dataset
+    def test_step(self, batch, batch_idx):
+        x, y = batch
 
-    :   Choose what optimizers and learning-rate schedulers to use in
-        your optimization. Normally you'd need one. But in the case of
-        GANs or similar you might have multiple. Optimization with
-        multiple optimizers only works in the manual optimization mode.
+        # implement your own
+        out = self(x)
+        loss = self.loss(out, y)
 
-        Return:
+        # log 6 example images
+        # or generated text... or whatever
+        sample_imgs = x[:6]
+        grid = torchvision.utils.make_grid(sample_imgs)
+        self.logger.experiment.add_image('example_images', grid, 0)
 
-        :   Any of these 6 options.
+        # calculate acc
+        labels_hat = torch.argmax(out, dim=1)
+        test_acc = torch.sum(y == labels_hat).item() / (len(y) * 1.0)
 
-            -   **Single optimizer**.
+        # log the outputs!
+        self.log_dict({'test_loss': loss, 'test_acc': test_acc})
 
-            -   **List or Tuple** of optimizers.
+</div>
 
-            -   **Two lists** - The first list has multiple optimizers,
-                and the second has multiple LR schedulers (or multiple
-                `lr_scheduler_config`{.docutils .literal .notranslate}).
+</div>
 
-            -   **Dictionary**, with an `"optimizer"`{.docutils .literal
-                .notranslate} key, and (optionally) a
-                `"lr_scheduler"`{.docutils .literal .notranslate} key
-                whose value is a single LR scheduler or
-                `lr_scheduler_config`{.docutils .literal .notranslate}.
+If you pass in multiple test dataloaders,
+[`test_step()`](#models.pytorch.lightning_models.LightningBaseModel.test_step "models.pytorch.lightning_models.LightningBaseModel.test_step")
+will have an additional argument. We recommend setting the default value
+of 0 so that you can quickly switch between single and multiple
+dataloaders.
 
-            -   **None** - Fit will run without any optimizer.
+<div class="highlight-python notranslate">
 
-        The `lr_scheduler_config`{.docutils .literal .notranslate} is a
-        dictionary which contains the scheduler and its associated
-        configuration. The default configuration is shown below.
+<div class="highlight">
 
-        ::: {.highlight-python .notranslate}
-        ::: {.highlight}
-            lr_scheduler_config = {
-                # REQUIRED: The scheduler instance
-                "scheduler": lr_scheduler,
-                # The unit of the scheduler's step size, could also be 'step'.
-                # 'epoch' updates the scheduler on epoch end whereas 'step'
-                # updates it after a optimizer update.
-                "interval": "epoch",
-                # How many epochs/steps should pass between calls to
-                # `scheduler.step()`. 1 corresponds to updating the learning
-                # rate after every epoch/step.
-                "frequency": 1,
-                # Metric to to monitor for schedulers like `ReduceLROnPlateau`
-                "monitor": "val_loss",
-                # If set to `True`, will enforce that the value specified 'monitor'
-                # is available when the scheduler is updated, thus stopping
-                # training if not found. If set to `False`, it will only produce a warning
-                "strict": True,
-                # If using the `LearningRateMonitor` callback to monitor the
-                # learning rate progress, this keyword can be used to specify
-                # a custom logged name
-                "name": None,
-            }
-        :::
-        :::
+    # CASE 2: multiple test dataloaders
+    def test_step(self, batch, batch_idx, dataloader_idx=0):
+        # dataloader_idx tells you which dataset this is.
+        ...
 
-        When there are schedulers in which the `.step()`{.docutils
-        .literal .notranslate} method is conditioned on a value, such as
-        the `torch.optim.lr_scheduler.ReduceLROnPlateau`{.xref .py
-        .py-class .docutils .literal .notranslate} scheduler, Lightning
-        requires that the `lr_scheduler_config`{.docutils .literal
-        .notranslate} contains the keyword `"monitor"`{.docutils
-        .literal .notranslate} set to the metric name that the scheduler
-        should be conditioned on.
+</div>
 
-        Metrics can be made available to monitor by simply logging it
-        using `self.log('metric_to_track', metric_val)`{.docutils
-        .literal .notranslate} in your `LightningModule`{.xref .py
-        .py-class .docutils .literal .notranslate}.
+</div>
 
-        Note:
+Note:  
+If you don’t need to test you don’t need to implement this method.
 
-        :   Some things to know:
+Note:  
+When the
+[`test_step()`](#models.pytorch.lightning_models.LightningBaseModel.test_step "models.pytorch.lightning_models.LightningBaseModel.test_step")
+is called, the model has been put in eval mode and PyTorch gradients
+have been disabled. At the end of the test epoch, the model goes back to
+training mode and gradients are enabled.
 
-            -   Lightning calls `.backward()`{.docutils .literal
-                .notranslate} and `.step()`{.docutils .literal
-                .notranslate} automatically in case of automatic
-                optimization.
+training\_step(*batch*, *batch\_idx*)[¶](#models.pytorch.lightning_models.LightningBaseModel.training_step "Permalink to this definition")  
+Here you compute and return the training loss and some additional
+metrics for e.g. the progress bar or logger.
 
-            -   If a learning rate scheduler is specified in
-                `configure_optimizers()`{.docutils .literal
-                .notranslate} with key `"interval"`{.docutils .literal
-                .notranslate} (default "epoch") in the scheduler
-                configuration, Lightning will call the scheduler's
-                `.step()`{.docutils .literal .notranslate} method
-                automatically in case of automatic optimization.
+Args:  
+batch (`Tensor` \| (`Tensor`, …) \| \[`Tensor`, …\]):  
+The output of your `DataLoader`. A tensor, tuple or list.
 
-            -   If you use 16-bit precision (`precision=16`{.docutils
-                .literal .notranslate}), Lightning will automatically
-                handle the optimizer.
+batch\_idx (`int`): Integer displaying index of this batch
 
-            -   If you use `torch.optim.LBFGS`{.xref .py .py-class
-                .docutils .literal .notranslate}, Lightning handles the
-                closure function automatically for you.
+Return:  
+Any of.
 
-            -   If you use multiple optimizers, you will have to switch
-                to 'manual optimization' mode and step them yourself.
+-   `Tensor` - The loss tensor
 
-            -   If you need to control how often the optimizer steps,
-                override the `optimizer_step()`{.xref .py .py-meth
-                .docutils .literal .notranslate} hook.
+-   `dict` - A dictionary. Can include any keys, but must include the
+    key `'loss'`
 
-    [[forward]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[x]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.lightning_models.LightningBaseModel.forward "Permalink to this definition"){.headerlink}
+-   `None` - Training will skip to the next batch. This is only for automatic optimization.  
+    This is not supported for multi-GPU, TPU, IPU, or DeepSpeed.
 
-    :   Same as `torch.nn.Module.forward()`{.xref .py .py-meth .docutils
-        .literal .notranslate}.
+In this step you’d normally do the forward pass and calculate the loss
+for a batch. You can also do fancier things like multiple forward passes
+or something model specific.
 
-        Args:
+Example:
 
-        :   [[\*]{#id2 .problematic}](#id1)args: Whatever you decide to
-            pass into the forward method. [[\*\*]{#id4
-            .problematic}](#id3)kwargs: Keyword arguments are also
-            possible.
+<div class="highlight-default notranslate">
 
-        Return:
+<div class="highlight">
 
-        :   Your model's output
+    def training_step(self, batch, batch_idx):
+        x, y, z = batch
+        out = self.encoder(x)
+        loss = self.loss(out, x)
+        return loss
 
-    [[on_test_end]{.pre}]{.sig-name .descname}[(]{.sig-paren}[)]{.sig-paren} [[→]{.sig-return-icon} [[None]{.pre}]{.sig-return-typehint}]{.sig-return}[¶](#models.pytorch.lightning_models.LightningBaseModel.on_test_end "Permalink to this definition"){.headerlink}
+</div>
 
-    :   Called at the end of testing.
+</div>
 
-    [[on_train_epoch_end]{.pre}]{.sig-name .descname}[(]{.sig-paren}[)]{.sig-paren} [[→]{.sig-return-icon} [[None]{.pre}]{.sig-return-typehint}]{.sig-return}[¶](#models.pytorch.lightning_models.LightningBaseModel.on_train_epoch_end "Permalink to this definition"){.headerlink}
+To use multiple optimizers, you can switch to ‘manual optimization’ and
+control their stepping:
 
-    :   Called in the training loop at the very end of the epoch.
+<div class="highlight-python notranslate">
 
-        To access all batch outputs at the end of the epoch, you can
-        cache step outputs as an attribute of the
-        `LightningModule`{.xref .py .py-class .docutils .literal
-        .notranslate} and access them in this hook:
+<div class="highlight">
 
-        ::: {.highlight-python .notranslate}
-        ::: {.highlight}
-            class MyLightningModule(L.LightningModule):
-                def __init__(self):
-                    super().__init__()
-                    self.training_step_outputs = []
+    def __init__(self):
+        super().__init__()
+        self.automatic_optimization = False
 
-                def training_step(self):
-                    loss = ...
-                    self.training_step_outputs.append(loss)
-                    return loss
 
-                def on_train_epoch_end(self):
-                    # do something with all training_step outputs, for example:
-                    epoch_mean = torch.stack(self.training_step_outputs).mean()
-                    self.log("training_epoch_mean", epoch_mean)
-                    # free up the memory
-                    self.training_step_outputs.clear()
-        :::
-        :::
+    # Multiple optimizers (e.g.: GANs)
+    def training_step(self, batch, batch_idx):
+        opt1, opt2 = self.optimizers()
 
-    [[on_validation_end]{.pre}]{.sig-name .descname}[(]{.sig-paren}[)]{.sig-paren}[¶](#models.pytorch.lightning_models.LightningBaseModel.on_validation_end "Permalink to this definition"){.headerlink}
+        # do training_step with encoder
+        ...
+        opt1.step()
+        # do training_step with decoder
+        ...
+        opt2.step()
 
-    :   Called at the end of validation.
+</div>
 
-    [[test_step]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[batch]{.pre}]{.n}*, *[[batch_idx]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.lightning_models.LightningBaseModel.test_step "Permalink to this definition"){.headerlink}
+</div>
 
-    :   Operates on a single batch of data from the test set. In this
-        step you'd normally generate examples or calculate anything of
-        interest such as accuracy.
+Note:  
+When `accumulate_grad_batches` &gt; 1, the loss returned here will be
+automatically normalized by `accumulate_grad_batches` internally.
 
-        Args:
+validation\_step(*batch*, *batch\_idx*)[¶](#models.pytorch.lightning_models.LightningBaseModel.validation_step "Permalink to this definition")  
+Operates on a single batch of data from the validation set. In this step
+you’d might generate examples or calculate anything of interest like
+accuracy.
 
-        :   batch: The output of your `DataLoader`{.xref .py .py-class
-            .docutils .literal .notranslate}. batch_idx: The index of
-            this batch. dataloader_id: The index of the dataloader that
-            produced this batch.
+Args:  
+batch: The output of your `DataLoader`. batch\_idx: The index of this
+batch. dataloader\_idx: The index of the dataloader that produced this
+batch.
 
-            > <div>
-            >
-            > (only if multiple test dataloaders used).
-            >
-            > </div>
+> <div>
+>
+> (only if multiple val dataloaders used)
+>
+> </div>
 
-        Return:
+Return:  
+-   Any object or value
 
-        :   Any of.
+-   `None` - Validation will skip to the next batch
 
-            > <div>
-            >
-            > -   Any object or value
-            >
-            > -   `None`{.docutils .literal .notranslate} - Testing will
-            >     skip to the next batch
-            >
-            > </div>
+<div class="highlight-python notranslate">
 
-        ::: {.highlight-python .notranslate}
-        ::: {.highlight}
-            # if you have one test dataloader:
-            def test_step(self, batch, batch_idx):
-                ...
+<div class="highlight">
 
+    # if you have one val dataloader:
+    def validation_step(self, batch, batch_idx):
+        ...
 
-            # if you have multiple test dataloaders:
-            def test_step(self, batch, batch_idx, dataloader_idx=0):
-                ...
-        :::
-        :::
 
-        Examples:
+    # if you have multiple val dataloaders:
+    def validation_step(self, batch, batch_idx, dataloader_idx=0):
+        ...
 
-        ::: {.highlight-default .notranslate}
-        ::: {.highlight}
-            # CASE 1: A single test dataset
-            def test_step(self, batch, batch_idx):
-                x, y = batch
+</div>
 
-                # implement your own
-                out = self(x)
-                loss = self.loss(out, y)
+</div>
 
-                # log 6 example images
-                # or generated text... or whatever
-                sample_imgs = x[:6]
-                grid = torchvision.utils.make_grid(sample_imgs)
-                self.logger.experiment.add_image('example_images', grid, 0)
+Examples:
 
-                # calculate acc
-                labels_hat = torch.argmax(out, dim=1)
-                test_acc = torch.sum(y == labels_hat).item() / (len(y) * 1.0)
+<div class="highlight-default notranslate">
 
-                # log the outputs!
-                self.log_dict({'test_loss': loss, 'test_acc': test_acc})
-        :::
-        :::
+<div class="highlight">
 
-        If you pass in multiple test dataloaders, [`test_step()`{.xref
-        .py .py-meth .docutils .literal
-        .notranslate}](#models.pytorch.lightning_models.LightningBaseModel.test_step "models.pytorch.lightning_models.LightningBaseModel.test_step"){.reference
-        .internal} will have an additional argument. We recommend
-        setting the default value of 0 so that you can quickly switch
-        between single and multiple dataloaders.
+    # CASE 1: A single validation dataset
+    def validation_step(self, batch, batch_idx):
+        x, y = batch
 
-        ::: {.highlight-python .notranslate}
-        ::: {.highlight}
-            # CASE 2: multiple test dataloaders
-            def test_step(self, batch, batch_idx, dataloader_idx=0):
-                # dataloader_idx tells you which dataset this is.
-                ...
-        :::
-        :::
+        # implement your own
+        out = self(x)
+        loss = self.loss(out, y)
 
-        Note:
+        # log 6 example images
+        # or generated text... or whatever
+        sample_imgs = x[:6]
+        grid = torchvision.utils.make_grid(sample_imgs)
+        self.logger.experiment.add_image('example_images', grid, 0)
 
-        :   If you don't need to test you don't need to implement this
-            method.
+        # calculate acc
+        labels_hat = torch.argmax(out, dim=1)
+        val_acc = torch.sum(y == labels_hat).item() / (len(y) * 1.0)
 
-        Note:
+        # log the outputs!
+        self.log_dict({'val_loss': loss, 'val_acc': val_acc})
 
-        :   When the [`test_step()`{.xref .py .py-meth .docutils
-            .literal
-            .notranslate}](#models.pytorch.lightning_models.LightningBaseModel.test_step "models.pytorch.lightning_models.LightningBaseModel.test_step"){.reference
-            .internal} is called, the model has been put in eval mode
-            and PyTorch gradients have been disabled. At the end of the
-            test epoch, the model goes back to training mode and
-            gradients are enabled.
+</div>
 
-    [[training_step]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[batch]{.pre}]{.n}*, *[[batch_idx]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.lightning_models.LightningBaseModel.training_step "Permalink to this definition"){.headerlink}
+</div>
 
-    :   Here you compute and return the training loss and some
-        additional metrics for e.g. the progress bar or logger.
+If you pass in multiple val dataloaders,
+[`validation_step()`](#models.pytorch.lightning_models.LightningBaseModel.validation_step "models.pytorch.lightning_models.LightningBaseModel.validation_step")
+will have an additional argument. We recommend setting the default value
+of 0 so that you can quickly switch between single and multiple
+dataloaders.
 
-        Args:
+<div class="highlight-python notranslate">
 
-        :   
+<div class="highlight">
 
-            batch (`Tensor`{.xref .py .py-class .docutils .literal .notranslate} \| (`Tensor`{.xref .py .py-class .docutils .literal .notranslate}, ...) \| \[`Tensor`{.xref .py .py-class .docutils .literal .notranslate}, ...\]):
+    # CASE 2: multiple validation dataloaders
+    def validation_step(self, batch, batch_idx, dataloader_idx=0):
+        # dataloader_idx tells you which dataset this is.
+        ...
 
-            :   The output of your `DataLoader`{.xref .py .py-class
-                .docutils .literal .notranslate}. A tensor, tuple or
-                list.
+</div>
 
-            batch_idx (`int`{.docutils .literal .notranslate}): Integer
-            displaying index of this batch
+</div>
 
-        Return:
+Note:  
+If you don’t need to validate you don’t need to implement this method.
 
-        :   Any of.
+Note:  
+When the
+[`validation_step()`](#models.pytorch.lightning_models.LightningBaseModel.validation_step "models.pytorch.lightning_models.LightningBaseModel.validation_step")
+is called, the model has been put in eval mode and PyTorch gradients
+have been disabled. At the end of validation, the model goes back to
+training mode and gradients are enabled.
 
-            -   `Tensor`{.xref .py .py-class .docutils .literal
-                .notranslate} - The loss tensor
+&nbsp;
 
-            -   `dict`{.docutils .literal .notranslate} - A dictionary.
-                Can include any keys, but must include the key
-                `'loss'`{.docutils .literal .notranslate}
+*class *models.pytorch.lightning\_models.LightningTransformerPredictor(*\*args: Any*, *\*\*kwargs: Any*)[¶](#models.pytorch.lightning_models.LightningTransformerPredictor "Permalink to this definition")  
+\_\_init\_\_(*\*\*kwargs*)[¶](#models.pytorch.lightning_models.LightningTransformerPredictor.__init__ "Permalink to this definition")  
 
-            -   
+forward(*x*)[¶](#models.pytorch.lightning_models.LightningTransformerPredictor.forward "Permalink to this definition")  
+Same as `torch.nn.Module.forward()`.
 
-                `None`{.docutils .literal .notranslate} - Training will skip to the next batch. This is only for automatic optimization.
+Args:  
+[\*](#id5)args: Whatever you decide to pass into the forward method.
+[\*\*](#id7)kwargs: Keyword arguments are also possible.
 
-                :   This is not supported for multi-GPU, TPU, IPU, or
-                    DeepSpeed.
+Return:  
+Your model’s output
 
-        In this step you'd normally do the forward pass and calculate
-        the loss for a batch. You can also do fancier things like
-        multiple forward passes or something model specific.
+&nbsp;
 
-        Example:
+*class *models.pytorch.lightning\_models.LightningTransformerSequenceClassifier(*\*args: Any*, *\*\*kwargs: Any*)[¶](#models.pytorch.lightning_models.LightningTransformerSequenceClassifier "Permalink to this definition")  
+Transformer-based Sequence Classifier
 
-        ::: {.highlight-default .notranslate}
-        ::: {.highlight}
-            def training_step(self, batch, batch_idx):
-                x, y, z = batch
-                out = self.encoder(x)
-                loss = self.loss(out, x)
-                return loss
-        :::
-        :::
+\_\_init\_\_(*\*\*kwargs*)[¶](#models.pytorch.lightning_models.LightningTransformerSequenceClassifier.__init__ "Permalink to this definition")  
 
-        To use multiple optimizers, you can switch to 'manual
-        optimization' and control their stepping:
+forward(*inputs*)[¶](#models.pytorch.lightning_models.LightningTransformerSequenceClassifier.forward "Permalink to this definition")  
+Forward pass through the model
 
-        ::: {.highlight-python .notranslate}
-        ::: {.highlight}
-            def __init__(self):
-                super().__init__()
-                self.automatic_optimization = False
+</div>
 
+</div>
 
-            # Multiple optimizers (e.g.: GANs)
-            def training_step(self, batch, batch_idx):
-                opt1, opt2 = self.optimizers()
+</div>
 
-                # do training_step with encoder
-                ...
-                opt1.step()
-                # do training_step with decoder
-                ...
-                opt2.step()
-        :::
-        :::
+<div id="indices-and-tables" class="section">
 
-        Note:
+# Indices and tables[¶](#indices-and-tables "Permalink to this headline")
 
-        :   When `accumulate_grad_batches`{.docutils .literal
-            .notranslate} \> 1, the loss returned here will be
-            automatically normalized by
-            `accumulate_grad_batches`{.docutils .literal .notranslate}
-            internally.
+-   [Index](genindex.html)
 
-    [[validation_step]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[batch]{.pre}]{.n}*, *[[batch_idx]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.lightning_models.LightningBaseModel.validation_step "Permalink to this definition"){.headerlink}
+-   [Module Index](py-modindex.html)
 
-    :   Operates on a single batch of data from the validation set. In
-        this step you'd might generate examples or calculate anything of
-        interest like accuracy.
+-   [Search Page](search.html)
 
-        Args:
+</div>
 
-        :   batch: The output of your `DataLoader`{.xref .py .py-class
-            .docutils .literal .notranslate}. batch_idx: The index of
-            this batch. dataloader_idx: The index of the dataloader that
-            produced this batch.
+</div>
 
-            > <div>
-            >
-            > (only if multiple val dataloaders used)
-            >
-            > </div>
+</div>
 
-        Return:
+</div>
 
-        :   -   Any object or value
+<div class="sphinxsidebar" role="navigation"
+aria-label="main navigation">
 
-            -   `None`{.docutils .literal .notranslate} - Validation
-                will skip to the next batch
+<div class="sphinxsidebarwrapper">
 
-        ::: {.highlight-python .notranslate}
-        ::: {.highlight}
-            # if you have one val dataloader:
-            def validation_step(self, batch, batch_idx):
-                ...
-
-
-            # if you have multiple val dataloaders:
-            def validation_step(self, batch, batch_idx, dataloader_idx=0):
-                ...
-        :::
-        :::
-
-        Examples:
-
-        ::: {.highlight-default .notranslate}
-        ::: {.highlight}
-            # CASE 1: A single validation dataset
-            def validation_step(self, batch, batch_idx):
-                x, y = batch
-
-                # implement your own
-                out = self(x)
-                loss = self.loss(out, y)
-
-                # log 6 example images
-                # or generated text... or whatever
-                sample_imgs = x[:6]
-                grid = torchvision.utils.make_grid(sample_imgs)
-                self.logger.experiment.add_image('example_images', grid, 0)
-
-                # calculate acc
-                labels_hat = torch.argmax(out, dim=1)
-                val_acc = torch.sum(y == labels_hat).item() / (len(y) * 1.0)
-
-                # log the outputs!
-                self.log_dict({'val_loss': loss, 'val_acc': val_acc})
-        :::
-        :::
-
-        If you pass in multiple val dataloaders,
-        [`validation_step()`{.xref .py .py-meth .docutils .literal
-        .notranslate}](#models.pytorch.lightning_models.LightningBaseModel.validation_step "models.pytorch.lightning_models.LightningBaseModel.validation_step"){.reference
-        .internal} will have an additional argument. We recommend
-        setting the default value of 0 so that you can quickly switch
-        between single and multiple dataloaders.
-
-        ::: {.highlight-python .notranslate}
-        ::: {.highlight}
-            # CASE 2: multiple validation dataloaders
-            def validation_step(self, batch, batch_idx, dataloader_idx=0):
-                # dataloader_idx tells you which dataset this is.
-                ...
-        :::
-        :::
-
-        Note:
-
-        :   If you don't need to validate you don't need to implement
-            this method.
-
-        Note:
-
-        :   When the [`validation_step()`{.xref .py .py-meth .docutils
-            .literal
-            .notranslate}](#models.pytorch.lightning_models.LightningBaseModel.validation_step "models.pytorch.lightning_models.LightningBaseModel.validation_step"){.reference
-            .internal} is called, the model has been put in eval mode
-            and PyTorch gradients have been disabled. At the end of
-            validation, the model goes back to training mode and
-            gradients are enabled.
-
-```{=html}
-<!-- -->
-```
-
-*[class]{.pre}[ ]{.w}*[[models.pytorch.lightning_models.]{.pre}]{.sig-prename .descclassname}[[LightningTransformerPredictor]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*]{.pre}]{.o}[[args]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*, *[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.lightning_models.LightningTransformerPredictor "Permalink to this definition"){.headerlink}
-
-:   
-
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.lightning_models.LightningTransformerPredictor.__init__ "Permalink to this definition"){.headerlink}
-
-    :   
-
-    [[forward]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[x]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.lightning_models.LightningTransformerPredictor.forward "Permalink to this definition"){.headerlink}
-
-    :   Same as `torch.nn.Module.forward()`{.xref .py .py-meth .docutils
-        .literal .notranslate}.
-
-        Args:
-
-        :   [[\*]{#id6 .problematic}](#id5)args: Whatever you decide to
-            pass into the forward method. [[\*\*]{#id8
-            .problematic}](#id7)kwargs: Keyword arguments are also
-            possible.
-
-        Return:
-
-        :   Your model's output
-
-```{=html}
-<!-- -->
-```
-
-*[class]{.pre}[ ]{.w}*[[models.pytorch.lightning_models.]{.pre}]{.sig-prename .descclassname}[[LightningTransformerSequenceClassifier]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*]{.pre}]{.o}[[args]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*, *[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}[[:]{.pre}]{.p}[ ]{.w}[[Any]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.lightning_models.LightningTransformerSequenceClassifier "Permalink to this definition"){.headerlink}
-
-:   Transformer-based Sequence Classifier
-
-    [[\_\_init\_\_]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[\*\*]{.pre}]{.o}[[kwargs]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.lightning_models.LightningTransformerSequenceClassifier.__init__ "Permalink to this definition"){.headerlink}
-
-    :   
-
-    [[forward]{.pre}]{.sig-name .descname}[(]{.sig-paren}*[[inputs]{.pre}]{.n}*[)]{.sig-paren}[¶](#models.pytorch.lightning_models.LightningTransformerSequenceClassifier.forward "Permalink to this definition"){.headerlink}
-
-    :   Forward pass through the model
-:::
-:::
-:::
-
-::: {#indices-and-tables .section}
-# Indices and tables[¶](#indices-and-tables "Permalink to this headline"){.headerlink}
-
--   [[Index]{.std .std-ref}](genindex.html){.reference .internal}
-
--   [[Module Index]{.std .std-ref}](py-modindex.html){.reference
-    .internal}
-
--   [[Search Page]{.std .std-ref}](search.html){.reference .internal}
-:::
-:::
-:::
-:::
-
-::: {.sphinxsidebar role="navigation" aria-label="main navigation"}
-::: {.sphinxsidebarwrapper}
-# [American Sign Language Recognition](#) {#american-sign-language-recognition .logo}
-
-### Navigation
-
-[Contents:]{.caption-text}
-
--   [Data Augmentations](index.html#document-augmentations){.reference
-    .internal}
--   [Training Callbacks](index.html#document-callbacks){.reference
-    .internal}
--   [Project Configuration](index.html#document-config){.reference
-    .internal}
--   [Data Utilities](index.html#document-data_utils){.reference
-    .internal}
--   [HyperParameter
-    Search](index.html#document-hparam_search){.reference .internal}
--   [Camera Stream
-    Predictions](index.html#document-predict_on_camera){.reference
-    .internal}
--   [ASL Dataset](index.html#document-dataset){.reference .internal}
--   [Data Utilities](index.html#document-dl_utils){.reference .internal}
--   [Model Training](index.html#document-trainer){.reference .internal}
--   [Data Visualizations](index.html#document-visualizations){.reference
-    .internal}
--   [Pytorch Models](index.html#document-pytorch_models){.reference
-    .internal}
--   [Tensorflow
-    Models](index.html#document-tensorflow_models){.reference .internal}
--   [Torch Lightning
-    Models](index.html#document-lightning_models){.reference .internal}
-
-::: {.relations}
-### Related Topics
-
--   [Documentation overview](#)
-:::
-:::
-:::
-
-::: {.clearer}
-:::
-:::
-
-::: {.footer}
 ©2023, Asad Bin Imtiaz, Felix Schlatter. \| Powered by [Sphinx
 4.5.0](http://sphinx-doc.org/) & [Alabaster
 0.7.12](https://github.com/bitprophet/alabaster)
-:::
+
+</div>
