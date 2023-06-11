@@ -244,7 +244,7 @@ class Trainer:
 
             else:
                 self.patience_counter += 1
-                print(f'No improvement in loss for {self.patience_counter} epoch(s)')
+                print(f'No improvement in {EARLY_STOP_METRIC} for {self.patience_counter} epoch(s)')
 
             if self.patience_counter >= self.patience:
                 print(f'Early stopping at epoch {epoch+1}')
