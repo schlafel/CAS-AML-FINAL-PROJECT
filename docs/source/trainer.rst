@@ -1,5 +1,5 @@
-Training
-========
+Model Training
+==============
 
 .. automodule:: trainer
    :members:

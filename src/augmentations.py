@@ -1,11 +1,10 @@
+
 import sys
 sys.path.insert(0, '../src')
 from config import *
 import numpy as np
 
-"""
-Data Augmentation Methods
-"""
+
 def shift_landmarks(frames, max_shift=0.01):
     """
     Shift landmark coordinates randomly by a small amount.

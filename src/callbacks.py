@@ -26,7 +26,11 @@ from config import DYNAMIC_DROP_OUT_REDUCTION_RATE, DYNAMIC_DROP_OUT_MAX_THRESHO
 from dl_utils import get_dataset
 import torch.nn as nn
 
-
+"""
+================
+Callback Methods
+================
+"""
 def dropout_callback(trainer, dropout_rate=DYNAMIC_DROP_OUT_REDUCTION_RATE,
                      max_dropout=DYNAMIC_DROP_OUT_MAX_THRESHOLD):
     """

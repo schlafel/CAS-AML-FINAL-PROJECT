@@ -7,17 +7,22 @@ Welcome to American Sign Language Recognition's documentation!
 ==============================================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
-   config
    augmentations
-   dl_utils
-   data_utils
-   dataset
    callbacks
-   visualizations
+   config
+   data_utils
+   hparam_search
+   predict_on_camera
+   dataset
+   dl_utils
    trainer
+   visualizations
+   pytorch_models
+   tensorflow_models
+   lightning_models
 
 
 Indices and tables

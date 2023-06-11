@@ -1,5 +1,6 @@
 import sys
-sys.path.insert(0,"./..")
+
+sys.path.insert(0, "./..")
 
 from config import N_CLASSES, DEVICE
 
@@ -8,14 +9,15 @@ import torch
 import torch.nn as nn
 import pytorch_lightning as pl
 
+
 class LightningBaseModel(pl.LightningModule):
     def __init__(self, learning_rate, n_classes=N_CLASSES):
         super().__init__()
         self.learning_rate = learning_rate
         self.criterion = nn.CrossEntropyLoss()
         self.accuracy = accuracy.Accuracy(
-            task = "multiclass",
-            num_classes = n_classes
+            task="multiclass",
+            num_classes=n_classes
         )
 
         self.train_step_outputs = []
@@ -31,7 +33,7 @@ class LightningBaseModel(pl.LightningModule):
         return [optimizer], [scheduler]
 
     def training_step(self, batch, batch_idx):
-        landmarks,labels = batch
+        landmarks, labels = batch
 
         # forward pass through the model
         out = self(landmarks)
@@ -61,11 +63,11 @@ class LightningBaseModel(pl.LightningModule):
         print(" ")
         print(f"EPOCH {self.current_epoch}: Train accuracy: {train_acc}")
         self.train_step_outputs.clear()
-        print(100*"*")
+        print(100 * "*")
 
     def validation_step(self, batch, batch_idx):
 
-        landmarks,labels = batch
+        landmarks, labels = batch
 
         # forward pass through the model
         out = self(landmarks)
@@ -104,7 +106,7 @@ class LightningBaseModel(pl.LightningModule):
         self.validation_step_outputs.clear()  # free memory
 
     def test_step(self, batch, batch_idx):
-        landmarks,labels = batch
+        landmarks, labels = batch
 
         # forward pass through the model
         out = self(landmarks)
@@ -205,12 +207,12 @@ class LightningTransformerSequenceClassifier(nn.Module):
 
 class LightningTransformerPredictor(LightningBaseModel):
     def __init__(self, **kwargs):
-        super().__init__(learning_rate=kwargs["learning_rate"],n_classes=kwargs["num_classes"])
+        super().__init__(learning_rate=kwargs["learning_rate"], n_classes=kwargs["num_classes"])
 
         # Instantiate the Transformer model
         self.model = LightningTransformerSequenceClassifier(**kwargs)
 
-        #self.save_hyperparameters()
+        # self.save_hyperparameters()
 
     def forward(self, x):
         return self.model(x)

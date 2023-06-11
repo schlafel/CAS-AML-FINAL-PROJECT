@@ -1,3 +1,6 @@
+"""
+This kodule defines a PyTorch `BaseModel` providing a basic framework for learning and validating from `Trainer`
+"""
 import sys
 
 sys.path.insert(0, "./..")

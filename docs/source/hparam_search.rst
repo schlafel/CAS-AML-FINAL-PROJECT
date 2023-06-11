@@ -1,6 +1,6 @@
-Training Callbacks
-==================
+HyperParameter Search
+=====================
 
-.. automodule:: callbacks
+.. automodule:: hparam_search
    :members:
    :special-members:

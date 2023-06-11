@@ -1,6 +1,6 @@
 Tensorflow Models
 =================
 
-.. automodule:: tensorflow.models
+.. automodule:: models.tensorflow.models
    :members:
    :special-members:

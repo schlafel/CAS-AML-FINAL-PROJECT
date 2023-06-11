@@ -1,6 +1,8 @@
-HyperParameter Search
-=====================
+Camera Stream Predictions
+=========================
 
-.. automodule:: hparam_search
+.. automodule:: predict_on_camera
    :members:
+   :undoc-members:
+   :private-members:
    :special-members:

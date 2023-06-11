@@ -1,5 +1,5 @@
-Dataset
-=======
+ASL Dataset
+===========
 
 .. automodule:: data.dataset
    :members:

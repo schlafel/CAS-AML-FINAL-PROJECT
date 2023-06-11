@@ -1,5 +1,5 @@
-Configuration
-=============
+Project Configuration
+=====================
 
 .. automodule:: config
    :members:

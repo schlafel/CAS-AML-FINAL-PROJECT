@@ -10,30 +10,19 @@ PyTorch's nn.Module for constructing pytorch LSTM or Transformer based models:
    * - Class
      - Description
    * - `TransformerSequenceClassifier`
-     - This is a transformer-based sequence classification model. The class constructs a transformer encoder based on
-     user-defined parameters or default settings. The forward method first checks and reshapes the input, then passes it
-     through the transformer layers. It then pools the sequence by taking the mean over the time dimension, and finally
-     applies the output layer to generate the class predictions.
+     - This is a transformer-based sequence classification model. The class constructs a transformer encoder based on user-defined parameters or default settings. The forward method first checks and reshapes the input, then passes it through the transformer layers. It then pools the sequence by taking the mean over the time dimension, and finally applies the output layer to generate the class predictions.
    * - `TransformerPredictor`
-     - A TransformerPredictor model that extends the Pytorch BaseModel. This class wraps `TransformerSequenceClassifier`
-     model and provides functionality to use it for making predictions.
+     - A TransformerPredictor model that extends the Pytorch BaseModel. This class wraps `TransformerSequenceClassifier` model and provides functionality to use it for making predictions.
    * - `MultiHeadSelfAttention`
-     - This class applies a multi-head attention mechanism. It has options for causal masking and layer normalization.
-     The input is expected to have dimensions [batch_size, seq_len, features].
+     - This class applies a multi-head attention mechanism. It has options for causal masking and layer normalization. The input is expected to have dimensions [batch_size, seq_len, features].
    * - `TransformerBlock`
-     - This class represents a single block of a transformer architecture, including multi-head self-attention and a
-     feed-forward neural network, both with optional layer normalization and dropout. The input is expected to have
-     dimensions [batch_size, seq_len, features].
+     - This class represents a single block of a transformer architecture, including multi-head self-attention and a feed-forward neural network, both with optional layer normalization and dropout. The input is expected to have dimensions [batch_size, seq_len, features].
    * - `YetAnotherTransformerClassifier`
-     - This class constructs a transformer-based classifier with a specified number of `TransformerBlock` instances.
-     The output of the model is a tensor of logits with dimensions [batch_size, num_classes].
+     - This class constructs a transformer-based classifier with a specified number of `TransformerBlock` instances. The output of the model is a tensor of logits with dimensions [batch_size, num_classes].
    * - `YetAnotherTransformer`
-     - This class is a wrapper for `YetAnotherTransformerClassifier` which includes learning rate, optimizer, and
-     learning rate scheduler settings. It extends from the `BaseModel` class.
+     - This class is a wrapper for `YetAnotherTransformerClassifier` which includes learning rate, optimizer, and learning rate scheduler settings. It extends from the `BaseModel` class.
    * - `YetAnotherEnsemble`
-     - This class constructs an ensemble of `YetAnotherTransformerClassifier` instances, where the outputs are
-     concatenated and passed through a fully connected layer. This class also extends from the `BaseModel` class and
-     includes learning rate, optimizer, and learning rate scheduler settings.
+     - This class constructs an ensemble of `YetAnotherTransformerClassifier` instances, where the outputs are concatenated and passed through a fully connected layer. This class also extends from the `BaseModel` class and includes learning rate, optimizer, and learning rate scheduler settings.
 
 """
 
@@ -50,8 +39,13 @@ from torchmetrics.classification import accuracy
 from torchvision import models
 
 
+"""
+BaseModel
+---------
+"""
 class BaseModel(nn.Module):
     """
+
     A BaseModel that extends the nn.Module from PyTorch.
 
     Functionality:

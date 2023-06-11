@@ -4,8 +4,8 @@ import pandas as pd
 import cv2
 import mediapipe as mp
 from config import *
-from src.data import data_utils
-from src.models import models
+import data.data_utils
+import models.pytorch.models
 import torch
 import numpy as np
 import pandas as pd

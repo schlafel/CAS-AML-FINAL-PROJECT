@@ -1,6 +1,6 @@
 Pytorch Models
 ==============
 
-.. automodule:: pytorch.models
+.. automodule:: models.pytorch.models
    :members:
    :special-members:

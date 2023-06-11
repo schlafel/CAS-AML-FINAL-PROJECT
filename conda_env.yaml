@@ -36,3 +36,6 @@ dependencies:
     - Sphinx
     - jsonargparse[signatures]
     - omegaconf
+    - ray
+    - mlflow
+    - recommonmark
