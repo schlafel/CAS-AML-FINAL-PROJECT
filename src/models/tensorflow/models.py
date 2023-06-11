@@ -43,7 +43,7 @@ class BaseModel(tf.keras.Model):
         super(BaseModel, self).__init__()
         self.learning_rate = learning_rate
 
-        self.criterion = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+        self.criterion = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False)
         self.accuracy = tf.keras.metrics.SparseCategoricalAccuracy()
 
         self.optimizer = None
@@ -67,19 +67,6 @@ class BaseModel(tf.keras.Model):
         """
         return self.accuracy(y_true, y_pred)
 
-    def calculate_accuracy(self, y_pred, y_true):
-        """
-        Calculates the accuracy of the model's prediction.
-
-        :param y_pred: The predicted output from the model.
-        :type y_pred: Tensor
-        :param y_true: The ground truth or actual labels.
-        :type y_true: Tensor
-
-        :returns: The calculated accuracy.
-        :rtype: float
-        """
-        ...
 
     def call(self, inputs, training=False):
         """
@@ -96,7 +83,7 @@ class BaseModel(tf.keras.Model):
             This function must be implemented in the subclass, else it raises a NotImplementedError.
         """
         raise NotImplementedError()
-
+    @tf.function
     def training_step(self, batch):
         """
         Performs a training step using the input batch data.
@@ -110,6 +97,7 @@ class BaseModel(tf.keras.Model):
         landmarks, labels = batch
 
         # Forward pass
+
         with tf.GradientTape() as tape:
             predictions = self(landmarks, training=self.training)
 
@@ -126,8 +114,8 @@ class BaseModel(tf.keras.Model):
 
         del landmarks, labels
 
-        return loss.numpy(), accuracy.numpy()
-
+        return loss, accuracy
+    @tf.function
     def validation_step(self, batch):
         """
         Performs a validation step using the input batch data.
@@ -148,7 +136,7 @@ class BaseModel(tf.keras.Model):
 
         accuracy = self.calculate_accuracy(predictions, labels)
 
-        return loss.numpy(), accuracy.numpy()
+        return loss, accuracy
 
     def test_step(self, batch):
         """
@@ -559,26 +547,35 @@ class CVTransferLearningModel(BaseModel):
             include_top=True,
             weights=self.settings['hparams']['weights'],
             input_tensor=None,
-            input_shape=None,
+            input_shape=(64,48,3),
             pooling=None,
             classes=self.settings['params']['num_classes'],
-            **kwargs
         )
 
 
 
-        self.optimizer = torch.optim.Adam(model.parameters(), lr=self.learning_rate)
-        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer,
-                                                                gamma=kwargs['hparams']["gamma"])
+
+        self.scheduler = tf.keras.optimizers.schedules.ExponentialDecay(
+            initial_learning_rate=self.learning_rate,
+            decay_steps=10000,
+            decay_rate=self.settings['hparams']['gamma']
+        )
+
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate=self.scheduler)
 
         self.model = model
 
-        self.to(DEVICE)
+
 
     @tf.function
     def call(self, inputs, training=True):
-        x_new = tf.reshape(x,shape= (-1,64,43,3))
-        #reshape and pad
-        x_new = F.pad(x, (0, 1), value=0.).reshape(-1, 64, 48, 3).moveaxis(-1, 1)
+
+        # Reshape the array to (-1, 64, 48, 3)
+        reshaped_array = tf.reshape(inputs, (-1, 64, 48, 2))
+
+        # Pad the array
+        padded_array = tf.concat([reshaped_array,tf.zeros((inputs.shape[0],64,48,1))],axis=-1)
+
+        output = self.model(padded_array)
 
         return output

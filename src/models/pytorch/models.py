@@ -773,7 +773,7 @@ class CVTransferLearningModel(BaseModel):
                         last_layer_name = name + "." + name2
 
         new_last_layer = nn.Linear(last_layer.in_features,
-                                   self.settings['params']['n_classes'],
+                                   self.settings['params']['num_classes'],
                                    bias=True,
                                    )
 

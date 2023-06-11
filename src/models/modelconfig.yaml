@@ -94,7 +94,7 @@ models:
 
   CVTransferLearningModel:
     params:
-        n_classes: 250
+        num_classes: 250
     hparams:
       backbone: resnet152
       weights: null
