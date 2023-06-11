@@ -84,7 +84,8 @@ def interpolate_missing_values(arr, max_gap=INTEREMOLATE_MISSING):
     interpolation method that assumes a straight line between the two points on either side of the gap. The maximum
     gap size for which interpolation should be performed is also configurable.
 
-    AThe function takes two arguments - an array with missing values, and a maximum gap size for interpolation. If the
+    Arguments:
+    The function takes two arguments - an array with missing values, and a maximum gap size for interpolation. If the
     size of the gap (i.e., number of consecutive missing values) is less than or equal to this specified maximum gap
     size, the function will fill it with interpolated values. This ensures that the data maintains its continuity
     without making too far-fetched estimations for larger gaps.

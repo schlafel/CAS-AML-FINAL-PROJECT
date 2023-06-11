@@ -35,7 +35,7 @@ from config import DEVICE, N_CLASSES
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torchmetrics.classification import accuracy
+from torchmetrics.classification import accuracy, F1Score,Precision,Recall, AUROC
 from torchvision import models
 
 
@@ -80,6 +80,27 @@ class BaseModel(nn.Module):
             task="multiclass",
             num_classes=n_classes
         )
+        self.precision = Precision(
+            task="multiclass",
+            num_classes=n_classes
+        )
+
+        self.recall = Recall(
+            task="multiclass",
+            num_classes=n_classes
+        )
+        self.f1score = F1Score(
+            task="multiclass",
+            num_classes=n_classes
+        )
+        self.auroc = AUROC(
+            task="multiclass",
+            num_classes=n_classes
+        )
+
+
+
+
 
         self.metrics = {"train": [], "val": [], "test": []}
 
@@ -750,9 +771,10 @@ class CVTransferLearningModel(BaseModel):
 
         # Freeze layers
         # Freeze the parameters....
-        for p in model.parameters():
-            if hasattr(p, "requires_grad"):
-                p.requires_grad = False
+        if self.settings['hparams']['weights'] is not None :
+            for p in model.parameters():
+                if hasattr(p, "requires_grad"):
+                    p.requires_grad = False
 
         # recursively iterate over child modules until we find the last fully connected layer
         for name, module in model.named_children():
@@ -766,7 +788,7 @@ class CVTransferLearningModel(BaseModel):
                         last_layer_name = name + "." + name2
 
         new_last_layer = nn.Linear(last_layer.in_features,
-                                   self.settings['params']['n_classes'],
+                                   self.settings['params']['num_classes'],
                                    bias=True,
                                    )
 

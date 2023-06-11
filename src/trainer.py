@@ -104,6 +104,7 @@ class Trainer:
             Make sure the specified model name corresponds to an actual model in your project's models directory.
         """
         self.model_name = modelname
+        self.DL_FRAMEWORK = DL_FRAMEWORK
         module_name = f"models.{DL_FRAMEWORK}.models"
         self.params = get_model_params(modelname)
 
@@ -193,10 +194,15 @@ class Trainer:
             print(end='', flush=True)
             for i, batch in pbar:
                 loss, acc = self.model.training_step(batch)
+
                 self.model.optimize()
 
-                total_loss += loss
-                total_acc += acc
+                if DL_FRAMEWORK == "tensorflow":
+                    total_loss += loss.numpy()
+                    total_acc += acc.numpy()
+                else:
+                    total_loss += loss
+                    total_acc += acc
 
                 pbar.set_postfix({'Loss': total_loss / (i + 1), 'Accuracy': total_acc / (i + 1)})
 
@@ -213,6 +219,7 @@ class Trainer:
             self.epoch = epoch
 
             val_loss, val_acc = self.evaluate()
+
 
             if EARLY_STOP_METRIC == "loss":
                 metric = val_loss
@@ -244,7 +251,7 @@ class Trainer:
 
             else:
                 self.patience_counter += 1
-                print(f'No improvement in loss for {self.patience_counter} epoch(s)')
+                print(f'No improvement in {EARLY_STOP_METRIC} for {self.patience_counter} epoch(s)')
 
             if self.patience_counter >= self.patience:
                 print(f'Early stopping at epoch {epoch+1}')
@@ -290,11 +297,15 @@ class Trainer:
         for i, batch in pbar:
             loss, acc = self.model.validation_step(batch)
 
+            if DL_FRAMEWORK == "tensorflow":
+                total_loss += loss.numpy()
+                total_acc += acc.numpy()
+            else:
+                total_loss += loss
+                total_acc += acc
+
             valid_losses.append(loss)
             valid_accuracies.append(acc)
-
-            total_loss += loss
-            total_acc += acc
 
             pbar.set_postfix({'Loss': total_loss / (i + 1), 'Accuracy': total_acc / (i + 1)})
 
@@ -375,7 +386,9 @@ class Trainer:
 
 if __name__ == '__main__':
     # Get Data
-    trainer = Trainer(modelname='YetAnotherEnsemble', enableAugmentationDropout=False, augmentation_threshold=0.05)
+    trainer = Trainer(modelname=MODELNAME,
+                      enableAugmentationDropout=False,
+                      augmentation_threshold=0.35)
     trainer.add_callback(dropout_callback)
     trainer.add_callback(augmentation_increase_callback)
     trainer.train()

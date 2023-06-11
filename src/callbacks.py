@@ -25,6 +25,7 @@ from config import DYNAMIC_DROP_OUT_REDUCTION_RATE, DYNAMIC_DROP_OUT_MAX_THRESHO
     DYNAMIC_DROP_OUT_REDUCTION_INTERVAL, DYNAMIC_AUG_INC_RATE, DYNAMIC_AUG_MAX_THRESHOLD, DYNAMIC_AUG_INC_INTERVAL
 from dl_utils import get_dataset
 import torch.nn as nn
+import tensorflow as tf
 
 """
 ================
@@ -67,9 +68,15 @@ def dropout_callback(trainer, dropout_rate=DYNAMIC_DROP_OUT_REDUCTION_RATE,
     model = trainer.model
     if step % DYNAMIC_DROP_OUT_REDUCTION_INTERVAL == 0:
         print(f"Increasing dropout rate by {dropout_rate}")
-        for module in model.modules():
-            if isinstance(module, nn.Dropout):
-                module.p = min(module.p * dropout_rate, max_dropout)
+        if trainer.DL_FRAMEWORK == "pytorch":
+            for module in model.modules():
+                if isinstance(module, nn.Dropout):
+                    module.p = min(module.p * dropout_rate, max_dropout)
+        elif trainer.DL_FRAMEWORK == "tensorflow":
+            # Iterate over the layers of the model
+            for layer in model.layers:
+                if isinstance(layer, tf.keras.layers.Dropout):
+                    layer.rate = min(layer.rate * dropout_rate, max_dropout)
 
 
 def augmentation_increase_callback(trainer, aug_increase_rate=DYNAMIC_AUG_INC_RATE,

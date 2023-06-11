@@ -17,6 +17,18 @@ from config import *
 
 
 def load_tf(dirname):
+    """
+    Function to load tensorbaord-logs as a pd.DataFrame.
+
+    Args:
+        dirname (str): Which tensorbaord-log should be loaded (it loads all the checkpoints
+
+    Functionality:
+        Searches for tensorboard logs and loads scalars into a pd Dataframe
+
+    :param dirname:
+    :return:
+    """
 
     dirname = glob.glob(dirname + '/*')[0]
 
@@ -34,11 +46,20 @@ def load_tf(dirname):
 def plot_training_validation(data,
                              x="epoch",
                              y="Accuracy",
-
-
                              style="Metric",
                              hue = "Experiment_FullName",
                              y_lim = (0,1)):
+    """
+
+    :param data: pd.DataFrame
+    :param x:
+    :param y:
+    :param style:
+    :param hue:
+    :param y_lim:
+    :return:
+    """
+
     fig, (ax, ax2) = plt.subplots(1, 2, figsize=(18 / 2.54, 3.8
                                                  ),
                                   sharex=True)
@@ -75,6 +96,8 @@ def plot_training_validation(data,
 def plot_trainingLossAccuracies(ckpt_paths):
     """
     Function that plots training accuracy and loss based on checkpoints that are entered in a list
+
+
     :param ckpt_paths: List of Checkpoints to evaluate. Simply put the directory in, where tensorboard checkpoints are located
     :type ckpt_paths: list
     :return: figure object (fig,(ax,ax1))
@@ -119,7 +142,7 @@ def plot_trainingLossAccuracies(ckpt_paths):
 
 if __name__ == '__main__':
 
-
+    save_name = "compare_"
     ckpt_paths = [
         os.path.join(ROOT_PATH,r"runs\pytorch\LSTMPredictor\2023-05-29 00_56"),
         os.path.join(ROOT_PATH,r"runs/tensorflow/LSTMPredictor/2023-05-28 16_00"),
@@ -127,7 +150,7 @@ if __name__ == '__main__':
     ]
     fig,ax = plot_trainingLossAccuracies(ckpt_paths)
 
-    fig.savefig(os.path.join(ROOT_PATH,OUT_DIR,"test_illustration.svg"))
+    fig.savefig(os.path.join(ROOT_PATH,OUT_DIR,f"{save_name}.svg"))
 
     plt.show()
 

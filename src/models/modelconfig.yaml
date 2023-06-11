@@ -94,13 +94,13 @@ models:
 
   CVTransferLearningModel:
     params:
-        n_classes: 250
+        num_classes: 250
     hparams:
       backbone: resnet152
-      weights: IMAGENET1K_V2
+      weights: null
       learning_rate: 0.001
       gamma: 0.95
-      pretrained: True
+
 
   YetAnotherTransformer:
     YetAnotherTransformerClassifier:
