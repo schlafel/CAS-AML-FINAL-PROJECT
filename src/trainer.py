@@ -18,8 +18,11 @@ from callbacks import dropout_callback, augmentation_increase_callback
 import yaml
 
 class Trainer:
-    def __init__(self, modelname=MODELNAME, dataset=ASL_DATASET, patience=EARLY_STOP_PATIENCE,
-                 enableAugmentationDropout=True, augmentation_threshold=0.35):
+    def __init__(self, modelname=MODELNAME,
+                 dataset=ASL_DATASET,
+                 patience=EARLY_STOP_PATIENCE,
+                 enableAugmentationDropout=True,
+                 augmentation_threshold=0.35):
 
         self.model_name = modelname
         module_name = f"models.{DL_FRAMEWORK}.models"
@@ -207,7 +210,9 @@ class Trainer:
 
 if __name__ == '__main__':
     # Get Data
-    trainer = Trainer(modelname='YetAnotherEnsemble', enableAugmentationDropout=False, augmentation_threshold=0.05)
+    trainer = Trainer(modelname=MODELNAME,
+                      enableAugmentationDropout=False,
+                      augmentation_threshold=0.35)
     trainer.add_callback(dropout_callback)
     trainer.add_callback(augmentation_increase_callback)
     trainer.train()
