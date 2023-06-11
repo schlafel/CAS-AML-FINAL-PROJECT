@@ -217,7 +217,7 @@ def log_metrics(writer, log_dict):
     """
 
     for key,value in log_dict.items():
-        if key not in ['phase','epoch']:
+        if key not in ['phase']:
             writer.add_scalar(f'{key}'.capitalize()+f'/{log_dict["phase"]}', value, log_dict["epoch"] + 1)
 
     # writer.add_scalar(f'Loss/{phase}', loss, epoch + 1)
