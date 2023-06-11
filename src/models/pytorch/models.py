@@ -401,23 +401,23 @@ class CVTransferLearningModel(BaseModel):
                 if hasattr(p, "requires_grad"):
                     p.requires_grad = False
 
-            # recursively iterate over child modules until we find the last fully connected layer
-            for name, module in model.named_children():
-                if isinstance(module, nn.Linear):
-                    last_layer = module
-                    last_layer_name = name
-                if isinstance(module, nn.Sequential):
-                    for name2, module2 in module.named_children():
-                        if isinstance(module2, nn.Linear):
-                            last_layer = module2
-                            last_layer_name = name + "." + name2
+        # recursively iterate over child modules until we find the last fully connected layer
+        for name, module in model.named_children():
+            if isinstance(module, nn.Linear):
+                last_layer = module
+                last_layer_name = name
+            if isinstance(module, nn.Sequential):
+                for name2, module2 in module.named_children():
+                    if isinstance(module2, nn.Linear):
+                        last_layer = module2
+                        last_layer_name = name + "." + name2
 
-            new_last_layer = nn.Linear(last_layer.in_features,
-                                       self.settings['params']['n_classes'],
-                                       bias=True,
-                                       )
+        new_last_layer = nn.Linear(last_layer.in_features,
+                                   self.settings['params']['n_classes'],
+                                   bias=True,
+                                   )
 
-            setattr(model, last_layer_name, new_last_layer)
+        setattr(model, last_layer_name, new_last_layer)
 
         self.optimizer = torch.optim.Adam(model.parameters(), lr=self.learning_rate)
         self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer,

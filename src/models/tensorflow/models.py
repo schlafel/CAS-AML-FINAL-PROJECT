@@ -340,3 +340,46 @@ class HybridModel(BaseModel):
         output = self.fc(combined)
 
         return output
+
+class CVTransferLearningModel(BaseModel):
+    DEFAULTS = dict({})
+
+    def __init__(self, **kwargs):
+
+        # Override defaults with passed-in values
+        self.settings = {**self.DEFAULTS, **kwargs}
+        super().__init__(learning_rate=self.settings['hparams']['learning_rate'])
+
+        # get weights
+        if "weights" not in self.settings['hparams'].keys():
+            self.settings['hparams']['weights'] = None
+
+
+
+        model = tf.keras.applications.resnet.ResNet152(
+            include_top=True,
+            weights=self.settings['hparams']['weights'],
+            input_tensor=None,
+            input_shape=None,
+            pooling=None,
+            classes=self.settings['params']['num_classes'],
+            **kwargs
+        )
+
+
+
+        self.optimizer = torch.optim.Adam(model.parameters(), lr=self.learning_rate)
+        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer,
+                                                                gamma=kwargs['hparams']["gamma"])
+
+        self.model = model
+
+        self.to(DEVICE)
+
+    @tf.function
+    def call(self, inputs, training=True):
+        x_new = tf.reshape(x,shape= (-1,64,43,3))
+        #reshape and pad
+        x_new = F.pad(x, (0, 1), value=0.).reshape(-1, 64, 48, 3).moveaxis(-1, 1)
+
+        return output
