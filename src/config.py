@@ -79,7 +79,7 @@ BATCH_SIZE = 128                                            # Training batch siz
 #: Training Learning rate
 LEARNING_RATE = 0.001                                       # Training learning rate, may be overridden in model yaml
 #: Training Number of epochs
-EPOCHS = 50                                                 # Training number of epochs
+EPOCHS = 60                                                 # Training number of epochs
 #: Training Train set split size
 TRAIN_SIZE = 0.90                                           # Training set split size
 #: Training Validation set size
@@ -128,7 +128,7 @@ DYNAMIC_AUG_INC_RATE = 1.5                                  # Data augmentation 
 #: The maximum limit to which the probability of data augmentation can be increased.
 DYNAMIC_AUG_MAX_THRESHOLD = 0.35                            # Maximum data augmentation threshold
 #: The number of epochs to wait before increasing the probability of data augmentation.
-DYNAMIC_AUG_INC_INTERVAL = 5                                # Interval for augmentation rate increase
+DYNAMIC_AUG_INC_INTERVAL = 150                                # Interval for augmentation rate increase
 
 #
 # =============================================================================
@@ -137,9 +137,9 @@ DYNAMIC_AUG_INC_INTERVAL = 5                                # Interval for augme
 #
 
 #: Deep learning framework to use for training and inference. Can be either 'pytorch' or 'tensorflow'.
-DL_FRAMEWORK='tensorflow'                                      # Deep learning framework to use for training and inference.
+DL_FRAMEWORK='pytorch'                                      # Deep learning framework to use for training and inference.
 #: Name of the model to be used for training.
-MODELNAME='CVTransferLearningModel'                 # Name of the model to be used for training.
+MODELNAME='TransformerPredictor'                 # Name of the model to be used for training.
 
 
 #
