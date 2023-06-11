@@ -119,7 +119,7 @@ def plot_trainingLossAccuracies(ckpt_paths):
 
 if __name__ == '__main__':
 
-
+    save_name = "compare_"
     ckpt_paths = [
         os.path.join(ROOT_PATH,r"runs\pytorch\LSTMPredictor\2023-05-29 00_56"),
         os.path.join(ROOT_PATH,r"runs/tensorflow/LSTMPredictor/2023-05-28 16_00"),
@@ -127,7 +127,7 @@ if __name__ == '__main__':
     ]
     fig,ax = plot_trainingLossAccuracies(ckpt_paths)
 
-    fig.savefig(os.path.join(ROOT_PATH,OUT_DIR,"test_illustration.svg"))
+    fig.savefig(os.path.join(ROOT_PATH,OUT_DIR,f"{save_name}.svg"))
 
     plt.show()
 
