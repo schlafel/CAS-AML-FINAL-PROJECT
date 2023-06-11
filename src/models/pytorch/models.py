@@ -1,5 +1,5 @@
 """
-This kodule defines a PyTorch `BaseModel` providing a basic framework for learning and validating from `Trainer`
+This module defines a PyTorch `BaseModel` providing a basic framework for learning and validating from `Trainer`
 module, from which other pytorch models are inherited. This module includes several model classes that build upon the
 PyTorch's nn.Module for constructing pytorch LSTM or Transformer based models:
 
