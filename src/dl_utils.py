@@ -103,6 +103,7 @@ class DatasetWithLen:
     def __init__(self, tf_dataset, length):
         self.tf_dataset = tf_dataset
         self.length = length
+        self.augmentation_threshold = 0.1
 
     def __len__(self):
         """

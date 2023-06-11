@@ -46,7 +46,7 @@ from config import DEVICE, N_CLASSES
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torchmetrics.classification import accuracy
+from torchmetrics.classification import accuracy, F1Score,Precision,Recall, AUROC
 from torchvision import models
 
 
@@ -86,6 +86,27 @@ class BaseModel(nn.Module):
             task="multiclass",
             num_classes=n_classes
         )
+        self.precision = Precision(
+            task="multiclass",
+            num_classes=n_classes
+        )
+
+        self.recall = Recall(
+            task="multiclass",
+            num_classes=n_classes
+        )
+        self.f1score = F1Score(
+            task="multiclass",
+            num_classes=n_classes
+        )
+        self.auroc = AUROC(
+            task="multiclass",
+            num_classes=n_classes
+        )
+
+
+
+
 
         self.metrics = {"train": [], "val": [], "test": []}
 
