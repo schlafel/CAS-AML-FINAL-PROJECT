@@ -1,3 +1,42 @@
+"""
+This kodule defines a PyTorch `BaseModel` providing a basic framework for learning and validating from `Trainer`
+module, from which other pytorch models are inherited. This module includes several model classes that build upon the
+PyTorch's nn.Module for constructing pytorch LSTM or Transformer based models:
+
+.. list-table:: Model Classes
+   :widths: 25 75
+   :header-rows: 1
+
+   * - Class
+     - Description
+   * - `TransformerSequenceClassifier`
+     - This is a transformer-based sequence classification model. The class constructs a transformer encoder based on
+     user-defined parameters or default settings. The forward method first checks and reshapes the input, then passes it
+     through the transformer layers. It then pools the sequence by taking the mean over the time dimension, and finally
+     applies the output layer to generate the class predictions.
+   * - `TransformerPredictor`
+     - A TransformerPredictor model that extends the Pytorch BaseModel. This class wraps `TransformerSequenceClassifier`
+     model and provides functionality to use it for making predictions.
+   * - `MultiHeadSelfAttention`
+     - This class applies a multi-head attention mechanism. It has options for causal masking and layer normalization.
+     The input is expected to have dimensions [batch_size, seq_len, features].
+   * - `TransformerBlock`
+     - This class represents a single block of a transformer architecture, including multi-head self-attention and a
+     feed-forward neural network, both with optional layer normalization and dropout. The input is expected to have
+     dimensions [batch_size, seq_len, features].
+   * - `YetAnotherTransformerClassifier`
+     - This class constructs a transformer-based classifier with a specified number of `TransformerBlock` instances.
+     The output of the model is a tensor of logits with dimensions [batch_size, num_classes].
+   * - `YetAnotherTransformer`
+     - This class is a wrapper for `YetAnotherTransformerClassifier` which includes learning rate, optimizer, and
+     learning rate scheduler settings. It extends from the `BaseModel` class.
+   * - `YetAnotherEnsemble`
+     - This class constructs an ensemble of `YetAnotherTransformerClassifier` instances, where the outputs are
+     concatenated and passed through a fully connected layer. This class also extends from the `BaseModel` class and
+     includes learning rate, optimizer, and learning rate scheduler settings.
+
+"""
+
 import sys
 
 sys.path.insert(0, "./..")
@@ -12,6 +51,34 @@ from torchvision import models
 
 
 class BaseModel(nn.Module):
+    """
+    A BaseModel that extends the nn.Module from PyTorch.
+
+    Functionality:
+    #. The class initializes with a given learning rate and number of classes.
+    #. It sets up the loss criterion, accuracy metric, and default states for optimizer and scheduler.
+    #. It defines an abstract method 'forward' which should be implemented in the subclass.
+    #. It also defines various utility functions like calculating accuracy, training, validation and testing steps, scheduler stepping, and model checkpointing.
+
+    Args:
+        learning_rate (float): The initial learning rate for optimizer.
+        n_classes (int): The number of classes for classification.
+
+    :param learning_rate: The initial learning rate for optimizer.
+    :type learning_rate: float
+    :param n_classes: The number of classes for classification.
+    :type n_classes: int
+
+    :returns: None
+    :rtype: None
+
+    .. note::
+        The class does not directly initialize the optimizer and scheduler. They should be initialized in the subclass if needed.
+
+    .. warning::
+        The 'forward' function must be implemented in the subclass, else it will raise a NotImplementedError.
+
+    """
     def __init__(self, learning_rate, n_classes=N_CLASSES):
         super().__init__()
         self.criterion = nn.CrossEntropyLoss()
@@ -27,6 +94,18 @@ class BaseModel(nn.Module):
         self.scheduler = None
 
     def calculate_accuracy(self, y_hat, y):
+        """
+        Calculates the accuracy of the model's prediction.
+
+        :param y_hat: The predicted output from the model.
+        :type y_hat: Tensor
+        :param y: The ground truth or actual labels.
+        :type y: Tensor
+
+        :returns: The calculated accuracy.
+        :rtype: Tensor
+
+        """
         # Damn Mac https://github.com/pytorch/pytorch/issues/92311
         preds = torch.argmax(y_hat.cpu(), dim=1)
         targets = y.view(-1).cpu()
@@ -34,9 +113,31 @@ class BaseModel(nn.Module):
         return acc.cpu()
 
     def forward(self, x):
+        """
+        The forward function for the BaseModel.
+
+        :param x: The inputs to the model.
+        :type x: Tensor
+
+        :returns: None
+
+        .. warning::
+            This function must be implemented in the subclass, else it raises a NotImplementedError.
+
+        """
         raise NotImplementedError()
 
     def training_step(self, batch):
+        """
+        Performs a training step using the input batch data.
+
+        :param batch: A tuple containing input data and labels.
+        :type batch: tuple
+
+        :returns: The calculated loss and accuracy.
+        :rtype: tuple
+
+        """
         landmarks, labels = batch[0].to(DEVICE), batch[1].to(DEVICE)
 
         # forward pass through the model
@@ -55,6 +156,16 @@ class BaseModel(nn.Module):
         return loss.cpu().detach(), step_accuracy.cpu()
 
     def validation_step(self, batch):
+        """
+        Performs a validation step using the input batch data.
+
+        :param batch: A tuple containing input data and labels.
+        :type batch: tuple
+
+        :returns: The calculated loss and accuracy.
+        :rtype: tuple
+
+        """
 
         with torch.no_grad():
             landmarks, labels = batch[0].to(DEVICE), batch[1].to(DEVICE)
@@ -74,6 +185,16 @@ class BaseModel(nn.Module):
         return loss.cpu().detach(), step_accuracy.cpu()
 
     def test_step(self, batch):
+        """
+        Performs a test step using the input batch data.
+
+        :param batch: A tuple containing input data and labels.
+        :type batch: tuple
+
+        :returns: The calculated loss, accuracy, and model predictions.
+        :rtype: tuple
+
+        """
         with torch.no_grad():
             landmarks, labels = batch[0].to(DEVICE), batch[1].to(DEVICE)
 
@@ -94,23 +215,47 @@ class BaseModel(nn.Module):
         return loss.cpu().detach(), step_accuracy.cpu(), preds.cpu()
 
     def optimize(self):
+        """
+        Steps the optimizer and sets the gradients of all optimized :class:`torch.Tensor` s to zero.
+        """
         self.optimizer.step()
         self.optimizer.zero_grad()
 
     def train_mode(self):
+        """
+        Sets the model to training mode.
+        """
         self.optimizer.zero_grad()
         self.train()
 
     def eval_mode(self):
+        """
+        Sets the model to evaluation mode.
+        """
         self.eval()
 
     def step_scheduler(self):
+        """
+        Steps the learning rate scheduler, adjusting the optimizer's learning rate as necessary.
+        """
         self.scheduler.step()
 
     def get_lr(self):
+        """
+        Gets the current learning rate of the model.
+
+        :returns: The current learning rate.
+        :rtype: float
+        """
         return self.optimizer.param_groups[0]['lr']
 
     def save_checkpoint(self, filepath):
+        """
+        Saves the model and optimizer states to a checkpoint.
+
+        :param filepath: The file path where to save the model checkpoint.
+        :type filepath: str
+        """
         checkpoint = {
             'model_state_dict': self.state_dict(),
             'optimizer_state_dict': self.optimizer.state_dict(),
@@ -119,6 +264,12 @@ class BaseModel(nn.Module):
         torch.save(checkpoint, filepath)
 
     def load_checkpoint(self, filepath):
+        """
+        Loads the model and optimizer states from a checkpoint.
+
+        :param filepath: The file path where to load the model checkpoint from.
+        :type filepath: str
+        """
         checkpoint = torch.load(filepath)
         self.load_state_dict(checkpoint['model_state_dict'])
         self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
@@ -126,7 +277,32 @@ class BaseModel(nn.Module):
 
 
 class TransformerSequenceClassifier(nn.Module):
-    """Transformer-based Sequence Classifier"""
+    """
+    =============================
+    TransformerSequenceClassifier
+    =============================
+
+    A Transformer-based Sequence Classifier. This class utilizes a transformer encoder to process the input sequence.
+
+    The transformer encoder consists of a stack of N transformer layers that are applied to the input sequence.
+    The output sequence from the transformer encoder is then passed through a linear layer to generate class predictions.
+
+    Attributes
+    ----------
+    DEFAULTS : dict
+        Default settings for the transformer encoder and classifier. These can be overridden by passing values in the constructor.
+    transformer : nn.TransformerEncoder
+        The transformer encoder used to process the input sequence.
+    output_layer : nn.Linear
+        The output layer used to generate class predictions.
+    batch_first : bool
+        Whether the first dimension of the input tensor represents the batch size.
+
+    Methods
+    -------
+    forward(inputs)
+        Performs a forward pass through the model.
+    """
     DEFAULTS = dict(
         d_model=256,
         n_head=8,
@@ -192,6 +368,31 @@ class TransformerSequenceClassifier(nn.Module):
 
 
 class TransformerPredictor(BaseModel):
+    """
+    ===================
+    TransformerPredictor
+    ===================
+
+    A TransformerPredictor model that extends the Pytorch BaseModel.
+
+    This class wraps the TransformerSequenceClassifier model and provides functionality to use it for making predictions.
+
+    Attributes
+    ----------
+    learning_rate : float
+        The learning rate for the optimizer.
+    model : TransformerSequenceClassifier
+        The transformer sequence classifier used for making predictions.
+    optimizer : torch.optim.Adam
+        The optimizer used for updating the model parameters.
+    scheduler : torch.optim.lr_scheduler.ExponentialLR
+        The learning rate scheduler used for adapting the learning rate during training.
+
+    Methods
+    -------
+    forward(x)
+        Performs a forward pass through the model.
+    """
     def __init__(self, **kwargs):
         super().__init__(learning_rate=kwargs["learning_rate"], n_classes=kwargs["num_classes"])
 
@@ -211,7 +412,29 @@ class TransformerPredictor(BaseModel):
 
 
 class LSTMClassifier(nn.Module):
-    """LSTM-based Sequence Classifier"""
+    """
+    ===========================
+    LSTMClassifier
+    ===========================
+
+    A LSTM-based Sequence Classifier. This class utilizes a LSTM network for sequence classification tasks.
+
+    Attributes
+    ----------
+    DEFAULTS : dict
+        Default settings for the LSTM and classifier. These can be overridden by passing values in the constructor.
+    lstm : nn.LSTM
+        The LSTM network used for processing the input sequence.
+    dropout : nn.Dropout
+        The dropout layer applied after LSTM network.
+    output_layer : nn.Linear
+        The output layer used to generate class predictions.
+
+    Methods
+    -------
+    forward(x)
+        Performs a forward pass through the model.
+    """
     DEFAULTS = dict(
         input_dim=192,
         hidden_dim=100,
@@ -258,6 +481,31 @@ class LSTMClassifier(nn.Module):
 
 
 class LSTMPredictor(BaseModel):
+    """
+    ===================
+    LSTMPredictor
+    ===================
+
+    A LSTMPredictor model that extends the Pytorch BaseModel.
+
+    This class wraps the LSTMClassifier model and provides functionality to use it for making predictions.
+
+    Attributes
+    ----------
+    learning_rate : float
+        The learning rate for the optimizer.
+    model : LSTMClassifier
+        The LSTM classifier used for making predictions.
+    optimizer : torch.optim.Adam
+        The optimizer used for updating the model parameters.
+    scheduler : torch.optim.lr_scheduler.ExponentialLR
+        The learning rate scheduler used for adapting the learning rate during training.
+
+    Methods
+    -------
+    forward(x)
+        Performs a forward pass through the model.
+    """
     def __init__(self, **kwargs):
         super().__init__(learning_rate=kwargs["learning_rate"], n_classes=kwargs["output_dim"])
 
@@ -276,6 +524,34 @@ class LSTMPredictor(BaseModel):
 
 
 class HybridModel(BaseModel):
+    """
+    ===================
+    HybridModel
+    ===================
+
+    A HybridModel that extends the Pytorch BaseModel.
+
+    This class combines the LSTMClassifier and TransformerSequenceClassifier models
+    and provides functionality to use the combined model for making predictions.
+
+    Attributes
+    ----------
+    lstm : LSTMClassifier
+        The LSTM classifier used for making predictions.
+    transformer : TransformerSequenceClassifier
+        The transformer sequence classifier used for making predictions.
+    fc : nn.Linear
+        The final fully-connected layer.
+    optimizer : torch.optim.Adam
+        The optimizer used for updating the model parameters.
+    scheduler : torch.optim.lr_scheduler.ExponentialLR
+        The learning rate scheduler used for adapting the learning rate during training.
+
+    Methods
+    -------
+    forward(x)
+        Performs a forward pass through the model.
+    """
     def __init__(self, **kwargs):
         common_params = kwargs['common_params']
         transformer_kwargs = kwargs['transformer_params']
@@ -306,6 +582,34 @@ class HybridModel(BaseModel):
 
 
 class TransformerEnsemble(BaseModel):
+    """
+    ===================
+    TransformerEnsemble
+    ===================
+
+    A TransformerEnsemble that extends the Pytorch BaseModel.
+
+    This class creates an ensemble of TransformerSequenceClassifier models
+    and provides functionality to use the ensemble for making predictions.
+
+    Attributes
+    ----------
+    learning_rate : float
+        The learning rate for the optimizer.
+    models : nn.ModuleList
+        The list of transformer sequence classifiers used for making predictions.
+    fc : nn.Linear
+        The final fully-connected layer.
+    optimizer : torch.optim.Adam
+        The optimizer used for updating the model parameters.
+    scheduler : torch.optim.lr_scheduler.ExponentialLR
+        The learning rate scheduler used for adapting the learning rate during training.
+
+    Methods
+    -------
+    forward(x)
+        Performs a forward pass through the model.
+    """
     def __init__(self, **kwargs):
         common_params = kwargs['common_params']
         transformer_params = kwargs['TransformerSequenceClassifier']
@@ -336,6 +640,36 @@ class TransformerEnsemble(BaseModel):
 
 
 class HybridEnsembleModel(BaseModel):
+    """
+    =======================
+    HybridEnsembleModel
+    =======================
+
+    A HybridEnsembleModel that extends the Pytorch BaseModel.
+
+    This class creates an ensemble of LSTM and Transformer models and provides
+    functionality to use the ensemble for making predictions.
+
+    Attributes
+    ----------
+    learning_rate : float
+        The learning rate for the optimizer.
+    lstms : nn.ModuleList
+        The list of LSTM models.
+    models : nn.ModuleList
+        The list of Transformer models.
+    fc : nn.Linear
+        The final fully-connected layer.
+    optimizer : torch.optim.Adam
+        The optimizer used for updating the model parameters.
+    scheduler : torch.optim.lr_scheduler.ExponentialLR
+        The learning rate scheduler used for adapting the learning rate during training.
+
+    Methods
+    -------
+    forward(x)
+        Performs a forward pass through the model.
+    """
     def __init__(self, **kwargs):
         common_params = kwargs['common_params']
         transformer_params = kwargs['TransformerSequenceClassifier']
@@ -378,6 +712,32 @@ class HybridEnsembleModel(BaseModel):
 
 
 class CVTransferLearningModel(BaseModel):
+    """
+    ========================
+    CVTransferLearningModel
+    ========================
+
+    A CVTransferLearningModel that extends the Pytorch BaseModel.
+
+    This class applies transfer learning for computer vision tasks using pretrained models.
+    It also provides a forward method to pass an input through the model.
+
+    Attributes
+    ----------
+    learning_rate : float
+        The learning rate for the optimizer.
+    model : nn.Module
+        The base model for transfer learning.
+    optimizer : torch.optim.Adam
+        The optimizer used for updating the model parameters.
+    scheduler : torch.optim.lr_scheduler.ExponentialLR
+        The learning rate scheduler used for adapting the learning rate during training.
+
+    Methods
+    -------
+    forward(x)
+        Performs a forward pass through the model.
+    """
     DEFAULTS = dict({})
 
     def __init__(self, **kwargs):
@@ -434,6 +794,41 @@ class CVTransferLearningModel(BaseModel):
 
 
 class MultiHeadSelfAttention(nn.Module):
+    """
+    ======================
+    MultiHeadSelfAttention
+    ======================
+
+    A MultiHeadSelfAttention module that extends the nn.Module from PyTorch.
+
+    Functionality:
+    #. The class initializes with a given dimension size, number of attention heads, dropout rate, layer normalization and causality.
+    #. It sets up the multihead attention module and layer normalization.
+    #. It also defines a forward method that applies the multihead attention, causal masking if requested, and layer normalization if requested.
+
+    Attributes
+    ----------
+    multihead_attn : nn.MultiheadAttention
+        The multihead attention module.
+    layer_norm : nn.LayerNorm or None
+        The layer normalization module. If it is not applied, set to None.
+    causal : bool
+        If True, applies causal masking.
+
+    Methods
+    -------
+    forward(x)
+        Performs a forward pass through the model.
+
+    Args:
+        dim (int): The dimension size of the input data.
+        num_heads (int): The number of attention heads.
+        dropout (float): The dropout rate.
+        layer_norm (bool): Whether to apply layer normalization.
+        causal (bool): Whether to apply causal masking.
+
+    Returns: None
+    """
     def __init__(self, dim, num_heads=8, dropout=0.1, layer_norm=True, causal=True):
         super().__init__()
         self.multihead_attn = nn.MultiheadAttention(dim, num_heads, dropout=dropout)
@@ -460,6 +855,43 @@ class MultiHeadSelfAttention(nn.Module):
 
 
 class TransformerBlock(nn.Module):
+    """
+    ================
+    TransformerBlock
+    ================
+
+    A TransformerBlock module that extends the nn.Module from PyTorch.
+
+    Functionality:
+    #. The class initializes with a given dimension size, number of attention heads, expansion factor, attention dropout rate, and dropout rate.
+    #. It sets up the multihead self-attention module, layer normalization and feed-forward network.
+    #. It also defines a forward method that applies the multihead self-attention, dropout, layer normalization and feed-forward network.
+
+    Attributes
+    ----------
+    norm1, norm2, norm3 : nn.LayerNorm
+        The layer normalization modules.
+    attn : MultiHeadSelfAttention
+        The multihead self-attention module.
+    feed_forward : nn.Sequential
+        The feed-forward network.
+    dropout : nn.Dropout
+        The dropout module.
+
+    Methods
+    -------
+    forward(x)
+        Performs a forward pass through the model.
+
+    Args:
+        dim (int): The dimension size of the input data.
+        num_heads (int): The number of attention heads.
+        expansion_factor (int): The expansion factor for the hidden layer size in the feed-forward network.
+        attn_dropout (float): The dropout rate for the attention module.
+        drop_rate (float): The dropout rate for the module.
+
+    Returns: None
+    """
     def __init__(self, dim=192, num_heads=4, expansion_factor=4, attn_dropout=0.2, drop_rate=0.2):
         super().__init__()
         self.norm1 = nn.LayerNorm(dim)
@@ -496,6 +928,39 @@ class TransformerBlock(nn.Module):
 
 
 class YetAnotherTransformerClassifier(nn.Module):
+    """
+    ===============================
+    YetAnotherTransformerClassifier
+    ===============================
+
+    A YetAnotherTransformerClassifier module that extends the nn.Module from PyTorch.
+
+    Functionality:
+    #. The class initializes with a set of parameters for the transformer blocks.
+    #. It sets up the transformer blocks and the output layer.
+    #. It also defines a forward method that applies the transformer blocks, takes the mean over the time dimension of the transformed sequence, and applies the output layer.
+
+    Attributes
+    ----------
+    DEFAULTS : dict
+        The default settings for the transformer.
+    settings : dict
+        The settings for the transformer, with any user-provided values overriding the defaults.
+    transformer : nn.ModuleList
+        The list of transformer blocks.
+    output_layer : nn.Linear
+        The output layer.
+
+    Methods
+    -------
+    forward(inputs)
+        Performs a forward pass through the model.
+
+    Args:
+        kwargs (dict): A dictionary containing the parameters for the transformer blocks.
+
+    Returns: None
+    """
     DEFAULTS = dict(
         d_model=192,
         n_head=8,
@@ -551,6 +1016,39 @@ class YetAnotherTransformerClassifier(nn.Module):
 
 
 class YetAnotherTransformer(BaseModel):
+    """
+    =====================
+    YetAnotherTransformer
+    =====================
+
+    A YetAnotherTransformer model that extends the Pytorch BaseModel.
+
+    Functionality:
+    #. The class initializes with a set of parameters for the YetAnotherTransformerClassifier.
+    #. It sets up the YetAnotherTransformerClassifier model, the optimizer and the learning rate scheduler.
+    #. It also defines a forward method that applies the YetAnotherTransformerClassifier model.
+
+    Attributes
+    ----------
+    learning_rate : float
+        The learning rate for the optimizer.
+    model : YetAnotherTransformerClassifier
+        The YetAnotherTransformerClassifier model.
+    optimizer : torch.optim.AdamW
+        The AdamW optimizer.
+    scheduler : torch.optim.lr_scheduler.ExponentialLR
+        The learning rate scheduler.
+
+    Methods
+    -------
+    forward(x)
+        Performs a forward pass through the model.
+
+    Args:
+        kwargs (dict): A dictionary containing the parameters for the YetAnotherTransformerClassifier, optimizer and learning rate scheduler.
+
+    Returns: None
+    """
     def __init__(self, **kwargs):
         common_params = kwargs['common_params']
         transformer_params = kwargs['YetAnotherTransformerClassifier']
@@ -572,6 +1070,23 @@ class YetAnotherTransformer(BaseModel):
 
 
 class YetAnotherEnsemble(BaseModel):
+    """
+    ==================
+    YetAnotherEnsemble
+    ==================
+
+    A YetAnotherEnsemble model that extends the Pytorch BaseModel.
+
+    Functionality:
+    #. The class initializes with a set of parameters for the YetAnotherTransformerClassifier.
+    #. It sets up an ensemble of YetAnotherTransformerClassifier models, a fully connected layer, the optimizer and the learning rate scheduler.
+    #. It also defines a forward method that applies each YetAnotherTransformerClassifier model in the ensemble, concatenates the outputs and applies the fully connected layer.
+
+    Args:
+        kwargs (dict): A dictionary containing the parameters for the YetAnotherTransformerClassifier models, fully connected layer, optimizer and learning rate scheduler.
+
+    Returns: None
+    """
     def __init__(self, **kwargs):
         common_params = kwargs['common_params']
         transformer_params = kwargs['YetAnotherTransformerClassifier']

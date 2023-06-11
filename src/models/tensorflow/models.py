@@ -14,6 +14,31 @@ import tensorflow as tf
 
 
 class BaseModel(tf.keras.Model):
+    """
+    A BaseModel that extends the tf.keras.Model.
+
+    Functionality:
+    #. The class initializes with a given learning rate.
+    #. It sets up the loss criterion, accuracy metric, and default states for optimizer and scheduler.
+    #. It defines an abstract method 'call' which should be implemented in the subclass.
+    #. It also defines various utility functions like calculating accuracy, training, validation and testing steps, scheduler stepping, and model checkpointing.
+
+    Args:
+        learning_rate (float): The initial learning rate for optimizer.
+
+    :param learning_rate: The initial learning rate for optimizer.
+    :type learning_rate: float
+
+    :returns: None
+    :rtype: None
+
+    .. note::
+        The class does not directly initialize the optimizer and scheduler. They should be initialized in the subclass
+        if needed.
+
+    .. warning::
+        The 'call' function must be implemented in the subclass, else it will raise a NotImplementedError.
+    """
     def __init__(self, learning_rate):
         super(BaseModel, self).__init__()
         self.learning_rate = learning_rate
@@ -29,12 +54,59 @@ class BaseModel(tf.keras.Model):
         self.compile()
 
     def calculate_accuracy(self, y_pred, y_true):
+        """
+        Calculates the accuracy of the model's prediction.
+
+        :param y_pred: The predicted output from the model.
+        :type y_pred: Tensor
+        :param y_true: The ground truth or actual labels.
+        :type y_true: Tensor
+
+        :returns: The calculated accuracy.
+        :rtype: float
+        """
         return self.accuracy(y_true, y_pred)
 
+    def calculate_accuracy(self, y_pred, y_true):
+        """
+        Calculates the accuracy of the model's prediction.
+
+        :param y_pred: The predicted output from the model.
+        :type y_pred: Tensor
+        :param y_true: The ground truth or actual labels.
+        :type y_true: Tensor
+
+        :returns: The calculated accuracy.
+        :rtype: float
+        """
+        ...
+
     def call(self, inputs, training=False):
+        """
+        The call function for the BaseModel.
+
+        :param inputs: The inputs to the model.
+        :type inputs: Tensor
+        :param training: A flag indicating whether the model is in training mode. Default is False.
+        :type training: bool
+
+        :returns: None
+
+        .. warning::
+            This function must be implemented in the subclass, else it raises a NotImplementedError.
+        """
         raise NotImplementedError()
 
     def training_step(self, batch):
+        """
+        Performs a training step using the input batch data.
+
+        :param batch: A tuple containing input data and labels.
+        :type batch: tuple
+
+        :returns: The calculated loss and accuracy.
+        :rtype: tuple
+        """
         landmarks, labels = batch
 
         # Forward pass
@@ -57,6 +129,15 @@ class BaseModel(tf.keras.Model):
         return loss.numpy(), accuracy.numpy()
 
     def validation_step(self, batch):
+        """
+        Performs a validation step using the input batch data.
+
+        :param batch: A tuple containing input data and labels.
+        :type batch: tuple
+
+        :returns: The calculated loss and accuracy.
+        :rtype: tuple
+        """
         landmarks, labels = batch
 
         predictions = self(landmarks, training=False)
@@ -70,6 +151,15 @@ class BaseModel(tf.keras.Model):
         return loss.numpy(), accuracy.numpy()
 
     def test_step(self, batch):
+        """
+        Performs a test step using the input batch data.
+
+        :param batch: A tuple containing input data and labels.
+        :type batch: tuple
+
+        :returns: The calculated loss, accuracy, and model predictions.
+        :rtype: tuple
+        """
 
         landmarks, labels = batch
 
@@ -85,33 +175,95 @@ class BaseModel(tf.keras.Model):
         return loss.numpy(), accuracy.numpy(), preds.numpy()
 
     def optimize(self):
+        """
+        Sets the model to training mode.
+        """
         self.training = True
 
     def train_mode(self):
+        """
+        Sets the model to training mode.
+        """
         self.training = True
 
     def eval_mode(self):
+        """
+        Sets the model to evaluation mode.
+        """
         self.training = False
 
     def step_scheduler(self):
+        """
+        Adjusts the learning rate according to the learning rate scheduler.
+        """
         try:
             self.optimizer.learning_rate = self.scheduler(self.optimizer.iterations)
         except:
             pass
 
     def get_lr(self):
+        """
+        Gets the current learning rate of the model.
+
+        :returns: The current learning rate.
+        :rtype: float
+        """
         if not hasattr(self.optimizer, 'iterations'):
             return self.learning_rate
         return self.scheduler(self.optimizer.iterations).numpy()
 
     def save_checkpoint(self, filepath):
+        """
+        Saves the model weights to a checkpoint.
+
+        :param filepath: The file path where to save the model checkpoint.
+        :type filepath: str
+        """
         self.save_weights(filepath)
 
     def load_checkpoint(self, filepath):
+        """
+        Loads the model weights from a checkpoint.
+
+        :param filepath: The file path where to load the model checkpoint from.
+        :type filepath: str
+        """
         self.load_weights(filepath)
 
 
 class TransformerEncoderLayer(tf.keras.layers.Layer):
+    """
+    A Transformer Encoder layer as a subclass of tf.keras.layers.Layer.
+
+    Functionality:
+    #. The class first initializes with key parameters for MultiHeadAttention and feedforward network.
+    #. Then it defines the key components like multi-head attention, feedforward network, layer normalization, and dropout.
+    #. In the call function, it takes input and performs self-attention, followed by layer normalization and feedforward operation.
+
+    Args:
+        d_model (int): The dimensionality of the input.
+        n_head (int): The number of heads in the multi-head attention.
+        dim_feedforward (int): The dimensionality of the feedforward network model.
+        dropout (float): The dropout value.
+
+    :param d_model: The dimensionality of the input.
+    :type d_model: int
+    :param n_head: The number of heads in the multi-head attention.
+    :type n_head: int
+    :param dim_feedforward: The dimensionality of the feedforward network model.
+    :type dim_feedforward: int
+    :param dropout: The dropout value.
+    :type dropout: float
+
+    :returns: None
+    :rtype: None
+
+    .. note::
+        The implementation is based on the "Attention is All You Need" paper.
+
+    .. warning::
+        Ensure that the input dimension 'd_model' is divisible by the number of attention heads 'n_head'.
+    """
     def __init__(self, d_model, n_head, dim_feedforward, dropout):
         super(TransformerEncoderLayer, self).__init__()
 
@@ -141,6 +293,29 @@ class TransformerEncoderLayer(tf.keras.layers.Layer):
 
 
 class TransformerSequenceClassifier(Model):
+    """
+    A Transformer Sequence Classifier as a subclass of tf.keras.Model.
+
+    Functionality:
+    #. The class first initializes with default or provided settings.
+    #. Then it defines the key components like the transformer encoder layers and output layer.
+    #. In the call function, it takes input and passes it through each transformer layer followed by normalization and dense layer for final output.
+
+    Args:
+        kwargs (dict): Any additional arguments. If not provided, defaults will be used.
+
+    :param kwargs: Any additional arguments.
+    :type kwargs: dict
+
+    :returns: None
+    :rtype: None
+
+    .. note::
+        The implementation is based on the "Attention is All You Need" paper.
+
+    .. warning::
+        The inputs should have a shape of (batch_size, seq_length, height, width), otherwise, a ValueError will be raised.
+    """
     DEFAULTS = dict(
         d_model=256,
         n_head=8,
@@ -204,6 +379,30 @@ class TransformerSequenceClassifier(Model):
 
 
 class TransformerPredictor(BaseModel):
+    """
+    A Transformer Predictor model that extends the BaseModel.
+
+    Functionality:
+    #. The class first initializes with the learning rate and other parameters.
+    #. It then creates an instance of TransformerSequenceClassifier.
+    #. It also sets up the learning rate scheduler and the optimizer.
+    #. In the call function, it simply runs the TransformerSequenceClassifier.
+
+    Args:
+        kwargs (dict): A dictionary of arguments.
+
+    :param kwargs: A dictionary of arguments.
+    :type kwargs: dict
+
+    :returns: None
+    :rtype: None
+
+    .. note::
+        The learning rate is set up with an exponential decay schedule.
+
+    .. warning::
+        The learning rate and gamma for the decay schedule must be specified in the 'kwargs'.
+    """
     def __init__(self, **kwargs):
         super().__init__(learning_rate=kwargs["learning_rate"])
 

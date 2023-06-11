@@ -1,3 +1,23 @@
+"""
+=====================
+Callbacks description
+=====================
+
+This module contains callback codes which may be executed during training. These callbacks are used to dynamically
+adjust the dropout rate and data augmentation probability during the training process, which can be useful techniques
+to prevent overfitting and increase the diversity of the training data, potentially improving the model's performance.
+
+The dropout_callback function is designed to increase the dropout rate of the model during the training process after
+a certain number of epochs. The dropout rate is a regularization technique used to prevent overfitting during the
+training process. The rate of dropout is increased every few epochs based on a specified rate until it reaches a
+specified maximum limit.
+
+The augmentation_increase_callback: function is designed to increase the probability of data augmentation applied to
+the dataset during the training process after a certain number of epochs. Data augmentation is a technique that can
+generate new training samples by applying transformations to the existing data. The probability of data augmentation
+is increased every few epochs based on a specified rate until it reaches a specified maximum limit.
+
+"""
 import sys
 
 sys.path.insert(0, '..')
@@ -24,14 +44,20 @@ def dropout_callback(trainer, dropout_rate=DYNAMIC_DROP_OUT_REDUCTION_RATE,
         max_dropout: The maximum limit to which dropout can be increased. Default is value of
         'DYNAMIC_DROP_OUT_MAX_THRESHOLD' from config.
 
+    Returns:
+        None
+
     Functionality:
         Increases the dropout rate of all nn.Dropout modules in the model after certain number of epochs defined by
         'DYNAMIC_DROP_OUT_REDUCTION_INTERVAL'.
 
-    :rtype: None
     :param trainer: Trainer object handling the training process
     :param dropout_rate: Rate at which to increase the dropout rate
     :param max_dropout: Maximum allowable dropout rate
+
+    :return: None
+    :rtype: None
+
     """
     step = trainer.epoch + 1
     model = trainer.model
@@ -59,13 +85,19 @@ def augmentation_increase_callback(trainer, aug_increase_rate=DYNAMIC_AUG_INC_RA
         max_limit: The maximum limit to which data augmentation probability can be increased.
         Default is value of 'DYNAMIC_AUG_MAX_THRESHOLD' from config.
 
-        Functionality:
-            Increases the probability of data augmentation applied on the dataset after certain number of epochs defined by 'DYNAMIC_AUG_INC_INTERVAL'.
+    Returns:
+        None
 
-        :rtype: None
-        :param trainer: Trainer object handling the training process
-        :param aug_increase_rate: Rate at which to increase the data augmentation probability
-        :param max_limit: Maximum allowable data augmentation probability
+    Functionality:
+        Increases the probability of data augmentation applied on the dataset after certain number of epochs defined by 'DYNAMIC_AUG_INC_INTERVAL'.
+
+    :param trainer: Trainer object handling the training process
+    :param aug_increase_rate: Rate at which to increase the data augmentation probability
+    :param max_limit: Maximum allowable data augmentation probability
+
+    :return: None
+    :rtype: None
+
     """
     step = trainer.epoch + 1
     loader = trainer.train_loader
