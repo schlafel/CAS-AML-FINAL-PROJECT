@@ -35,7 +35,7 @@ add_callback(callback): Adds a callback function to the list of functions to be 
 
 """
 import sys
-
+from shutil import copyfile
 sys.path.insert(0, '../src')
 
 from config import *
@@ -255,7 +255,7 @@ class Trainer:
                 with open(checkpoint_param_path, 'w') as outfile:
                     yaml.dump(self.params, outfile, default_flow_style=False)
                 print(f"Best model and parameters saved at epoch {epoch + 1}")
-
+                copyfile('config.py',os.path.join(self.checkpoint_path,"config.py")) #copy the configurations file
 
 
             else:
