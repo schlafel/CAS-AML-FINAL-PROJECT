@@ -208,11 +208,8 @@ def log_metrics(writer, log_dict):
     """
     Helper function to log metrics to TensorBoard.
 
-    :param phase: String, the phase of the process ('train' or 'validation').
-    :param loss: Float, the current loss value.
-    :param acc: Float, the current accuracy value.
-    :param epoch: Integer, the current epoch number.
-    :param lr: Float, the current learning rate.
+    :param log_dict: Dictionary to log all the metrics to tensorboard. It must contain the keys {epoch,accuracy, loss, lr,}
+    :type: log_dict
     :param writer: TensorBoard writer object.
     """
 
