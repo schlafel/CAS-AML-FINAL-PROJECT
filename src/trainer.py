@@ -104,6 +104,7 @@ class Trainer:
             Make sure the specified model name corresponds to an actual model in your project's models directory.
         """
         self.model_name = modelname
+        self.DL_FRAMEWORK = DL_FRAMEWORK
         module_name = f"models.{DL_FRAMEWORK}.models"
         self.params = get_model_params(modelname)
 
@@ -193,10 +194,15 @@ class Trainer:
             print(end='', flush=True)
             for i, batch in pbar:
                 loss, acc = self.model.training_step(batch)
+
                 self.model.optimize()
 
-                total_loss += loss
-                total_acc += acc
+                if DL_FRAMEWORK == "tensorflow":
+                    total_loss += loss.numpy()
+                    total_acc += acc.numpy()
+                else:
+                    total_loss += loss
+                    total_acc += acc
 
                 pbar.set_postfix({'Loss': total_loss / (i + 1), 'Accuracy': total_acc / (i + 1)})
 
@@ -213,6 +219,7 @@ class Trainer:
             self.epoch = epoch
 
             val_loss, val_acc = self.evaluate()
+
 
             if EARLY_STOP_METRIC == "loss":
                 metric = val_loss
@@ -290,11 +297,15 @@ class Trainer:
         for i, batch in pbar:
             loss, acc = self.model.validation_step(batch)
 
+            if DL_FRAMEWORK == "tensorflow":
+                total_loss += loss.numpy()
+                total_acc += acc.numpy()
+            else:
+                total_loss += loss
+                total_acc += acc
+
             valid_losses.append(loss)
             valid_accuracies.append(acc)
-
-            total_loss += loss
-            total_acc += acc
 
             pbar.set_postfix({'Loss': total_loss / (i + 1), 'Accuracy': total_acc / (i + 1)})
 
