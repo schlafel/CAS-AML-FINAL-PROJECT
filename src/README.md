@@ -9,8 +9,33 @@
 <div id="welcome-to-american-sign-language-recognition-s-documentation"
 class="section">
 
+# [American Sign Language Recognition](#)
+
+### Navigation
+
+Contents:
+
+-   [Data Augmentations](augmentations.py)
+-   [Training Callbacks](callbacks.py)
+-   [Project Configuration](config.py)
+-   [Data Utilities](data/data_utils.py)
+-   [HyperParameter Search](hparam_search.py)
+-   [Camera Stream Predictions](predict_on_camera.py)
+-   [ASL Dataset](data/dataset.py)
+-   [Data Utilities](dl_utils.py)
+-   [Model Training](trainer.py)
+-   [Data Visualizations](visualizations.py)
+-   [Pytorch Models](pytorch_models.py)
+-   [Tensorflow Models](tensorflow_models.py)
+-   [Torch Lightning Models](lightning_models.py)
+
+<div class="relations">
+
 # Welcome to American Sign Language Recognition’s documentation![¶](#welcome-to-american-sign-language-recognition-s-documentation "Permalink to this headline")
 
+This project aims to classify isolated American Sign Language (ASL) signs using deep learning techniques implemented in PyTorch. The dataset used for this project is provided by Google's "Isolated Sign Language Recognition" competition on Kaggle.
+
+# Modules:
 <div class="toctree-wrapper compound">
 
 <div id="module-augmentations" class="section">
@@ -3485,46 +3510,6 @@ Forward pass through the model
 aria-label="main navigation">
 
 <div class="sphinxsidebarwrapper">
-
-# [American Sign Language Recognition](#)
-
-### Navigation
-
-Contents:
-
--   [Data Augmentations](index.html#document-augmentations)
--   [Training Callbacks](index.html#document-callbacks)
--   [Project Configuration](index.html#document-config)
--   [Data Utilities](index.html#document-data_utils)
--   [HyperParameter Search](index.html#document-hparam_search)
--   [Camera Stream Predictions](index.html#document-predict_on_camera)
--   [ASL Dataset](index.html#document-dataset)
--   [Data Utilities](index.html#document-dl_utils)
--   [Model Training](index.html#document-trainer)
--   [Data Visualizations](index.html#document-visualizations)
--   [Pytorch Models](index.html#document-pytorch_models)
--   [Tensorflow Models](index.html#document-tensorflow_models)
--   [Torch Lightning Models](index.html#document-lightning_models)
-
-<div class="relations">
-
-### Related Topics
-
--   [Documentation overview](#)
-
-</div>
-
-</div>
-
-</div>
-
-<div class="clearer">
-
-</div>
-
-</div>
-
-<div class="footer">
 
 ©2023, Asad Bin Imtiaz, Felix Schlatter. \| Powered by [Sphinx
 4.5.0](http://sphinx-doc.org/) & [Alabaster

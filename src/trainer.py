@@ -35,7 +35,7 @@ add_callback(callback): Adds a callback function to the list of functions to be 
 
 """
 import sys
-
+from shutil import copyfile
 sys.path.insert(0, '../src')
 
 from config import *
@@ -140,7 +140,7 @@ class Trainer:
         self.epoch = 0
         self.callbacks = []
 
-    def train(self, n_epochs=EPOCHS):
+    def train(self, n_epochs=EPOCHS, limit_batches = None):
         """
         Trains the model for a specified number of epochs.
 
@@ -213,7 +213,14 @@ class Trainer:
 
             avg_train_loss = np.mean(train_losses)
             avg_train_acc = np.mean(train_accuracies)
-            log_metrics('Train', avg_train_loss, avg_train_acc, epoch, self.model.get_lr(), self.writer)
+            # log_metrics('Train', avg_train_loss, avg_train_acc, epoch, self.model.get_lr(), self.writer)
+            log_metrics(writer = self.writer,
+                        log_dict ={'phase':'Train',
+                                   'epoch':epoch,
+                                   'accuracy':avg_train_acc,
+                                   'loss':avg_train_loss,
+                                   'lr':self.model.get_lr(),
+                                   } )
             print(end='', flush=True)
 
             self.epoch = epoch
@@ -248,6 +255,8 @@ class Trainer:
                 with open(checkpoint_param_path, 'w') as outfile:
                     yaml.dump(self.params, outfile, default_flow_style=False)
                 print(f"Best model and parameters saved at epoch {epoch + 1}")
+                copyfile('config.py',os.path.join(self.checkpoint_path,"config.py")) #copy the configurations file
+
 
             else:
                 self.patience_counter += 1
@@ -313,7 +322,13 @@ class Trainer:
         avg_valid_loss = np.mean(valid_losses)
         avg_valid_acc = np.mean(valid_accuracies)
 
-        log_metrics('Validation', avg_valid_loss, avg_valid_acc, self.epoch, self.model.get_lr(), self.writer)
+        log_metrics(writer=self.writer,
+                    log_dict={'phase': 'Validation',
+                              'epoch': self.epoch,
+                              'accuracy': avg_valid_acc,
+                              'loss': avg_valid_loss,
+                              'lr': self.model.get_lr(),
+                              })
         print(flush=True)
 
         return avg_valid_loss, avg_valid_acc
@@ -356,7 +371,13 @@ class Trainer:
         avg_test_loss = np.mean(test_losses)
         avg_test_acc = np.mean(test_accuracies)
 
-        log_metrics('Test', avg_test_loss, avg_test_acc, self.epoch, self.model.get_lr(), self.writer)
+        log_metrics(writer=self.writer,
+                    log_dict={'phase': 'Test',
+                              'epoch': self.epoch,
+                              'accuracy': avg_test_acc,
+                              'loss': avg_test_loss,
+                              'lr': self.model.get_lr(),
+                              })
         print(flush=True)
         self.writer.close()
 

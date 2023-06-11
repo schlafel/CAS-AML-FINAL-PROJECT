@@ -204,20 +204,27 @@ def to_PT_DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=o
     return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
 
 
-def log_metrics(phase, loss, acc, epoch, lr, writer):
+def log_metrics(writer, log_dict):
     """
     Helper function to log metrics to TensorBoard.
 
-    :param phase: String, the phase of the process ('train' or 'validation').
-    :param loss: Float, the current loss value.
-    :param acc: Float, the current accuracy value.
-    :param epoch: Integer, the current epoch number.
-    :param lr: Float, the current learning rate.
+    :param log_dict: Dictionary to log all the metrics to tensorboard. It must contain the keys {epoch,accuracy, loss, lr,}
+    :type: log_dict
     :param writer: TensorBoard writer object.
     """
-    writer.add_scalar(f'Loss/{phase}', loss, epoch + 1)
-    writer.add_scalar(f'Accuracy/{phase}', acc, epoch + 1)
-    print(f"EPOCH {epoch + 1:>3}: {phase} accuracy: {acc:>3.2f}, {phase} Loss: {loss:>9.8f}, LRate {lr:>9.8f} ",
+
+    for key,value in log_dict.items():
+        if key not in ['phase','epoch']:
+            writer.add_scalar(f'{key}'.capitalize()+f'/{log_dict["phase"]}', value, log_dict["epoch"] + 1)
+
+    # writer.add_scalar(f'Loss/{phase}', loss, epoch + 1)
+    # writer.add_scalar(f'Accuracy/{phase}', acc, epoch + 1)
+    # for key,value in kwargs:
+    #     writer.add_scalar(f'{key}'.capitalize()+f'/{phase}', value, epoch + 1)
+
+
+    print(f"EPOCH {log_dict['epoch'] + 1:>3}: {log_dict['phase']} accuracy: {log_dict['accuracy']:>3.2f}, "
+          f"{log_dict['phase']} Loss: {log_dict['loss']:>9.8f}, LRate {log_dict['lr']:>9.8f} ",
           flush=True)
 
 
