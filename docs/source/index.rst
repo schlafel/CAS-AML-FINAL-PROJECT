@@ -8,8 +8,8 @@ Welcome to American Sign Language Recognition's documentation!
 
 .. toctree::
    :maxdepth: 3
-   :caption: Contents:
 
+   report
    augmentations
    callbacks
    config
@@ -22,7 +22,7 @@ Welcome to American Sign Language Recognition's documentation!
    visualizations
    pytorch_models
    tensorflow_models
-   lightning_models
+
 
 
 Indices and tables
