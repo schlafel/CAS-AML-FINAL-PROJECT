@@ -5,7 +5,7 @@
 
 
 ==============
-Report
+American Sign Language Recognition with DeepLearning
 ==============
 
 Introduction
@@ -77,9 +77,6 @@ Summarize the main findings and conclusions of the report.
 
 :cite:p:`vaswani2017attention`.
 
-
-References
-----------
 
 
 

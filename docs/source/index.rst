@@ -24,10 +24,7 @@ Welcome to American Sign Language Recognition's documentation!
    tensorflow_models
 
 
-.. only:: html
 
-   References
-   ==========
 
 
 .. bibliography:: references.bib
