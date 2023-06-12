@@ -33,7 +33,7 @@ Dataset
 ---------
 The dataset used for this project was provided by Google and hosted by Kaggle and was part of the 2023 challenge Isolated Sign Language Recognition [1][3]. This rich and comprehensive dataset has been a joint contribution from Google, the Georgia Institute of Technology, the National Technical Institute for the Deaf at Rochester Institute of Technology, and Deaf Professional Arts Network.
 The data comprised a total of 54.43 GB of processed data. split into 94’479 unique files containing one of 250 distinct signs. Each sign is performed by different participants, thus capturing a wide variety of signing styles, personal quirks, and potential minor variations in sign performance. This arrangement allows for the capture of a broad spectrum of signing styles, personal idiosyncrasies, and possible minor discrepancies in sign execution. The breadth and depth of this dataset make it an invaluable resource for understanding and modeling sign language patterns.
-The videos are preprocessed using the MediaPipe -Holistic pipeline [4] and are thus represented as a series of 543 distinct landmark coordinates (x,y,z). The landmarks comprise coordinates for pose, both hands, and face. This representation not only helps reduce the data complexity but also enables efficient and accurate analysis of the sign language patterns.
+The videos are preprocessed using the MediaPipe -Holistic pipeline :cite:p:`DBLP:journals/corr/abs-1906-08172` and are thus represented as a series of 543 distinct landmark coordinates (x,y,z). The landmarks comprise coordinates for pose, both hands, and face. This representation not only helps reduce the data complexity but also enables efficient and accurate analysis of the sign language patterns.
 
 .. figure:: _static/mediapipe.png
    :alt: Alternative text
@@ -65,12 +65,14 @@ Summarize the main findings and conclusions of the report.
     % add some blindtext
     \blindtext
 
-
-
-
     \blindtext
     \blindtext
     \blindtext
+
+.. image:: _static/logo.png
+
+
+
 
 
 :cite:p:`vaswani2017attention`.
@@ -78,8 +80,7 @@ Summarize the main findings and conclusions of the report.
 
 References
 ----------
-.. bibliography:: references.bib
-   :style: plain
+
 
 
 .. raw:: latex

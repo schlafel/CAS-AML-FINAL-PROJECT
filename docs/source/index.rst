@@ -24,10 +24,20 @@ Welcome to American Sign Language Recognition's documentation!
    tensorflow_models
 
 
+.. only:: html
 
-Indices and tables
-==================
+   References
+   ==========
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+
+.. bibliography:: references.bib
+   :style: unsrt
+
+
+.. only:: html
+
+   Indices and tables
+   ==================
+   * :ref:`genindex`
+   * :ref:`modindex`
+   * :ref:`search`

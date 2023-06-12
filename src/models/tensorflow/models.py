@@ -370,7 +370,11 @@ class TransformerSequenceClassifier(Model):
 
 
 class TransformerPredictor(BaseModel):
+
     """
+    ===================
+    TransformerPredictor
+    ===================
     A Transformer Predictor model that extends the BaseModel.
 
     Functionality:

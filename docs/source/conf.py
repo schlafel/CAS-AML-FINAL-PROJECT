@@ -85,7 +85,8 @@ latex_elements = {
 # The font size ('10pt', '11pt' or '12pt').
 #
 'pointsize': '10pt',
-'classoptions':',twocolumn',
+'classoptions':',twocolumn,',
+    'extraclassoptions': 'openany,oneside',
 # Additional stuff for the LaTeX preamble.
 #
 'preamble': r'''
@@ -249,11 +250,14 @@ TitleColor={rgb}{0,0,0}, \
 HeaderFamily=\\rmfamily\\bfseries, \
 InnerLinkColor={rgb}{0,0,1}, \
 OuterLinkColor={rgb}{0,0,1}',
-'tableofcontents':' ',
+#'tableofcontents':' ',
+    'tableofcontents': '\\tableofcontents\n\n',  # Exclude bibliography from TOC
+
 }
 
 
 latex_logo = '_static/Logo_UniBe.pdf'
+# latex_logo = '_static/logo.png'
 
 
 bibtex_bibfiles = ['references.bib']
