@@ -117,7 +117,7 @@ latex_elements = {
 
 
 % Keywords used in the template. 
-\newcommand{\thesistitle}{Thesis Title} % Your thesis title, print it with \ttitle
+\newcommand{\thesistitle}{American Sign Language Recognition with DeepLearning} % Your thesis title, print it with \ttitle
 \newcommand{\supervisor}{Prof. Dr. Charles Darwin} % Your supervisor's name, print it with \supname. Include academic title.
 \newcommand{\coadvisor}{Prof. Dr. Gregor Mendel} %Your co-advisors's name, print it with \coaname. Include academic title.
 \newcommand{\firstname}{John} % Your first name, print it with \fname. 
@@ -185,6 +185,9 @@ latex_elements = {
 \usepackage{chngcntr}
 
 \counterwithin*{section}{chapter}  % Reset section counter at each chapter
+\titleformat{\section}[hang]{\normalfont\Large\bfseries}{\thesection}{1em}{}
+\renewcommand{\thesection}{\arabic{section}}
+
 
 ''',
 
