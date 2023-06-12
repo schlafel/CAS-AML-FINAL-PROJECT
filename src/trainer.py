@@ -52,6 +52,7 @@ from data.dataset import ASL_DATASET
 from datetime import datetime
 from callbacks import dropout_callback, augmentation_increase_callback
 import yaml
+from metrics import Metric
 
 class Trainer:
     """
@@ -265,11 +266,7 @@ class Trainer:
             #Validation
             val_metrics = self.evaluate()
 
-
-            if EARLY_STOP_METRIC.upper() == "LOSS":
-                metric = val_metrics["Loss"]
-            elif EARLY_STOP_METRIC.upper()  == "ACCURACY":
-                metric = val_metrics["Accuracy"]
+            metric = val_metrics[f'{Metric["Accuracy"].value}/Validation']
 
             # check if early_stop_criterion has improved
             if EARLY_STOP_MODE == "min":
