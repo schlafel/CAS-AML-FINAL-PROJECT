@@ -15,6 +15,7 @@ from config import *
 
 import tensorflow as tf
 from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter,summary
 import math
 import yaml
 
@@ -228,8 +229,32 @@ def log_metrics(writer, log_dict):
           f"{log_dict['phase']} Loss: {log_dict['loss']:>9.8f}, LRate {log_dict['lr']:>9.8f} ",
           flush=True)
 
-def log_hparams(writer, hyperparams, metric_dict = {}):
-    writer.add_hparams(hparam_dict=hyperparams, metric_dict={})
+def log_hparams_metrics(writer,hparam_dict,metric_dict,epoch = 0):
+    """
+    Helper function to log metrics to TensorBoard. That accepts the logging of hyperparameters too.
+    It allows to display the hyperparameters as well in a tensorboard instance. Furthermore it logs everything in just
+    one tensorboard log.
+
+    :param writer: Summary Writer Object
+    :type writer: torch.utils.tensorboard.SummaryWriter
+    :param hparam_dict:
+    :type hparam_dict: dict
+    :param metric_dict:
+    :type metric_dict: dict
+    :param epoch: Step on the x-axis to log the results
+    :type epoch: int
+
+    """
+    exp, ssi, sei = summary.hparams(hparam_dict, metric_dict, hparam_domain_discrete=None)
+    writer.file_writer.add_summary(exp)
+    writer.file_writer.add_summary(ssi)
+    writer.file_writer.add_summary(sei)
+    for k, v in metric_dict.items():
+        if v is not None:
+            writer.add_scalar(k, v,global_step=epoch)
+
+
+
 
 
 def get_PT_Dataset(dataloader):
