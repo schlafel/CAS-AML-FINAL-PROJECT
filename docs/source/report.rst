@@ -72,23 +72,26 @@ Summarize the main findings and conclusions of the report.
     \blindtext
     \blindtext
 
+
+:cite:p:`vaswani2017attention`.
+
+
 References
 ----------
-.. raw:: latex
 
-    \blindtext
-- Reference 1
-- Reference 2
-- Reference 3
 
-Appendix
---------
 
-Include any additional supporting information, charts, figures, or data that may be relevant to the report.
+.. bibliography:: references.bib
+   :style: plain
+   :cited:
 
 
 .. raw:: latex
 
     % Switch back to one-column layout
     \onecolumn
+    \appendix
+
+
+
 

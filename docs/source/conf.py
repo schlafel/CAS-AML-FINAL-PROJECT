@@ -37,6 +37,7 @@ release = '0.0.1'
 extensions = [
     'sphinx.ext.duration',
     'sphinx.ext.autodoc',
+'sphinxcontrib.bibtex',
     #'sphinx.ext.napoleon',
     'sphinx.ext.autosummary',
     'recommonmark'
@@ -252,6 +253,14 @@ OuterLinkColor={rgb}{0,0,1}',
 
 
 latex_logo = '_static/Logo_UniBe.pdf'
+
+
+bibtex_bibfiles = ['references.bib']
+bibtex_bibliography_section = 'section'
+bibtex_bibliography_header = r'''
+\clearpage
+\section{References}
+'''
 
 
 
