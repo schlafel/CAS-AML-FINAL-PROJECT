@@ -538,17 +538,17 @@ class LSTMClassifier(Model):
 
 class LSTMPredictor(BaseModel):
     def __init__(self, **kwargs):
-        super().__init__(learning_rate=kwargs["learning_rate"])
+        super().__init__(learning_rate=kwargs["hparams"]["learning_rate"])
 
-        self.learning_rate = kwargs["learning_rate"]
+        self.learning_rate = kwargs["hparams"]["learning_rate"]
 
         # Instantiate the LSTM model
-        self.model = LSTMClassifier(**kwargs)
+        self.model = LSTMClassifier(**kwargs["params"])
 
         self.scheduler = tf.keras.optimizers.schedules.ExponentialDecay(
             initial_learning_rate=self.learning_rate,
             decay_steps=10000,
-            decay_rate=0.9
+            decay_rate=kwargs["hparams"]["gamma"]
         )
 
         self.optimizer = tf.keras.optimizers.Adam(learning_rate=self.scheduler)

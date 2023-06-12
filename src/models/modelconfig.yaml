@@ -30,13 +30,15 @@ models:
         max: 1024
         mode: choice
   LSTMPredictor:
-    input_dim: 192
-    hidden_dim: 100
-    layer_dim: 5
-    output_dim: 250
-    learning_rate: 0.001
-    gamma: 0.9
-    augmentation_threshold: 0.35
+    params:
+      input_dim: 192
+      hidden_dim: 100
+      layer_dim: 5
+      output_dim: 250
+    hparams:
+      learning_rate: 0.001
+      gamma: 0.9
+
   HybridModel:
     transformer_params:
       d_model: 192
