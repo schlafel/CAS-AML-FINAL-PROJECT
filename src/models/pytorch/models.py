@@ -544,7 +544,9 @@ class LSTMClassifier(nn.Module):
         super().__init__()
 
         # Override defaults with passed-in values
-        self.settings = {**self.DEFAULTS, **kwargs}
+        self.settings = dict(params={**self.DEFAULTS['params'], **kwargs['params']},
+                             hparams={**self.DEFAULTS['hparams'],
+                                      **(kwargs['hparams'] if "hparams" in kwargs.keys() else {})}, )
 
         # LSTM
         self.lstm = nn.LSTM(self.settings['params']['input_dim'], self.settings['params']['hidden_dim'],
