@@ -94,9 +94,9 @@ TEST_SIZE = 0.05                                            # Test set size
 #
 
 #: Which metric should be used for early stopping loss/accuracy
-EARLY_STOP_METRIC = "accuracy"                              # Metric used for early stopping
+EARLY_STOP_METRIC = "loss"                              # Metric used for early stopping
 #: What is the mode? min/max
-EARLY_STOP_MODE = "max"                                     # Mode for early stopping, can be 'min' or 'max'
+EARLY_STOP_MODE = "min"                                     # Mode for early stopping, can be 'min' or 'max'
 #: The number of epochs to wait for improvement in the validation loss before stopping training
 EARLY_STOP_PATIENCE = 10                                    # Number of epochs to wait for improvement before stopping
 #: The value of loss as margin to tolerate
@@ -113,7 +113,7 @@ DYNAMIC_DROP_OUT_INIT_RATE = 0.01                           # Initial dropout ra
 #: The value to increase dropouts by
 DYNAMIC_DROP_OUT_REDUCTION_RATE = 1.1                       # Dropout rate reduction factor
 #: The max value of dynamic dropouts
-DYNAMIC_DROP_OUT_MAX_THRESHOLD = 0.2                        # Maximum dropout threshold
+DYNAMIC_DROP_OUT_MAX_THRESHOLD = 0.3                        # Maximum dropout threshold
 #: The epoch interval value to gradually change dropout rate
 DYNAMIC_DROP_OUT_REDUCTION_INTERVAL = 2                     # Interval for dropout rate reduction
 
@@ -137,9 +137,9 @@ DYNAMIC_AUG_INC_INTERVAL = 5                                # Interval for augme
 #
 
 #: Deep learning framework to use for training and inference. Can be either 'pytorch' or 'tensorflow'.
-DL_FRAMEWORK='tensorflow'                                      # Deep learning framework to use for training and inference.
+DL_FRAMEWORK='pytorch'                                      # Deep learning framework to use for training and inference.
 #: Name of the model to be used for training.
-MODELNAME='CVTransferLearningModel'                 # Name of the model to be used for training.
+MODELNAME='LSTMPredictor'                 # Name of the model to be used for training.
 
 
 #
@@ -158,6 +158,20 @@ LANDMARK_FILES = 'train_landmark_files'                     # Directory where tr
 MARKER_FILE = 'preprocessed_data.marker'                    # File that marks the preprocessing stage
 #: File that marks the data cleaning stage.
 CLEANED_FILE = 'cleansed_data.marker'                       # File that marks the data cleaning stage
+
+
+#
+# =============================================================================
+# Training Configuration
+# =============================================================================
+#
+#: Which metrics shold be logged.
+LOG_METRICS = ['Accuracy','Loss','F1Score','Precision','Recall']
+#: limit batches
+LIMIT_BATCHES = 5
+
+
+
 
 #
 # =============================================================================
