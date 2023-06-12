@@ -217,6 +217,7 @@ def log_metrics(writer, log_dict):
         if key not in ['phase','epoch']:
             writer.add_scalar(f'{key}'.capitalize()+f'/{log_dict["phase"]}', value, log_dict["epoch"] + 1)
 
+
     # writer.add_scalar(f'Loss/{phase}', loss, epoch + 1)
     # writer.add_scalar(f'Accuracy/{phase}', acc, epoch + 1)
     # for key,value in kwargs:
@@ -226,6 +227,9 @@ def log_metrics(writer, log_dict):
     print(f"EPOCH {log_dict['epoch'] + 1:>3}: {log_dict['phase']} accuracy: {log_dict['accuracy']:>3.2f}, "
           f"{log_dict['phase']} Loss: {log_dict['loss']:>9.8f}, LRate {log_dict['lr']:>9.8f} ",
           flush=True)
+
+def log_hparams(writer, hyperparams, metric_dict = {}):
+    writer.add_hparams(hparam_dict=hyperparams, metric_dict={})
 
 
 def get_PT_Dataset(dataloader):

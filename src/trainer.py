@@ -408,8 +408,8 @@ class Trainer:
 if __name__ == '__main__':
     # Get Data
     trainer = Trainer(modelname=MODELNAME,
-                      enableAugmentationDropout=False,
-                      augmentation_threshold=0.35)
+                      enableAugmentationDropout=True,
+                      augmentation_threshold=0.1)
     trainer.add_callback(dropout_callback)
     trainer.add_callback(augmentation_increase_callback)
     trainer.train()
