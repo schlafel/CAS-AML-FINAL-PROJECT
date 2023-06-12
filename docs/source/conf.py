@@ -207,27 +207,31 @@ latex_elements = {
  \vspace*{.06\textheight}
   {\Large CAS Advanced Machine Learning 2022\par} % graduate school name
  {\LARGE \university\par}\vspace{1.5cm} % University name
-% \textsc{\Final Project}\\[0.5cm] % Thesis type
+
+
 
  {\huge \bfseries \thesistitle\par}\vspace{0.4cm} % Thesis title
-  {\Large CAS Final Project}\\[0.5cm]
-  {\LARGE \bfseries Felix Schlatter \& Asad Bin Imtiaz \par}\vspace{0.4cm} % Author name 
+  {\Large CAS Final Project}\\[0.8cm]
+
+\begin{tabular}{c@{\hspace{1.5cm}}c}
+    {\LARGE \bfseries Felix Schlatter} &   {\LARGE \bfseries Asad Bin Imtiaz} \\
+  {\href{mailto:felix.schlatter@bluemail.ch}{felix.schlatter@bluemail.ch} } & {\href{mailto:asad.imtiaz@students.unibe.ch}{asad.imtiaz@students.unibe.ch} } \\
+\end{tabular}
+
+
+
+\vspace{0.4cm}
+
+
+
   {\Large for the degree of}\\[0.5cm]
   {\Large \degree \par}
 
    \vfill
 
- % \emph{Supervisor}\\[1mm]
- %{\Large \supervisor}\\ % Supervisor name
- %{\Large \institute}\\ % by default it is your Institute, change if necessary
- %{\Large  \faculty ~of the \university} \\% by default it is your Faculty, change if necessary
 
 \vspace{0.4cm}
- %\emph{Co-advisor}\\[1mm]
- %{\Large asdf}\\ % Supervisor name
- %{\Large \href{https://www.mendel.uni.com/}{Institute of Gregor Mendel}}\\
- %{\Large \href{https://www.sci.mendel.uni.com/}{Faculty of Science} of the \href{https://www.uni.com/}{University of Mendel}}
- 
+
  \vfill
  \end{center}
 \end{titlepage}
