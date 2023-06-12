@@ -7,6 +7,7 @@ import matplotlib
 import seaborn as sns
 import tensorflow as tf
 from tensorboard.backend.event_processing import event_accumulator
+from tensorboard.plugins.hparams.plugin_data_pb2 import HParamsPluginData
 import tensorflow as tf
 import glob
 import pandas as pd
@@ -37,11 +38,22 @@ def load_tf(dirname):
     dframes = {}
     mnames = ea.Tags()['scalars']
 
+
+
     for n in mnames:
         dframes[n] = pd.DataFrame(ea.Scalars(n), columns=["wall_time", "epoch", n.replace('val/', '')])
         dframes[n].drop("wall_time", axis=1, inplace=True)
+    df_out = pd.concat([v for k, v in dframes.items()], axis=1)
 
-    return pd.concat([v for k, v in dframes.items()], axis=1)
+    #get the hparams
+    data = ea._plugin_to_tag_to_content['hparams']["_hparams_/session_start_info"]
+    hparam_data = HParamsPluginData.FromString(data).session_start_info.hparams
+    hparam_dict = {key: hparam_data[key].ListFields()[0][1] for key in hparam_data.keys()}
+
+    #accumulate the hparams in dataframe as well
+    for key,value in hparam_dict.items():
+        df_out[key] = value
+    return df_out
 
 def plot_training_validation(data,
                              x="epoch",
@@ -148,6 +160,8 @@ if __name__ == '__main__':
         os.path.join(ROOT_PATH,r"runs/tensorflow/LSTMPredictor/2023-05-28 16_00"),
         os.path.join(ROOT_PATH,r"runs/pytorch/HybridModel/2023-06-09 23_26"),
     ]
+
+    ckpt_paths = [r'C:\Users\fs.GUNDP\Python\CAS-AML-FINAL-PROJECT\tmp\tb_logs\test0']
     fig,ax = plot_trainingLossAccuracies(ckpt_paths)
 
     fig.savefig(os.path.join(ROOT_PATH,OUT_DIR,f"{save_name}.svg"))
