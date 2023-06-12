@@ -35,6 +35,7 @@ models:
       hidden_dim: 100
       layer_dim: 5
       output_dim: 250
+      dropout: 0.5
     hparams:
       learning_rate: 0.001
       gamma: 0.9
@@ -50,10 +51,11 @@ models:
       batch_first: True
       num_layers: 4
     lstm_params:
-      input_dim: 192
-      hidden_dim: 512
-      layer_dim: 4
-      dropout: 0.001
+      params:
+        input_dim: 192
+        hidden_dim: 512
+        layer_dim: 4
+        dropout: 0.001
     common_params:
       num_classes: 250
       learning_rate: 0.001
@@ -85,10 +87,11 @@ models:
       num_classes: 250
       learning_rate: 0.00106
     lstm_params:
-      input_dim: 192
-      hidden_dim: 512
-      layer_dim: 4
-      dropout: 0.05
+      params:
+        input_dim: 192
+        hidden_dim: 512
+        layer_dim: 4
+        dropout: 0.05
     common_params:
       num_classes: 250
       learning_rate: 0.001

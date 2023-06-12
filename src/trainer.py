@@ -62,7 +62,7 @@ class Trainer:
     designed to be agnostic to the specific deep learning framework, enhancing its versatility across various projects.
     """
     def __init__(self, config, modelname=config.MODELNAME, dataset=ASL_DATASET, patience=config.EARLY_STOP_PATIENCE,
-                 enableAugmentationDropout=True, augmentation_threshold=0.35):
+                 enableAugmentationDropout=True, augmentation_threshold=0.35,model_config = None):
         """
         Initializes the Trainer class with the specified parameters.
 
@@ -76,16 +76,20 @@ class Trainer:
         #. Finally, it prepares a directory for saving model checkpoints.
 
         Args:
+            config (dict): The basic configuration (Train Configuration)
             modelname (str): The name of the model to be used for training.
             dataset (Dataset): The dataset to be used.
             patience (int): The number of epochs with no improvement after which training will be stopped.
             enableAugmentationDropout (bool): If True, enable data augmentation dropout.
             augmentation_threshold (float): The threshold for data augmentation.
+            model_config (dict): preloaded model-config for hparam testing
 
         Functionality:
             This method initializes various components, such as the model, dataset, data loaders,
             logging writer, and checkpoint path, required for the training process.
 
+        :param config: Configuration for Training.
+        :type config: script
         :param modelname: The name of the model for training.
         :type modelname: str
         :param dataset: The dataset for training.
@@ -96,6 +100,8 @@ class Trainer:
         :type enableAugmentationDropout: bool
         :param augmentation_threshold: The threshold for data augmentation.
         :type augmentation_threshold: float
+        :param model_config: Loaded model configuration.
+        :type model_config: dict
 
         :rtype: None
 
@@ -109,7 +115,10 @@ class Trainer:
         self.model_name = modelname
         self.DL_FRAMEWORK = self.config.DL_FRAMEWORK
         module_name = f"models.{self.config.DL_FRAMEWORK}.models"
-        self.params = get_model_params(modelname)
+        if isinstance(model_config,dict):
+            self.params = model_config
+        else:
+            self.params = get_model_params(modelname)
 
         module = importlib.import_module(module_name)
         Model = getattr(module, modelname)
@@ -162,6 +171,10 @@ class Trainer:
         self.hyperparameters['EARLYSTOP_METRIC'] = self.config.EARLY_STOP_METRIC
         self.hyperparameters['EARLYSTOP_PATIENCE'] = self.config.EARLY_STOP_PATIENCE
 
+        #add also model params
+        if 'params' in self.params.keys():
+            for key,value in self.params['params'].items():
+                self.hyperparameters[key] = value
 
 
         #Log the hyperparameters and training metrics

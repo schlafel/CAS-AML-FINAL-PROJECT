@@ -35,14 +35,15 @@ from config import DEVICE, N_CLASSES
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torchmetrics.classification import accuracy, F1Score,Precision,Recall, AUROC
+from torchmetrics.classification import accuracy, F1Score, Precision, Recall, AUROC
 from torchvision import models
-
 
 """
 BaseModel
 ---------
 """
+
+
 class BaseModel(nn.Module):
     """
 
@@ -73,6 +74,7 @@ class BaseModel(nn.Module):
         The 'forward' function must be implemented in the subclass, else it will raise a NotImplementedError.
 
     """
+
     def __init__(self, learning_rate, n_classes=N_CLASSES):
         super().__init__()
         self.criterion = nn.CrossEntropyLoss()
@@ -98,10 +100,6 @@ class BaseModel(nn.Module):
             num_classes=n_classes
         )
 
-
-
-
-
         self.metrics = {"train": [], "val": [], "test": []}
 
         self.learning_rate = learning_rate
@@ -125,9 +123,9 @@ class BaseModel(nn.Module):
         preds = torch.argmax(y_hat.cpu(), dim=1)
         targets = y.view(-1).cpu()
         acc = self.accuracy(preds, targets)
-        return acc.cpu().numpy()
+        return acc
 
-    def calculate_recall(self,y_hat,y):
+    def calculate_recall(self, y_hat, y):
         """
         Calculates the recall of the model's prediction.
 
@@ -146,7 +144,7 @@ class BaseModel(nn.Module):
         rec = self.recall(preds, targets)
         return rec.cpu().numpy()
 
-    def calculate_auc(self,y_hat,y):
+    def calculate_auc(self, y_hat, y):
         """
         Calculates the auc of the model's prediction.
 
@@ -165,7 +163,7 @@ class BaseModel(nn.Module):
         auc = self.auroc(preds, targets)
         return auc.cpu().numpy()
 
-    def calculate_precision(self,y_hat,y):
+    def calculate_precision(self, y_hat, y):
         """
         Calculates the precision of the model's prediction.
 
@@ -184,7 +182,7 @@ class BaseModel(nn.Module):
         prec = self.precision(preds, targets)
         return prec.cpu().numpy()
 
-    def calculate_f1score(self,y_hat,y):
+    def calculate_f1score(self, y_hat, y):
         """
         Calculates the F1-Score of the model's prediction.
 
@@ -484,6 +482,7 @@ class TransformerPredictor(BaseModel):
     forward(x)
         Performs a forward pass through the model.
     """
+
     def __init__(self, **kwargs):
         super().__init__(learning_rate=kwargs["learning_rate"], n_classes=kwargs["num_classes"])
 
@@ -527,12 +526,18 @@ class LSTMClassifier(nn.Module):
         Performs a forward pass through the model.
     """
     DEFAULTS = dict(
-        input_dim=192,
-        hidden_dim=100,
-        layer_dim=5,
-        output_dim=N_CLASSES,
-        learning_rate=0.001,
-        dropout=0.5
+        params=dict(
+            input_dim=192,
+            hidden_dim=100,
+            layer_dim=5,
+            output_dim=N_CLASSES,
+            learning_rate=0.001,
+            dropout=0.5),
+        hparams=dict(
+            learning_rate=0.001,
+            gamma=0.9
+        )
+
     )
 
     def __init__(self, **kwargs):
@@ -542,14 +547,14 @@ class LSTMClassifier(nn.Module):
         self.settings = {**self.DEFAULTS, **kwargs}
 
         # LSTM
-        self.lstm = nn.LSTM(self.settings['input_dim'], self.settings['hidden_dim'],
-                            self.settings['layer_dim'], dropout=self.settings['dropout'], batch_first=True)
+        self.lstm = nn.LSTM(self.settings['params']['input_dim'], self.settings['params']['hidden_dim'],
+                            self.settings['params']['layer_dim'], dropout=self.settings['params']['dropout'], batch_first=True)
 
         # Dropout layer
-        self.dropout = nn.Dropout(self.settings['dropout'])
+        self.dropout = nn.Dropout(self.settings['params']['dropout'])
 
         # Readout layer
-        self.output_layer = nn.Linear(self.settings['hidden_dim'], self.settings['output_dim'])
+        self.output_layer = nn.Linear(self.settings['params']['hidden_dim'], self.settings['params']['output_dim'])
 
     def forward(self, x):
         """Forward pass through the model"""
@@ -558,10 +563,10 @@ class LSTMClassifier(nn.Module):
         batch_size, seq_length, height, width = x.shape
         x = x.view(batch_size, seq_length, height * width).to(DEVICE)
 
-        h0 = torch.zeros(self.settings['layer_dim'], x.size(0), self.settings['hidden_dim']).to(DEVICE)
+        h0 = torch.zeros(self.settings['params']['layer_dim'], x.size(0), self.settings['params']['hidden_dim']).to(DEVICE)
 
         # Initialize cell state
-        c0 = torch.zeros(self.settings['layer_dim'], x.size(0), self.settings['hidden_dim']).to(DEVICE)
+        c0 = torch.zeros(self.settings['params']['layer_dim'], x.size(0), self.settings['params']['hidden_dim']).to(DEVICE)
 
         # LSTM forward pass
         out, (hn, cn) = self.lstm(x, (h0.detach(), c0.detach()))
@@ -597,16 +602,17 @@ class LSTMPredictor(BaseModel):
     forward(x)
         Performs a forward pass through the model.
     """
-    def __init__(self, **kwargs):
-        super().__init__(learning_rate=kwargs["learning_rate"], n_classes=kwargs["output_dim"])
 
-        self.learning_rate = kwargs["learning_rate"]
+    def __init__(self, **kwargs):
+        super().__init__(learning_rate=kwargs["hparams"]["learning_rate"], n_classes=kwargs['params']["output_dim"])
+
+        self.learning_rate = kwargs["hparams"]["learning_rate"]
 
         # Instantiate the LSTM model
         self.model = LSTMClassifier(**kwargs).to(DEVICE)
 
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
-        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=kwargs["gamma"])
+        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=kwargs["hparams"]["gamma"])
 
         self.to(DEVICE)
 
@@ -643,6 +649,7 @@ class HybridModel(BaseModel):
     forward(x)
         Performs a forward pass through the model.
     """
+
     def __init__(self, **kwargs):
         common_params = kwargs['common_params']
         transformer_kwargs = kwargs['transformer_params']
@@ -701,6 +708,7 @@ class TransformerEnsemble(BaseModel):
     forward(x)
         Performs a forward pass through the model.
     """
+
     def __init__(self, **kwargs):
         common_params = kwargs['common_params']
         transformer_params = kwargs['TransformerSequenceClassifier']
@@ -761,6 +769,7 @@ class HybridEnsembleModel(BaseModel):
     forward(x)
         Performs a forward pass through the model.
     """
+
     def __init__(self, **kwargs):
         common_params = kwargs['common_params']
         transformer_params = kwargs['TransformerSequenceClassifier']
@@ -847,7 +856,7 @@ class CVTransferLearningModel(BaseModel):
 
         # Freeze layers
         # Freeze the parameters....
-        if self.settings['hparams']['weights'] is not None :
+        if self.settings['hparams']['weights'] is not None:
             for p in model.parameters():
                 if hasattr(p, "requires_grad"):
                     p.requires_grad = False
@@ -921,6 +930,7 @@ class MultiHeadSelfAttention(nn.Module):
 
     Returns: None
     """
+
     def __init__(self, dim, num_heads=8, dropout=0.1, layer_norm=True, causal=True):
         super().__init__()
         self.multihead_attn = nn.MultiheadAttention(dim, num_heads, dropout=dropout)
@@ -984,6 +994,7 @@ class TransformerBlock(nn.Module):
 
     Returns: None
     """
+
     def __init__(self, dim=192, num_heads=4, expansion_factor=4, attn_dropout=0.2, drop_rate=0.2):
         super().__init__()
         self.norm1 = nn.LayerNorm(dim)
@@ -1141,6 +1152,7 @@ class YetAnotherTransformer(BaseModel):
 
     Returns: None
     """
+
     def __init__(self, **kwargs):
         common_params = kwargs['common_params']
         transformer_params = kwargs['YetAnotherTransformerClassifier']
@@ -1179,6 +1191,7 @@ class YetAnotherEnsemble(BaseModel):
 
     Returns: None
     """
+
     def __init__(self, **kwargs):
         common_params = kwargs['common_params']
         transformer_params = kwargs['YetAnotherTransformerClassifier']
@@ -1205,5 +1218,3 @@ class YetAnotherEnsemble(BaseModel):
         combined = torch.cat(model_outputs, dim=1)
         output = self.fc(combined)
         return output
-
-
