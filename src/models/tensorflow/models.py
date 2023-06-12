@@ -94,7 +94,7 @@ class BaseModel(tf.keras.Model):
         :param batch: A tuple containing input data and labels.
         :type batch: tuple
 
-        :returns: The calculated loss and accuracy.
+        :returns: The calculated loss and accuracy, labels and predictions
         :rtype: tuple
         """
         landmarks, labels = batch
@@ -117,7 +117,7 @@ class BaseModel(tf.keras.Model):
 
         del landmarks, labels
 
-        return loss, accuracy
+        return loss, accuracy, labels, predictions
     @tf.function
     def validation_step(self, batch):
         """

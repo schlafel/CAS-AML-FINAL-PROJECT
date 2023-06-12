@@ -45,8 +45,8 @@ from tqdm import tqdm
 import time
 
 import importlib
-from torch.utils.tensorboard import SummaryWriter
-from dl_utils import get_model_params, log_metrics
+from torch.utils.tensorboard import SummaryWriter,summary
+from dl_utils import get_model_params, log_metrics, log_hparams_metrics,get_metric_dict
 from data.data_utils import create_data_loaders
 from data.dataset import ASL_DATASET
 from datetime import datetime
@@ -135,7 +135,7 @@ class Trainer:
         self.writer = SummaryWriter(os.path.join(ROOT_PATH, RUNS_DIR, DL_FRAMEWORK,
                                                  self.model_class, self.train_start_time),
                                     filename_suffix="experiment")
-
+        self.metrics = LOG_METRICS
         self.checkpoint_path = os.path.join(ROOT_PATH, CHECKPOINT_DIR, DL_FRAMEWORK, self.model_class, self.train_start_time)
 
         self.epoch = 0
@@ -147,9 +147,22 @@ class Trainer:
             self.hyperparameters = self.params['hparams']
         else: #infer them
             self.hyperparameters = {}
-            self.hyperparameters['BATCH_SIZE'] = BATCH_SIZE
 
-        log_hparams(self.writer,self.hyperparameters)
+        self.hyperparameters['BATCH_SIZE'] = BATCH_SIZE
+        self.hyperparameters['N_EPOCHS'] = EPOCHS
+        self.hyperparameters['AUGMENTATION_THRESHOLD'] = augmentation_threshold
+        self.hyperparameters['EARLYSTOP_METRIC'] = EARLY_STOP_METRIC
+        self.hyperparameters['EARLYSTOP_PATIENCE'] = EARLY_STOP_PATIENCE
+
+
+
+        #Log the hyperparameters and training metrics
+        self.metric_dict = get_metric_dict()
+        log_hparams_metrics(self.writer,
+                            hparam_dict=self.hyperparameters,
+                            metric_dict=self.metric_dict,
+                            epoch = self.epoch
+                            )
 
 
     def train(self, n_epochs=EPOCHS):
@@ -189,12 +202,17 @@ class Trainer:
         .. warning::
             If you set the patience value too low in the constructor, the model might stop training prematurely.
         """
+
+        warnings.warn(f"Warning! Will only Train/Validate/Test for {LIMIT_EPOCHS} and {LIMIT_BATCHES} batches,"
+                      f"as FAST_DEV_RUN is set to {FAST_DEV_RUN}")
+        phase = "Train"
         for epoch in range(n_epochs if not FAST_DEV_RUN else LIMIT_EPOCHS):
             print(f"Epoch {epoch + 1}/{n_epochs if not FAST_DEV_RUN else LIMIT_EPOCHS}", flush=True)
             time.sleep(0.25)  # time to flush std out
 
             train_losses = []
             train_accuracies = []
+            phase_metrics = dict({x:[] for x in LOG_METRICS})
 
             self.model.train_mode()
 
@@ -206,8 +224,8 @@ class Trainer:
             print(end='', flush=True)
             for i, batch in pbar:
                 if FAST_DEV_RUN & (i > LIMIT_BATCHES):
-                    continue
-                loss, acc = self.model.training_step(batch)
+                    break
+                loss, acc, labels, preds = self.model.training_step(batch)
 
                 self.model.optimize()
 
@@ -223,29 +241,35 @@ class Trainer:
                 train_losses.append(loss)
                 train_accuracies.append(acc)
 
+                #calculate metrics and append to phase_metrics
+                phase_metrics = self.calculate_metrics(acc, labels, loss, phase_metrics, preds)
+
+
             print(end='', flush=True)
 
-            avg_train_loss = np.mean(train_losses)
-            avg_train_acc = np.mean(train_accuracies)
-            # log_metrics('Train', avg_train_loss, avg_train_acc, epoch, self.model.get_lr(), self.writer)
-            log_metrics(writer = self.writer,
-                        log_dict ={'phase':'Train',
-                                   'epoch':epoch,
-                                   'accuracy':avg_train_acc,
-                                   'loss':avg_train_loss,
-                                   'lr':self.model.get_lr(),
-                                   } )
+            # calculate average metrics for the phase
+            for log_metric in LOG_METRICS:
+                self.metric_dict[f'{log_metric}/{phase}'] = np.array(phase_metrics[log_metric]).mean()
+            #
+            log_hparams_metrics(self.writer,
+                                hparam_dict=self.hyperparameters,
+                                metric_dict=self.metric_dict,
+                                epoch=self.epoch)
             print(end='', flush=True)
+            #
+            # avg_train_loss = np.mean(train_losses)
+            # avg_train_acc = np.mean(train_accuracies)
 
             self.epoch = epoch
 
-            val_loss, val_acc = self.evaluate()
+            #Validation
+            val_metrics = self.evaluate()
 
 
-            if EARLY_STOP_METRIC == "loss":
-                metric = val_loss
-            elif EARLY_STOP_METRIC == "accuracy":
-                metric = val_acc
+            if EARLY_STOP_METRIC.upper() == "LOSS":
+                metric = val_metrics["Loss"]
+            elif EARLY_STOP_METRIC.upper()  == "ACCURACY":
+                metric = val_metrics["Accuracy"]
 
             # check if early_stop_criterion has improved
             if EARLY_STOP_MODE == "min":
@@ -287,6 +311,20 @@ class Trainer:
                 callback(self)
 
 
+    def calculate_metrics(self, acc, labels, loss, phase_metrics, preds):
+        for log_metric in LOG_METRICS:
+            if log_metric.lower() == "precision":
+                phase_metrics[log_metric].append(self.model.calculate_precision(preds, labels))
+            elif log_metric.lower() == "recall":
+                phase_metrics[log_metric].append(self.model.calculate_recall(preds, labels).numpy())
+            elif log_metric.lower() == "f1score":
+                phase_metrics[log_metric].append(self.model.calculate_f1score(preds, labels).numpy())
+            elif log_metric.lower() == "accuracy":
+                phase_metrics[log_metric].append(acc)
+            elif log_metric.lower() == "loss":
+                phase_metrics[log_metric].append(loss)
+        return phase_metrics
+
     def evaluate(self):
         """
         Evaluates the model on the validation set.
@@ -310,15 +348,17 @@ class Trainer:
 
         valid_losses = []
         valid_accuracies = []
+        phase_metrics = dict({x: [] for x in LOG_METRICS})
 
         pbar = tqdm(enumerate(self.valid_loader), total=len(self.valid_loader), desc=f"Validation progress")
 
         total_loss = 0
         total_acc = 0
 
+        phase = "Validation"
         print(end='', flush=True)
         for i, batch in pbar:
-            loss, acc = self.model.validation_step(batch)
+            loss, acc, labels, preds = self.model.validation_step(batch)
 
             if DL_FRAMEWORK == "tensorflow":
                 total_loss += loss.numpy()
@@ -330,22 +370,29 @@ class Trainer:
             valid_losses.append(loss)
             valid_accuracies.append(acc)
 
+            #calculate metrics and append to phase_metrics
+            phase_metrics = self.calculate_metrics(acc, labels, loss, phase_metrics, preds)
+
             pbar.set_postfix({'Loss': total_loss / (i + 1), 'Accuracy': total_acc / (i + 1)})
+            print(end='', flush=True)
 
         print(end='', flush=True)
-        avg_valid_loss = np.mean(valid_losses)
-        avg_valid_acc = np.mean(valid_accuracies)
 
-        log_metrics(writer=self.writer,
-                    log_dict={'phase': 'Validation',
-                              'epoch': self.epoch,
-                              'accuracy': avg_valid_acc,
-                              'loss': avg_valid_loss,
-                              'lr': self.model.get_lr(),
-                              })
+        # calculate average metrics for the phase
+        for log_metric in LOG_METRICS:
+            self.metric_dict[f'{log_metric}/{phase}'] = np.array(phase_metrics[log_metric]).mean()
+        self.metric_dict['LearningRate'] = self.model.get_lr()
+
+        # log the metrics to the dict
+        log_hparams_metrics(self.writer,
+                            hparam_dict=self.hyperparameters,
+                            metric_dict=self.metric_dict,
+                            epoch=self.epoch)
+
+
         print(flush=True)
 
-        return avg_valid_loss, avg_valid_acc
+        return self.metric_dict
 
     def test(self):
         """
@@ -373,25 +420,28 @@ class Trainer:
         test_accuracies = []
         all_preds = []
         all_labels = []
+        phase_metrics = dict({x: [] for x in LOG_METRICS})
+        phase = "Test"
         for i, batch in tqdm(enumerate(self.test_loader), total=len(self.test_loader),
                              desc=f"Testing progress"):
-            loss, acc, preds = self.model.test_step(batch)
+            loss, acc, labels, preds = self.model.test_step(batch)
 
             test_losses.append(loss)
             test_accuracies.append(acc)
             all_preds.append(preds)
             all_labels.append(batch[1])
 
-        avg_test_loss = np.mean(test_losses)
-        avg_test_acc = np.mean(test_accuracies)
+        # calculate average metrics for the phase
+        for log_metric in LOG_METRICS:
+            self.metric_dict[f'{log_metric}/{phase}'] = np.array(phase_metrics[log_metric]).mean()
 
-        log_metrics(writer=self.writer,
-                    log_dict={'phase': 'Test',
-                              'epoch': self.epoch,
-                              'accuracy': avg_test_acc,
-                              'loss': avg_test_loss,
-                              'lr': self.model.get_lr(),
-                              })
+
+        # log the metrics to the dict
+        log_hparams_metrics(self.writer,
+                            hparam_dict=self.hyperparameters,
+                            metric_dict=self.metric_dict,
+                            epoch=self.epoch)
+
         print(flush=True)
         self.writer.close()
 

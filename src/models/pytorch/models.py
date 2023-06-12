@@ -127,6 +127,62 @@ class BaseModel(nn.Module):
         acc = self.accuracy(preds, targets)
         return acc.cpu()
 
+    def calculate_recall(self,y_hat,y):
+        """
+        Calculates the recall of the model's prediction.
+
+        :param y_hat: The predicted output from the model.
+        :type y_hat: Tensor
+        :param y: The ground truth or actual labels.
+        :type y: Tensor
+
+        :returns: The calculated recall.
+        :rtype: Tensor
+
+        """
+        # Damn Mac https://github.com/pytorch/pytorch/issues/92311
+        preds = torch.argmax(y_hat.cpu(), dim=1)
+        targets = y.view(-1).cpu()
+        rec = self.recall(preds, targets)
+        return rec.cpu()
+    def calculate_precision(self,y_hat,y):
+        """
+        Calculates the precision of the model's prediction.
+
+        :param y_hat: The predicted output from the model.
+        :type y_hat: Tensor
+        :param y: The ground truth or actual labels.
+        :type y: Tensor
+
+        :returns: The calculated precision.
+        :rtype: Tensor
+
+        """
+        # Damn Mac https://github.com/pytorch/pytorch/issues/92311
+        preds = torch.argmax(y_hat.cpu(), dim=1)
+        targets = y.view(-1).cpu()
+        prec = self.precision(preds, targets)
+        return prec.cpu()
+
+    def calculate_f1score(self,y_hat,y):
+        """
+        Calculates the F1-Score of the model's prediction.
+
+        :param y_hat: The predicted output from the model.
+        :type y_hat: Tensor
+        :param y: The ground truth or actual labels.
+        :type y: Tensor
+
+        :returns: The calculated f1.
+        :rtype: Tensor
+
+        """
+        # Damn Mac https://github.com/pytorch/pytorch/issues/92311
+        preds = torch.argmax(y_hat.cpu(), dim=1)
+        targets = y.view(-1).cpu()
+        f1 = self.f1score(preds, targets)
+        return f1.cpu()
+
     def forward(self, x):
         """
         The forward function for the BaseModel.
@@ -149,26 +205,26 @@ class BaseModel(nn.Module):
         :param batch: A tuple containing input data and labels.
         :type batch: tuple
 
-        :returns: The calculated loss and accuracy.
+        :returns: The calculated loss and accuracy, labels and predictions
         :rtype: tuple
 
         """
         landmarks, labels = batch[0].to(DEVICE), batch[1].to(DEVICE)
 
         # forward pass through the model
-        out = self(landmarks)
+        predictions = self(landmarks)
 
         # calculate loss
         loss = 0
         if labels is not None:
-            loss = self.criterion(out, labels.view(-1))  # need to "flatten" the labels
+            loss = self.criterion(predictions, labels.view(-1))  # need to "flatten" the labels
         loss.backward()
 
-        step_accuracy = self.calculate_accuracy(out, labels)
+        step_accuracy = self.calculate_accuracy(predictions, labels)
 
-        del landmarks, labels
+        # del landmarks, labels # @Asad: why did you delete the landmarks/labels
 
-        return loss.cpu().detach(), step_accuracy.cpu()
+        return loss.cpu().detach(), step_accuracy.cpu(), labels.cpu(), predictions.cpu()
 
     def validation_step(self, batch):
         """
@@ -177,7 +233,7 @@ class BaseModel(nn.Module):
         :param batch: A tuple containing input data and labels.
         :type batch: tuple
 
-        :returns: The calculated loss and accuracy.
+        :returns: The calculated loss and accuracy, labels and predictions
         :rtype: tuple
 
         """
@@ -186,18 +242,18 @@ class BaseModel(nn.Module):
             landmarks, labels = batch[0].to(DEVICE), batch[1].to(DEVICE)
 
             # forward pass through the model
-            out = self(landmarks)
+            predictions = self(landmarks)
 
             # calculate loss
             loss = 0
             if labels is not None:
-                loss = self.criterion(out, labels.view(-1))
+                loss = self.criterion(predictions, labels.view(-1))
 
-            step_accuracy = self.calculate_accuracy(out, labels)
+            step_accuracy = self.calculate_accuracy(predictions, labels)
 
-            del landmarks, labels
+            # del landmarks, labels #
 
-        return loss.cpu().detach(), step_accuracy.cpu()
+        return loss.cpu().detach(), step_accuracy.cpu(), labels.cpu(), predictions.cpu()
 
     def test_step(self, batch):
         """
@@ -206,7 +262,7 @@ class BaseModel(nn.Module):
         :param batch: A tuple containing input data and labels.
         :type batch: tuple
 
-        :returns: The calculated loss, accuracy, and model predictions.
+        :returns: The calculated loss, accuracy, labels, and model predictions.
         :rtype: tuple
 
         """
@@ -225,9 +281,9 @@ class BaseModel(nn.Module):
 
             step_accuracy = self.calculate_accuracy(out, labels)
 
-            del landmarks, labels
+            # del landmarks, labels
 
-        return loss.cpu().detach(), step_accuracy.cpu(), preds.cpu()
+        return loss.cpu().detach(), step_accuracy.cpu(), labels.cpu, preds.cpu()
 
     def optimize(self):
         """

@@ -178,13 +178,11 @@ LOG_METRICS = ['Accuracy','Loss','F1Score','Precision','Recall']
 FAST_DEV_RUN = True
 #: Number of batches to run (Only active if FAST_DEV_RUN is set to True)
 LIMIT_BATCHES = 3
-
 #: Number of Epochs to run (Only active if FAST_DEV_RUN is set to True)
-LIMIT_EPOCHS = 2
+LIMIT_EPOCHS = 5
 
-#: w
-warnings.warn(f"Warning! Will only Train/Validate/Test for {LIMIT_EPOCHS} and {LIMIT_BATCHES} batches,"
-              f"as FAST_DEV_RUN is set to {FAST_DEV_RUN}")
+
+
 
 
 

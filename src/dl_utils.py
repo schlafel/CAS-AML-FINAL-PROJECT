@@ -229,6 +229,24 @@ def log_metrics(writer, log_dict):
           f"{log_dict['phase']} Loss: {log_dict['loss']:>9.8f}, LRate {log_dict['lr']:>9.8f} ",
           flush=True)
 
+def get_metric_dict():
+    """
+    Instantiatnes an empty dict with the metrics to be logged in tensorboard
+    :return: dict with an empty metric dict to feed in log_hparams_metrics
+    """
+    metric_name = []
+    metric_val = []
+    for metric in LOG_METRICS:
+        for phase in ["Train", "Validation", "Test"]:
+            metric_val.append(None)
+            metric_name.append(f'{metric}/{phase}')
+
+    return dict(zip(metric_name,metric_val))
+
+
+
+
+
 def log_hparams_metrics(writer,hparam_dict,metric_dict,epoch = 0):
     """
     Helper function to log metrics to TensorBoard. That accepts the logging of hyperparameters too.
