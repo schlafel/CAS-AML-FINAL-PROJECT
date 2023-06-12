@@ -14,7 +14,7 @@ import os
 import torch
 import numpy as np
 from matplotlib import style
-
+import warnings
 #: Setting the style from matplotlib
 style.use(os.path.join(os.path.dirname(__file__),"..","styles","CASAML_Style.mplstyle"))
 
@@ -165,10 +165,27 @@ CLEANED_FILE = 'cleansed_data.marker'                       # File that marks th
 # Training Configuration
 # =============================================================================
 #
+
 #: Which metrics shold be logged.
 LOG_METRICS = ['Accuracy','Loss','F1Score','Precision','Recall']
-#: limit batches
-LIMIT_BATCHES = 5
+#: Fast development run (Limit the number of batches in Training/Validation Mode)
+"""  
+.. warning::
+  
+  Training/Validation/Testing will only be done on LIMIT_BATCHES and LIMIT_EPOCHS, if FAST_DEV_RUN is set to True
+  
+"""
+FAST_DEV_RUN = True
+#: Number of batches to run (Only active if FAST_DEV_RUN is set to True)
+LIMIT_BATCHES = 3
+
+#: Number of Epochs to run (Only active if FAST_DEV_RUN is set to True)
+LIMIT_EPOCHS = 2
+
+#: w
+warnings.warn(f"Warning! Will only Train/Validate/Test for {LIMIT_EPOCHS} and {LIMIT_BATCHES} batches,"
+              f"as FAST_DEV_RUN is set to {FAST_DEV_RUN}")
+
 
 
 

@@ -133,14 +133,26 @@ class Trainer:
         self.train_start_time = now.strftime("%Y-%m-%d %H_%M")
 
         self.writer = SummaryWriter(os.path.join(ROOT_PATH, RUNS_DIR, DL_FRAMEWORK,
-                                                 self.model_class, self.train_start_time))
+                                                 self.model_class, self.train_start_time),
+                                    filename_suffix="experiment")
 
         self.checkpoint_path = os.path.join(ROOT_PATH, CHECKPOINT_DIR, DL_FRAMEWORK, self.model_class, self.train_start_time)
 
         self.epoch = 0
         self.callbacks = []
 
-    def train(self, n_epochs=EPOCHS, limit_batches = None):
+
+        #Hyperparameter stuff
+        if 'hparams' in self.params.keys():
+            self.hyperparameters = self.params['hparams']
+        else: #infer them
+            self.hyperparameters = {}
+            self.hyperparameters['BATCH_SIZE'] = BATCH_SIZE
+
+        log_hparams(self.writer,self.hyperparameters)
+
+
+    def train(self, n_epochs=EPOCHS):
         """
         Trains the model for a specified number of epochs.
 
@@ -177,8 +189,8 @@ class Trainer:
         .. warning::
             If you set the patience value too low in the constructor, the model might stop training prematurely.
         """
-        for epoch in range(n_epochs):
-            print(f"Epoch {epoch + 1}/{n_epochs}", flush=True)
+        for epoch in range(n_epochs if not FAST_DEV_RUN else LIMIT_EPOCHS):
+            print(f"Epoch {epoch + 1}/{n_epochs if not FAST_DEV_RUN else LIMIT_EPOCHS}", flush=True)
             time.sleep(0.25)  # time to flush std out
 
             train_losses = []
@@ -193,6 +205,8 @@ class Trainer:
 
             print(end='', flush=True)
             for i, batch in pbar:
+                if FAST_DEV_RUN & (i > LIMIT_BATCHES):
+                    continue
                 loss, acc = self.model.training_step(batch)
 
                 self.model.optimize()
