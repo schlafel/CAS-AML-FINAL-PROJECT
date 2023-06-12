@@ -14,7 +14,7 @@ Introduction
 This is the introduction section of the report. Provide an overview of the report's purpose, scope, and key objectives.
 
 Scope of the project
----------
+--------------------
 
 The objectives of this project were dual pronged.
 The first aim was to leverage the power of Deep Learning to extract valuable insights from an existing dataset.
@@ -78,12 +78,8 @@ Summarize the main findings and conclusions of the report.
 
 References
 ----------
-
-
-
 .. bibliography:: references.bib
    :style: plain
-   :cited:
 
 
 .. raw:: latex
@@ -91,7 +87,9 @@ References
     % Switch back to one-column layout
     \onecolumn
     \appendix
-
+    % Redefine chapter numbering format for appendix
+    \renewcommand{\thechapter}{\Alph{chapter}}
+    \renewcommand{\thesection}{\thechapter.\arabic{section}}
 
 
 

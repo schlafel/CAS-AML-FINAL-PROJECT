@@ -119,20 +119,20 @@ latex_elements = {
 
 % Keywords used in the template. 
 \newcommand{\thesistitle}{American Sign Language Recognition with DeepLearning} % Your thesis title, print it with \ttitle
-\newcommand{\supervisor}{Prof. Dr. Charles Darwin} % Your supervisor's name, print it with \supname. Include academic title.
-\newcommand{\coadvisor}{Prof. Dr. Gregor Mendel} %Your co-advisors's name, print it with \coaname. Include academic title.
+\newcommand{\supervisor}{ } % Your supervisor's name, print it with \supname. Include academic title.
+\newcommand{\coadvisor}{ } %Your co-advisors's name, print it with \coaname. Include academic title.
 \newcommand{\firstname}{John} % Your first name, print it with \fname. 
 \newcommand{\lastname}{Smith} % Your last name, print it with \lname .
 \newcommand{\authorname}{\fname~ \lname} % Your whole name made from your input, print it with \authorname.
 \newcommand{\matriculationnumber}{19-271-631} % Your matriculation number, print it with \matrnumber
-\newcommand{\degree}{PhD in Cell Biology} % Your degree name, print it with \degreename. 
+\newcommand{\degree}{Certificate of Advanced Studies in Advanced Machine Learning AML University of Bern (CAS AML Unibe)} % Your degree name, print it with \degreename. 
 %Possible degrees at the GCB: PhD in Biochemistry and Molecular Biology, PhD in Cell Biology, PhD in Biomedical Engineering, PhD in Biomedical Sciences, PhD in Immunology, PhD in Neuroscience, Doctor of Medicine and Philosophy (MD,PhD), Doctor of Veterinary Medicine and Philosophy (DVM,PhD), Doctor of Dentistry and Philosophy (DDS,PhD), PhD in Computational Biology, 
-\newcommand{\institute}{asdf} % Your department's name and URL, print it with \instname
-\newcommand{\faculty}{asdfdd} % Your department's name and URL, print it with \facname. Possible faculties: Faculty of Medicine, Faculty of Science, Vetsuisse Faculty, Institute of Virology and Immunology IVI, Mittelhäusern, Institute for Research in Biomedicine IRB, Bellinzona
-\newcommand{\university}{asdf} % Your university's name and URL, print it with \univname. Possible Universities: University of Bern or University of Zurich (for Vetsuisse Zürich) 
+\newcommand{\institute}{Mathematical Institute} % Your department's name and URL, print it with \instname
+\newcommand{\faculty}{} % Your department's name and URL, print it with \facname. Possible faculties: Faculty of Medicine, Faculty of Science, Vetsuisse Faculty, Institute of Virology and Immunology IVI, Mittelhäusern, Institute for Research in Biomedicine IRB, Bellinzona
+\newcommand{\university}{University of Bern} % Your university's name and URL, print it with \univname. Possible Universities: University of Bern or University of Zurich (for Vetsuisse Zürich) 
 
 % The following keywords are not used in this template. But define it if you want to use it in the text. 
-\newcommand{\department}{Uni Bern}% Your department's name and URL, print it with \deptname
+\newcommand{\department}{University of Bern}% Your department's name and URL, print it with \deptname
 \newcommand{\group}{asdfasdf} % Your research group's name and URL, print it with \groupname
 \newcommand{\subject}{Cell biology} % Your subject area, print it with \subjectname
 \newcommand{\keywords}{} % Keywords for your thesis, print it with \keywordnames
@@ -186,8 +186,8 @@ latex_elements = {
 \usepackage{chngcntr}
 
 \counterwithin*{section}{chapter}  % Reset section counter at each chapter
-\titleformat{\section}[hang]{\normalfont\Large\bfseries}{\thesection}{1em}{}
-\renewcommand{\thesection}{\arabic{section}}
+\titleformat{\section}[hang]{\normalfont\Large\bfseries}{\thesection}{1em}{} 
+\renewcommand{\thesection}{\arabic{section}} %include chapter number in section title
 
 
 ''',
@@ -208,23 +208,23 @@ latex_elements = {
 % \textsc{\Final Project}\\[0.5cm] % Thesis type
 
  {\huge \bfseries \thesistitle\par}\vspace{0.4cm} % Thesis title
-  {\Large PhD Thesis submitted by}\\[0.5cm]
+  {\Large CAS Final Project}\\[0.5cm]
   {\LARGE \bfseries Felix Schlatter \& Asad Bin Imtiaz \par}\vspace{0.4cm} % Author name 
   {\Large for the degree of}\\[0.5cm]
   {\Large \degree \par}
 
    \vfill
 
- \emph{Supervisor}\\[1mm]
- {\Large \supervisor}\\ % Supervisor name
- {\Large \institute}\\ % by default it is your Institute, change if necessary
- {\Large  \faculty ~of the \university} \\% by default it is your Faculty, change if necessary
+ % \emph{Supervisor}\\[1mm]
+ %{\Large \supervisor}\\ % Supervisor name
+ %{\Large \institute}\\ % by default it is your Institute, change if necessary
+ %{\Large  \faculty ~of the \university} \\% by default it is your Faculty, change if necessary
 
 \vspace{0.4cm}
- \emph{Co-advisor}\\[1mm]
- {\Large asdf}\\ % Supervisor name
- {\Large \href{https://www.mendel.uni.com/}{Institute of Gregor Mendel}}\\
- {\Large \href{https://www.sci.mendel.uni.com/}{Faculty of Science} of the \href{https://www.uni.com/}{University of Mendel}}
+ %\emph{Co-advisor}\\[1mm]
+ %{\Large asdf}\\ % Supervisor name
+ %{\Large \href{https://www.mendel.uni.com/}{Institute of Gregor Mendel}}\\
+ %{\Large \href{https://www.sci.mendel.uni.com/}{Faculty of Science} of the \href{https://www.uni.com/}{University of Mendel}}
  
  \vfill
  \end{center}
@@ -256,12 +256,8 @@ latex_logo = '_static/Logo_UniBe.pdf'
 
 
 bibtex_bibfiles = ['references.bib']
-bibtex_bibliography_section = 'section'
-bibtex_bibliography_header = r'''
-\clearpage
-\section{References}
-'''
 
+# Other configuration settings...
 
-
+latex_index_module = 'sphinxcontrib.peculiarity'
 
