@@ -149,6 +149,10 @@ class Trainer:
         else: #infer them
             self.hyperparameters = {}
 
+        #add also modelname as it is somehow not downloadable by tensorflow
+        self.hyperparameters['MODELNAME'] = modelname
+        self.hyperparameters['FRAMEWORK'] = DL_FRAMEWORK
+        self.hyperparameters['EXPERIMENT'] = self.train_start_time
         self.hyperparameters['BATCH_SIZE'] = BATCH_SIZE
         self.hyperparameters['N_EPOCHS'] = EPOCHS
         self.hyperparameters['AUGMENTATION_THRESHOLD'] = augmentation_threshold
@@ -313,9 +317,9 @@ class Trainer:
             if log_metric.lower() == "precision":
                 phase_metrics[log_metric].append(self.model.calculate_precision(preds, labels))
             elif log_metric.lower() == "recall":
-                phase_metrics[log_metric].append(self.model.calculate_recall(preds, labels).numpy())
+                phase_metrics[log_metric].append(self.model.calculate_recall(preds, labels))
             elif log_metric.lower() == "f1score":
-                phase_metrics[log_metric].append(self.model.calculate_f1score(preds, labels).numpy())
+                phase_metrics[log_metric].append(self.model.calculate_f1score(preds, labels))
             elif log_metric.lower() == "accuracy":
                 phase_metrics[log_metric].append(acc)
             elif log_metric.lower() == "loss":
@@ -427,6 +431,9 @@ class Trainer:
             test_accuracies.append(acc)
             all_preds.append(preds)
             all_labels.append(batch[1])
+            #calculate metrics and append to phase_metrics
+            phase_metrics = self.calculate_metrics(acc, labels, loss, phase_metrics, preds)
+
 
         # calculate average metrics for the phase
         for log_metric in LOG_METRICS:
@@ -440,7 +447,7 @@ class Trainer:
                             epoch=self.epoch)
 
         print(flush=True)
-        self.writer.close()
+        # self.writer.close()
 
         return all_preds, all_labels
 

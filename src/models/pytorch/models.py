@@ -125,7 +125,7 @@ class BaseModel(nn.Module):
         preds = torch.argmax(y_hat.cpu(), dim=1)
         targets = y.view(-1).cpu()
         acc = self.accuracy(preds, targets)
-        return acc.cpu()
+        return acc.cpu().numpy()
 
     def calculate_recall(self,y_hat,y):
         """
@@ -144,7 +144,27 @@ class BaseModel(nn.Module):
         preds = torch.argmax(y_hat.cpu(), dim=1)
         targets = y.view(-1).cpu()
         rec = self.recall(preds, targets)
-        return rec.cpu()
+        return rec.cpu().numpy()
+
+    def calculate_auc(self,y_hat,y):
+        """
+        Calculates the auc of the model's prediction.
+
+        :param y_hat: The predicted output from the model.
+        :type y_hat: Tensor
+        :param y: The ground truth or actual labels.
+        :type y: Tensor
+
+        :returns: The calculated recall.
+        :rtype: Tensor
+
+        """
+        # Damn Mac https://github.com/pytorch/pytorch/issues/92311
+        preds = torch.argmax(y_hat.cpu(), dim=1)
+        targets = y.view(-1).cpu()
+        auc = self.auroc(preds, targets)
+        return auc.cpu().numpy()
+
     def calculate_precision(self,y_hat,y):
         """
         Calculates the precision of the model's prediction.
@@ -162,7 +182,7 @@ class BaseModel(nn.Module):
         preds = torch.argmax(y_hat.cpu(), dim=1)
         targets = y.view(-1).cpu()
         prec = self.precision(preds, targets)
-        return prec.cpu()
+        return prec.cpu().numpy()
 
     def calculate_f1score(self,y_hat,y):
         """
@@ -181,7 +201,7 @@ class BaseModel(nn.Module):
         preds = torch.argmax(y_hat.cpu(), dim=1)
         targets = y.view(-1).cpu()
         f1 = self.f1score(preds, targets)
-        return f1.cpu()
+        return f1.cpu().numpy()
 
     def forward(self, x):
         """

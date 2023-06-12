@@ -9,7 +9,7 @@ from config import DEVICE, N_CLASSES
 
 from tensorflow.keras.layers import MultiHeadAttention, LayerNormalization, Dense, Dropout, LayerNormalization, LSTM, Flatten
 from tensorflow.keras.models import Model
-
+import tensorflow_addons as tfa
 import os
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -48,6 +48,12 @@ class BaseModel(tf.keras.Model):
 
         self.criterion = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False)
         self.accuracy = tf.keras.metrics.SparseCategoricalAccuracy()
+        self.recall = tf.keras.metrics.Recall()
+        self.precision = tf.keras.metrics.Precision()
+        self.f1score = tfa.metrics.F1Score(num_classes=N_CLASSES)
+        self.f1score = tf.keras.metrics.AUC()
+
+
 
         self.optimizer = None
         self.scheduler = None
@@ -69,6 +75,61 @@ class BaseModel(tf.keras.Model):
         :rtype: float
         """
         return self.accuracy(y_true, y_pred)
+    def calculate_f1score(self, y_pred, y_true):
+        """
+        Calculates the F1-Score of the model's prediction.
+
+        :param y_pred: The predicted output from the model.
+        :type y_pred: Tensor
+        :param y_true: The ground truth or actual labels.
+        :type y_true: Tensor
+
+        :returns: The calculated accuracy.
+        :rtype: float
+        """
+        return self.f1score(y_true, tf.argmax(y_pred,axis = 1)).numpy()
+
+    def calculate_auc(self, y_pred, y_true):
+        """
+        Calculates the AUC of the model's prediction.
+
+        :param y_pred: The predicted output from the model.
+        :type y_pred: Tensor
+        :param y_true: The ground truth or actual labels.
+        :type y_true: Tensor
+
+        :returns: The calculated accuracy.
+        :rtype: float
+        """
+        return self.auc(y_true, tf.argmax(y_pred,axis = 1)).numpy()
+
+    def calculate_recall(self, y_pred, y_true):
+        """
+        Calculates the Recall of the model's prediction.
+
+        :param y_pred: The predicted output from the model.
+        :type y_pred: Tensor
+        :param y_true: The ground truth or actual labels.
+        :type y_true: Tensor
+
+        :returns: The calculated accuracy.
+        :rtype: float
+        """
+        return self.recall(y_true, tf.argmax(y_pred,axis = 1)).numpy()
+
+    def calculate_precision(self, y_pred, y_true):
+        """
+        Calculates the Recall of the model's prediction.
+
+        :param y_pred: The predicted output from the model.
+        :type y_pred: Tensor
+        :param y_true: The ground truth or actual labels.
+        :type y_true: Tensor
+
+        :returns: The calculated accuracy.
+        :rtype: float
+        """
+        return self.precision(y_true, tf.argmax(y_pred,axis = 1)).numpy()
 
 
     def call(self, inputs, training=False):
@@ -115,7 +176,7 @@ class BaseModel(tf.keras.Model):
         # Calculate accuracy
         accuracy = self.calculate_accuracy(predictions, labels)
 
-        del landmarks, labels
+        # del landmarks, labels
 
         return loss, accuracy, labels, predictions
     @tf.function
@@ -139,8 +200,9 @@ class BaseModel(tf.keras.Model):
 
         accuracy = self.calculate_accuracy(predictions, labels)
 
-        return loss, accuracy
+        return loss, accuracy, labels, predictions
 
+    @tf.function
     def test_step(self, batch):
         """
         Performs a test step using the input batch data.
@@ -163,7 +225,7 @@ class BaseModel(tf.keras.Model):
         preds = tf.argmax(predictions, axis=-1)
         accuracy = self.calculate_accuracy(predictions, labels)
 
-        return loss.numpy(), accuracy.numpy(), preds.numpy()
+        return loss, accuracy, labels, predictions
 
     def optimize(self):
         """

@@ -15,6 +15,7 @@ class Metric(Enum):
     - F1Score: Represents the F1 score metric.
     - Recall: Represents the recall metric.
     - Precision: Represents the precision metric.
+    - AUC: Area under the curve of the ROC.
     """
 
 
@@ -23,3 +24,4 @@ class Metric(Enum):
     F1Score = "F1Score"
     Recall = "Recall"
     Precision = "Precision"
+    AUC = "AUC"
