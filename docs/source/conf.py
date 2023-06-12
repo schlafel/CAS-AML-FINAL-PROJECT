@@ -79,6 +79,7 @@ latex_elements = {
 # 'fncychap': '\\usepackage[Lenny]{fncychap}',
 'fncychap': '\\usepackage{fncychap}',
 'fontpkg': '\\usepackage{amsmath,amsfonts,amssymb,amsthm}',
+    'printindex': r'\footnotesize\raggedright\printindex',
 'figure_align':'H',
 ''
 # The font size ('10pt', '11pt' or '12pt').
