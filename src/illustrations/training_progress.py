@@ -54,8 +54,9 @@ def load_tf(dirname):
     for key,value in hparam_dict.items():
         df_out[key] = value
     #drop duplicated epoch columns
+    df_filt = df_out.loc[:, ~df_out.columns.duplicated()]
 
-    return df_out
+    return df_filt
 
 def plot_training_validation(data,
                              x="epoch",
@@ -138,13 +139,13 @@ def plot_trainingLossAccuracies(ckpt_paths):
                     ],
         var_name="Metric")
 
-    melted_dftest = pd.melt(concat_df,
-                                  id_vars=['epoch', 'Experiment', ],
-                                  value_vars=[
-                            f'{"Accuracy"}/Test', f'{"Accuracy"}/Test',
-                            f'{"Loss"}/Test', f'{"Loss"}/Test',
-                             ],
-                                  var_name="Metric")
+    # melted_dftest = pd.melt(concat_df,
+    #                               id_vars=['epoch', 'Experiment', ],
+    #                               value_vars=[
+    #                         f'{"Accuracy"}/Test', f'{"Accuracy"}/Test',
+    #                         f'{"Loss"}/Test', f'{"Loss"}/Test',
+    #                          ],
+    #                               var_name="Metric")
 
     fig,ax = plot_training_validation(data = melted_df_train_val,
                                       y="value",
@@ -163,7 +164,9 @@ if __name__ == '__main__':
         os.path.join(ROOT_PATH,r"runs/pytorch/HybridModel/2023-06-09 23_26"),
     ]
 
-    ckpt_paths = [r"C:\Users\fs.GUNDP\Python\CAS-AML-FINAL-PROJECT\runs\pytorch\YetAnotherTransformer\2023-06-13 09_36"]
+    ckpt_paths = [
+        r"C:\Users\fs.GUNDP\Python\CAS-AML-FINAL-PROJECT\runs\pytorch\CVTransferLearningModel\2023-06-13 17_15",
+    ]
     fig,ax = plot_trainingLossAccuracies(ckpt_paths)
 
     fig.savefig(os.path.join(ROOT_PATH,OUT_DIR,f"{save_name}.svg"))
