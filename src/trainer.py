@@ -62,7 +62,7 @@ class Trainer:
     epochs, performing validation and testing, implementing early stopping, and logging results. The module has been
     designed to be agnostic to the specific deep learning framework, enhancing its versatility across various projects.
     """
-    def __init__(self, config, modelname=config.MODELNAME, dataset=ASL_DATASET):
+    def __init__(self, config, dataset=ASL_DATASET):
         """
         Initializes the Trainer class with the specified parameters.
 
@@ -105,17 +105,17 @@ class Trainer:
         .. warning::
             Make sure the specified model name corresponds to an actual model in your project's models directory.
         """
-        self.model_name = modelname
+        self.model_name = config.MODELNAME
         self.DL_FRAMEWORK = config.DL_FRAMEWORK
         module_name = f"models.{config.DL_FRAMEWORK}.models"
-        self.params = get_model_params(modelname)
+        self.params = get_model_params(self.model_name)
 
         module = importlib.import_module(module_name)
-        Model = getattr(module, modelname)
+        Model = getattr(module, self.model_name)
 
         # Get Model
         self.model = Model(**self.params)
-        print(f"Using model: {module_name}.{modelname}")
+        print(f"Using model: {module_name}.{self.model_name}")
 
         # Get Data
         self.dataset = dataset(augment=True,
@@ -155,7 +155,7 @@ class Trainer:
             self.hyperparameters = {}
 
         #add also modelname as it is somehow not downloadable by tensorflow
-        self.hyperparameters['MODELNAME'] = modelname
+        self.hyperparameters['MODELNAME'] = self.model_name
         self.hyperparameters['FRAMEWORK'] = config.DL_FRAMEWORK
         self.hyperparameters['EXPERIMENT'] = self.train_start_time
         self.hyperparameters['BATCH_SIZE'] = config.BATCH_SIZE
@@ -507,8 +507,7 @@ class Trainer:
 if __name__ == '__main__':
     # Get Data
     trainer = Trainer(
-                      config=config,
-                      modelname=config.MODELNAME,)
+                      config=config,)
     trainer.add_callback(dropout_callback)
     trainer.add_callback(augmentation_increase_callback)
     trainer.train()
