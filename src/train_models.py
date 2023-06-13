@@ -14,11 +14,20 @@ if __name__ == '__main__':
             'HybridEnsembleModel',
             'HybridModel',
             'TransformerEnsemble']:
+
+
+
+            #overwrite the config file
             config.MODELNAME = MODELNAME
             config.DL_FRAMEWORK = DL_FRAMEWORK
 
+            #get the model_params already here....
+            model_params = get_model_params(config.MODELNAME)
 
-            trainer = Trainer(config=config)
+
+
+
+            trainer = Trainer(config=config,model_config = model_params)
             # trainer.add_callback(dropout_callback)
             # trainer.add_callback(augmentation_increase_callback)
             trainer.train()
