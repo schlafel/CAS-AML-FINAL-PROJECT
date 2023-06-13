@@ -368,7 +368,10 @@ class TransformerEncoderLayer(tf.keras.layers.Layer):
         Ensure that the input dimension 'd_model' is divisible by the number of attention heads 'n_head'.
     """
 
-    def __init__(self, d_model, n_head, dim_feedforward, dropout):
+    def __init__(self, d_model=192, n_head=8, dim_feedforward=512,
+                 dropout=0.1,
+                 layer_norm = 1e-5,
+                 **kwargs):
         super(TransformerEncoderLayer, self).__init__()
 
         self.self_attn = MultiHeadAttention(num_heads=n_head, key_dim=int(d_model / n_head))
@@ -377,8 +380,8 @@ class TransformerEncoderLayer(tf.keras.layers.Layer):
             Dense(d_model)
         ])
 
-        self.layernorm1 = LayerNormalization(epsilon=1e-5)
-        self.layernorm2 = LayerNormalization(epsilon=1e-5)
+        self.layernorm1 = LayerNormalization(epsilon=layer_norm)
+        self.layernorm2 = LayerNormalization(epsilon=layer_norm)
 
         self.dropout1 = Dropout(dropout)
         self.dropout2 = Dropout(dropout)
@@ -420,37 +423,40 @@ class TransformerSequenceClassifier(Model):
     .. warning::
         The inputs should have a shape of (batch_size, seq_length, height, width), otherwise, a ValueError will be raised.
     """
-    DEFAULTS = dict(
-        d_model=256,
+    DEFAULT_PARAMS = dict(
+        d_model=192,
         n_head=8,
         dim_feedforward=512,
         dropout=0.1,
         num_layers=2,
         num_classes=N_CLASSES,
+        layer_norm_eps = 1e-5,
+        norm_first= True,
+        batch_first= True,
     )
 
     def __init__(self, **kwargs):
         super().__init__()
 
         # Override defaults with passed-in values
-        self.settings = {**self.DEFAULTS, **kwargs}
+        settings_model = {**self.DEFAULT_PARAMS,
+                          **(kwargs['params'] if 'params' in kwargs.keys() else {})}
+
+        self.settings = dict(params = settings_model)
+
 
         # Transformer layers
         self.transformer = [
-            TransformerEncoderLayer(
-                d_model=self.settings['d_model'],
-                n_head=self.settings['n_head'],
-                dim_feedforward=self.settings['dim_feedforward'],
-                dropout=self.settings['dropout'],
+            TransformerEncoderLayer(**self.settings['params']
             )
-            for _ in range(self.settings['num_layers'])
+            for _ in range(self.settings['params']['num_layers'])
         ]
 
         # Normalization layer
         self.norm = LayerNormalization(epsilon=1e-5)
 
         # Output layer
-        self.output_layer = Dense(self.settings['num_classes'])
+        self.output_layer = Dense(self.settings['params']['num_classes'])
 
     @tf.function
     def call(self, inputs, training=False):
@@ -512,9 +518,9 @@ class TransformerPredictor(BaseModel):
     """
 
     def __init__(self, **kwargs):
-        super().__init__(learning_rate=kwargs["learning_rate"])
+        super().__init__(**kwargs)
 
-        self.learning_rate = kwargs["learning_rate"]
+        # self.learning_rate = kwargs["learning_rate"]
 
         # Instantiate the Transformer model
         self.model = TransformerSequenceClassifier(**kwargs)

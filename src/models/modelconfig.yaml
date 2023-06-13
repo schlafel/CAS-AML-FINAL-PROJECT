@@ -5,12 +5,11 @@ models:
       n_head: 8
       dim_feedforward: 512
       dropout: 0.001
-      layer_norm_eps: !!float 1e-6
+      layer_norm_eps: !!float 1e-5
       norm_first: True
       batch_first: True
-      num_layers: 3
+      num_layers: 4
       num_classes: 250
-      augmentation_threshold: 0.35
     hparams:
       learning_rate: 0.011
       gamma: 0.9
