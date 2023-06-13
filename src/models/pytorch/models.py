@@ -35,7 +35,7 @@ from config import DEVICE, N_CLASSES
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torchmetrics.classification import accuracy, F1Score,Precision,Recall, AUROC
+from torchmetrics.classification import accuracy, F1Score, Precision, Recall, AUROC
 from torchvision import models
 
 
@@ -82,25 +82,28 @@ class BaseModel(nn.Module):
         )
         self.precision = Precision(
             task="multiclass",
-            num_classes=n_classes
+            num_classes=n_classes,
+            average="macro"
         )
 
         self.recall = Recall(
             task="multiclass",
-            num_classes=n_classes
+            num_classes=n_classes,
+            average="macro"
+
         )
         self.f1score = F1Score(
             task="multiclass",
-            num_classes=n_classes
+            num_classes=n_classes,
+            average="macro"
+
         )
         self.auroc = AUROC(
             task="multiclass",
-            num_classes=n_classes
+            num_classes=n_classes,
+            average="macro"
+
         )
-
-
-
-
 
         self.metrics = {"train": [], "val": [], "test": []}
 
@@ -125,7 +128,7 @@ class BaseModel(nn.Module):
         preds = torch.argmax(y_hat.cpu(), dim=1)
         targets = y.view(-1).cpu()
         acc = self.accuracy(preds, targets)
-        return acc.cpu().numpy()
+        return acc
 
     def calculate_recall(self,y_hat,y):
         """
@@ -143,10 +146,10 @@ class BaseModel(nn.Module):
         # Damn Mac https://github.com/pytorch/pytorch/issues/92311
         preds = torch.argmax(y_hat.cpu(), dim=1)
         targets = y.view(-1).cpu()
-        rec = self.recall(preds, targets)
+        rec = self.recall.cpu()(preds, targets)
         return rec.cpu().numpy()
 
-    def calculate_auc(self,y_hat,y):
+    def calculate_auc(self, y_hat, y):
         """
         Calculates the auc of the model's prediction.
 
@@ -162,7 +165,7 @@ class BaseModel(nn.Module):
         # Damn Mac https://github.com/pytorch/pytorch/issues/92311
         preds = torch.argmax(y_hat.cpu(), dim=1)
         targets = y.view(-1).cpu()
-        auc = self.auroc(preds, targets)
+        auc = self.auroc.cpu()(preds, targets)
         return auc.cpu().numpy()
 
     def calculate_precision(self,y_hat,y):
@@ -181,10 +184,10 @@ class BaseModel(nn.Module):
         # Damn Mac https://github.com/pytorch/pytorch/issues/92311
         preds = torch.argmax(y_hat.cpu(), dim=1)
         targets = y.view(-1).cpu()
-        prec = self.precision(preds, targets)
+        prec = self.precision.cpu()(preds, targets)
         return prec.cpu().numpy()
 
-    def calculate_f1score(self,y_hat,y):
+    def calculate_f1score(self, y_hat, y):
         """
         Calculates the F1-Score of the model's prediction.
 
@@ -199,8 +202,8 @@ class BaseModel(nn.Module):
         """
         # Damn Mac https://github.com/pytorch/pytorch/issues/92311
         preds = torch.argmax(y_hat.cpu(), dim=1)
-        targets = y.view(-1).cpu()
-        f1 = self.f1score(preds, targets)
+        targets = y.cpu().view(-1)
+        f1 =self.f1score.cpu()(preds, targets)
         return f1.cpu().numpy()
 
     def forward(self, x):
@@ -303,7 +306,7 @@ class BaseModel(nn.Module):
 
             # del landmarks, labels
 
-        return loss.cpu().detach(), step_accuracy.cpu(), labels.cpu, preds.cpu()
+        return loss.cpu().detach(), step_accuracy.cpu(), labels.cpu(), preds.cpu()
 
     def optimize(self):
         """

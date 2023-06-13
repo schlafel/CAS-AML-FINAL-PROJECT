@@ -79,7 +79,7 @@ BATCH_SIZE = 128                                            # Training batch siz
 #: Training Learning rate
 LEARNING_RATE = 0.001                                       # Training learning rate, may be overridden in model yaml
 #: Training Number of epochs
-EPOCHS = 50                                                 # Training number of epochs
+EPOCHS = 70                                                 # Training number of epochs
 #: Training Train set split size
 TRAIN_SIZE = 0.90                                           # Training set split size
 #: Training Validation set size
@@ -137,9 +137,9 @@ DYNAMIC_AUG_INC_INTERVAL = 5                                # Interval for augme
 #
 
 #: Deep learning framework to use for training and inference. Can be either 'pytorch' or 'tensorflow'.
-DL_FRAMEWORK='tensorflow'                                      # Deep learning framework to use for training and inference.
+DL_FRAMEWORK='pytorch'                                      # Deep learning framework to use for training and inference.
 #: Name of the model to be used for training.
-MODELNAME='LSTMPredictor'                 # Name of the model to be used for training.
+MODELNAME='YetAnotherEnsemble'                 # Name of the model to be used for training.
 
 
 #
@@ -175,7 +175,7 @@ LOG_METRICS = ['Accuracy','Loss','F1Score','Precision','Recall']
   Training/Validation/Testing will only be done on LIMIT_BATCHES and LIMIT_EPOCHS, if FAST_DEV_RUN is set to True
   
 """
-FAST_DEV_RUN = True
+FAST_DEV_RUN = False
 #: Number of batches to run (Only active if FAST_DEV_RUN is set to True)
 LIMIT_BATCHES = 3
 #: Number of Epochs to run (Only active if FAST_DEV_RUN is set to True)

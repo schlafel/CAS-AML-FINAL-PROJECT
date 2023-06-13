@@ -145,7 +145,7 @@ class Trainer:
 
         #Hyperparameter stuff
         if 'hparams' in self.params.keys():
-            self.hyperparameters = self.params['hparams']
+            self.hyperparameters = self.params['hparams'].copy()
         else: #infer them
             self.hyperparameters = {}
 
@@ -247,7 +247,7 @@ class Trainer:
                 train_accuracies.append(acc)
 
                 #calculate metrics and append to phase_metrics
-                phase_metrics = self.calculate_metrics(acc, labels, loss, phase_metrics, preds)
+                self.calculate_metrics(acc, labels, loss, phase_metrics, preds)
 
 
             print(end='', flush=True)
@@ -256,10 +256,11 @@ class Trainer:
             for log_metric in LOG_METRICS:
                 self.metric_dict[f'{log_metric}/{phase}'] = np.array(phase_metrics[log_metric]).mean()
             #
-            log_hparams_metrics(self.writer,
-                                hparam_dict=self.hyperparameters,
-                                metric_dict=self.metric_dict,
-                                epoch=self.epoch)
+            #logging is done in the validation....
+            # log_hparams_metrics(self.writer,
+            #                     hparam_dict=self.hyperparameters,
+            #                     metric_dict=self.metric_dict,
+            #                     epoch=self.epoch)
             print(end='', flush=True)
             #
             # avg_train_loss = np.mean(train_losses)
@@ -270,7 +271,7 @@ class Trainer:
             #Validation
             val_metrics = self.evaluate()
 
-            metric = val_metrics[f'{Metric["Accuracy"].value}/Validation']
+            metric = val_metrics[f'{Metric[EARLY_STOP_METRIC.capitalize()].value}/Validation']
 
             # check if early_stop_criterion has improved
             if EARLY_STOP_MODE == "min":
@@ -324,7 +325,7 @@ class Trainer:
                 phase_metrics[log_metric].append(acc)
             elif log_metric.lower() == "loss":
                 phase_metrics[log_metric].append(loss)
-        return phase_metrics
+
 
     def evaluate(self):
         """
@@ -372,7 +373,7 @@ class Trainer:
             valid_accuracies.append(acc)
 
             #calculate metrics and append to phase_metrics
-            phase_metrics = self.calculate_metrics(acc, labels, loss, phase_metrics, preds)
+            self.calculate_metrics(acc, labels, loss, phase_metrics, preds)
 
             pbar.set_postfix({'Loss': total_loss / (i + 1), 'Accuracy': total_acc / (i + 1)})
             print(end='', flush=True)
@@ -432,7 +433,7 @@ class Trainer:
             all_preds.append(preds)
             all_labels.append(batch[1])
             #calculate metrics and append to phase_metrics
-            phase_metrics = self.calculate_metrics(acc, labels, loss, phase_metrics, preds)
+            self.calculate_metrics(acc, labels, loss, phase_metrics, preds)
 
 
         # calculate average metrics for the phase
@@ -447,7 +448,9 @@ class Trainer:
                             epoch=self.epoch)
 
         print(flush=True)
-        # self.writer.close()
+        self.writer.close()
+
+        print(f"Test/Accuracy: {self.metric_dict[f'Accuracy/{phase}']}")
 
         return all_preds, all_labels
 
