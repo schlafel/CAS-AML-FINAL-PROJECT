@@ -1,37 +1,41 @@
 import config as config
 
 from trainer  import Trainer,get_model_params
-
+from callbacks import dropout_callback, augmentation_increase_callback
 
 if __name__ == '__main__':
 
     for DL_FRAMEWORK in ['pytorch', 'tensorflow']:
         for MODELNAME in [
+            'HybridEnsembleModel',
+            'HybridModel',
+            'TransformerEnsemble'
+            'YetAnotherEnsemble',
             'CVTransferLearningModel',
             'LSTMPredictor',
             'TransformerPredictor',
-            'YetAnotherTransformer',
-            'HybridEnsembleModel',
-            'HybridModel',
-            'TransformerEnsemble']:
+]:
 
+            for batch_size in [64,128,256]:
 
+                #overwrite the config file
+                config.BATCH_SIZE = batch_size
+                config.MODELNAME = MODELNAME
+                config.DL_FRAMEWORK = DL_FRAMEWORK
 
-            #overwrite the config file
-            config.MODELNAME = MODELNAME
-            config.DL_FRAMEWORK = DL_FRAMEWORK
-
-            #get the model_params already here....
-            model_params = get_model_params(config.MODELNAME)
+                #get the model_params already here....
+                model_params = get_model_params(config.MODELNAME)
 
 
 
 
-            trainer = Trainer(config=config,model_config = model_params)
-            # trainer.add_callback(dropout_callback)
-            # trainer.add_callback(augmentation_increase_callback)
-            trainer.train()
-            trainer.test()
+                trainer = Trainer(config=config)
+                trainer.add_callback(dropout_callback)
+                trainer.add_callback(augmentation_increase_callback)
+                trainer.train()
+                trainer.test()
+                preds, labels = trainer.test()
+                trainer.write_classification_report(preds, labels)
 
 
     #

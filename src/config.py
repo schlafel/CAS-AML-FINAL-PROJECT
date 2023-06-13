@@ -79,13 +79,17 @@ BATCH_SIZE = 128                                            # Training batch siz
 #: Training Learning rate
 LEARNING_RATE = 0.001                                       # Training learning rate, may be overridden in model yaml
 #: Training Number of epochs
-EPOCHS = 70                                                 # Training number of epochs
+EPOCHS = 3                                                 # Training number of epochs
 #: Training Train set split size
 TRAIN_SIZE = 0.90                                           # Training set split size
 #: Training Validation set size
 VALID_SIZE = 0.05                                           # Validation set size
 #: Testing Test set size
 TEST_SIZE = 0.05                                            # Test set size
+#: Enable Dropout of Frames in the data
+ENABLE_AUGMENTATION_DROPOUT = True
+#: Augmentation Threshold
+AUGMENTATION_THRESHOLD = 0.35
 
 #
 # =============================================================================
@@ -175,7 +179,7 @@ LOG_METRICS = ['Accuracy','Loss','F1Score','Precision','Recall']
   Training/Validation/Testing will only be done on LIMIT_BATCHES and LIMIT_EPOCHS, if FAST_DEV_RUN is set to True
   
 """
-FAST_DEV_RUN = True
+FAST_DEV_RUN = False
 #: Number of batches to run (Only active if FAST_DEV_RUN is set to True)
 LIMIT_BATCHES = 3
 #: Number of Epochs to run (Only active if FAST_DEV_RUN is set to True)

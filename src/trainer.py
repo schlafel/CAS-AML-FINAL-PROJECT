@@ -34,11 +34,11 @@ test(): Tests the model on the test set.
 add_callback(callback): Adds a callback function to the list of functions to be called at the end of each epoch.
 
 """
-import sys
+import sys,os
 from shutil import copyfile
 sys.path.insert(0, '../src')
 
-from config import *
+import config as config
 import numpy as np
 from tqdm import tqdm
 
@@ -54,6 +54,7 @@ from callbacks import dropout_callback, augmentation_increase_callback
 import yaml
 from metrics import Metric
 
+import  warnings
 from sklearn.metrics import classification_report
 class Trainer:
     """
@@ -61,8 +62,7 @@ class Trainer:
     epochs, performing validation and testing, implementing early stopping, and logging results. The module has been
     designed to be agnostic to the specific deep learning framework, enhancing its versatility across various projects.
     """
-    def __init__(self, modelname=MODELNAME, dataset=ASL_DATASET, patience=EARLY_STOP_PATIENCE,
-                 enableAugmentationDropout=True, augmentation_threshold=0.35):
+    def __init__(self, config, modelname=config.MODELNAME, dataset=ASL_DATASET):
         """
         Initializes the Trainer class with the specified parameters.
 
@@ -106,8 +106,8 @@ class Trainer:
             Make sure the specified model name corresponds to an actual model in your project's models directory.
         """
         self.model_name = modelname
-        self.DL_FRAMEWORK = DL_FRAMEWORK
-        module_name = f"models.{DL_FRAMEWORK}.models"
+        self.DL_FRAMEWORK = config.DL_FRAMEWORK
+        module_name = f"models.{config.DL_FRAMEWORK}.models"
         self.params = get_model_params(modelname)
 
         module = importlib.import_module(module_name)
@@ -118,15 +118,17 @@ class Trainer:
         print(f"Using model: {module_name}.{modelname}")
 
         # Get Data
-        self.dataset = dataset(augment=True, augmentation_threshold=augmentation_threshold, enableDropout=enableAugmentationDropout)
+        self.dataset = dataset(augment=True,
+                               augmentation_threshold=config.AUGMENTATION_THRESHOLD,
+                               enableDropout=config.ENABLE_AUGMENTATION_DROPOUT)
         self.train_loader, self.valid_loader, self.test_loader = create_data_loaders(
-            self.dataset, batch_size=BATCH_SIZE, dl_framework=DL_FRAMEWORK, num_workers=4)
+            self.dataset, batch_size=config.BATCH_SIZE, dl_framework=config.DL_FRAMEWORK, num_workers=4)
 
         batch = next(iter(self.train_loader))[0]
         self.model(batch)
 
-        self.patience = patience
-        self.best_val_metric = float('inf') if EARLY_STOP_MODE == "min" else float('-inf')
+        self.patience = config.EARLY_STOP_PATIENCE
+        self.best_val_metric = float('inf') if config.EARLY_STOP_MODE == "min" else float('-inf')
         self.patience_counter = 0
 
         now = datetime.now()
@@ -134,13 +136,13 @@ class Trainer:
         self.model_class = self.model.__class__.__name__
         self.train_start_time = now.strftime("%Y-%m-%d %H_%M")
 
-        self.log_dir = os.path.join(ROOT_PATH, RUNS_DIR, DL_FRAMEWORK,
+        self.log_dir = os.path.join(config.ROOT_PATH, config.RUNS_DIR, config.DL_FRAMEWORK,
                                                  self.model_class, self.train_start_time)
 
         self.writer = SummaryWriter(self.log_dir,
                                     filename_suffix="experiment")
-        self.metrics = LOG_METRICS
-        self.checkpoint_path = os.path.join(ROOT_PATH, CHECKPOINT_DIR, DL_FRAMEWORK, self.model_class, self.train_start_time)
+        self.metrics = config.LOG_METRICS
+        self.checkpoint_path = os.path.join(config.ROOT_PATH, config.CHECKPOINT_DIR, config.DL_FRAMEWORK, self.model_class, self.train_start_time)
 
         self.epoch = 0
         self.callbacks = []
@@ -154,13 +156,13 @@ class Trainer:
 
         #add also modelname as it is somehow not downloadable by tensorflow
         self.hyperparameters['MODELNAME'] = modelname
-        self.hyperparameters['FRAMEWORK'] = DL_FRAMEWORK
+        self.hyperparameters['FRAMEWORK'] = config.DL_FRAMEWORK
         self.hyperparameters['EXPERIMENT'] = self.train_start_time
-        self.hyperparameters['BATCH_SIZE'] = BATCH_SIZE
-        self.hyperparameters['N_EPOCHS'] = EPOCHS
-        self.hyperparameters['AUGMENTATION_THRESHOLD'] = augmentation_threshold
-        self.hyperparameters['EARLYSTOP_METRIC'] = EARLY_STOP_METRIC
-        self.hyperparameters['EARLYSTOP_PATIENCE'] = EARLY_STOP_PATIENCE
+        self.hyperparameters['BATCH_SIZE'] = config.BATCH_SIZE
+        self.hyperparameters['N_EPOCHS'] = config.EPOCHS
+        self.hyperparameters['AUGMENTATION_THRESHOLD'] = config.AUGMENTATION_THRESHOLD
+        self.hyperparameters['EARLYSTOP_METRIC'] = config.EARLY_STOP_METRIC
+        self.hyperparameters['EARLYSTOP_PATIENCE'] = config.EARLY_STOP_PATIENCE
 
 
 
@@ -173,7 +175,7 @@ class Trainer:
                             )
 
 
-    def train(self, n_epochs=EPOCHS):
+    def train(self, n_epochs=config.EPOCHS):
         """
         Trains the model for a specified number of epochs.
 
@@ -211,16 +213,16 @@ class Trainer:
             If you set the patience value too low in the constructor, the model might stop training prematurely.
         """
 
-        warnings.warn(f"Warning! Will only Train/Validate/Test for {LIMIT_EPOCHS} and {LIMIT_BATCHES} batches,"
-                      f"as FAST_DEV_RUN is set to {FAST_DEV_RUN}")
+        warnings.warn(f"Warning! Will only Train/Validate/Test for {config.LIMIT_EPOCHS} and {config.LIMIT_BATCHES} batches,"
+                      f"as FAST_DEV_RUN is set to {config.FAST_DEV_RUN}")
         phase = "Train"
-        for epoch in range(n_epochs if not FAST_DEV_RUN else LIMIT_EPOCHS):
-            print(f"Epoch {epoch + 1}/{n_epochs if not FAST_DEV_RUN else LIMIT_EPOCHS}", flush=True)
+        for epoch in range(n_epochs if not config.FAST_DEV_RUN else config.LIMIT_EPOCHS):
+            print(f"Epoch {epoch + 1}/{n_epochs if not config.FAST_DEV_RUN else config.LIMIT_EPOCHS}", flush=True)
             time.sleep(0.25)  # time to flush std out
 
             train_losses = []
             train_accuracies = []
-            phase_metrics = dict({x:[] for x in LOG_METRICS})
+            phase_metrics = dict({x:[] for x in config.LOG_METRICS})
 
             self.model.train_mode()
 
@@ -231,13 +233,13 @@ class Trainer:
 
             print(end='', flush=True)
             for i, batch in pbar:
-                if FAST_DEV_RUN & (i > LIMIT_BATCHES):
+                if config.FAST_DEV_RUN & (i > config.LIMIT_BATCHES):
                     break
                 loss, acc, labels, preds = self.model.training_step(batch)
 
                 self.model.optimize()
 
-                if DL_FRAMEWORK == "tensorflow":
+                if config.DL_FRAMEWORK == "tensorflow":
                     total_loss += loss.numpy()
                     total_acc += acc.numpy()
                 else:
@@ -256,7 +258,7 @@ class Trainer:
             print(end='', flush=True)
 
             # calculate average metrics for the phase
-            for log_metric in LOG_METRICS:
+            for log_metric in config.LOG_METRICS:
                 self.metric_dict[f'{log_metric}/{phase}'] = np.array(phase_metrics[log_metric]).mean()
             #
             #logging is done in the validation....
@@ -274,13 +276,13 @@ class Trainer:
             #Validation
             val_metrics = self.evaluate()
 
-            metric = val_metrics[f'{Metric[EARLY_STOP_METRIC.capitalize()].value}/Validation']
+            metric = val_metrics[f'{Metric[config.EARLY_STOP_METRIC.capitalize()].value}/Validation']
 
             # check if early_stop_criterion has improved
-            if EARLY_STOP_MODE == "min":
-                early_stop_criterion = metric - EARLY_STOP_TOLERENCE < self.best_val_metric
+            if config.EARLY_STOP_MODE == "min":
+                early_stop_criterion = metric - config.EARLY_STOP_TOLERENCE < self.best_val_metric
             else:
-                early_stop_criterion = metric + EARLY_STOP_TOLERENCE > self.best_val_metric
+                early_stop_criterion = metric + config.EARLY_STOP_TOLERENCE > self.best_val_metric
 
             # Check for early stopping
             if early_stop_criterion:
@@ -303,7 +305,7 @@ class Trainer:
 
             else:
                 self.patience_counter += 1
-                print(f'No improvement in {EARLY_STOP_METRIC} for {self.patience_counter} epoch(s)')
+                print(f'No improvement in {config.EARLY_STOP_METRIC} for {self.patience_counter} epoch(s)')
 
             if self.patience_counter >= self.patience:
                 print(f'Early stopping at epoch {epoch+1}')
@@ -317,7 +319,7 @@ class Trainer:
 
 
     def calculate_metrics(self, acc, labels, loss, phase_metrics, preds):
-        for log_metric in LOG_METRICS:
+        for log_metric in config.LOG_METRICS:
             if log_metric.lower() == "precision":
                 phase_metrics[log_metric].append(self.model.calculate_precision(preds, labels))
             elif log_metric.lower() == "recall":
@@ -353,7 +355,7 @@ class Trainer:
 
         valid_losses = []
         valid_accuracies = []
-        phase_metrics = dict({x: [] for x in LOG_METRICS})
+        phase_metrics = dict({x: [] for x in config.LOG_METRICS})
 
         pbar = tqdm(enumerate(self.valid_loader), total=len(self.valid_loader), desc=f"Validation progress")
 
@@ -365,7 +367,7 @@ class Trainer:
         for i, batch in pbar:
             loss, acc, labels, preds = self.model.validation_step(batch)
 
-            if DL_FRAMEWORK == "tensorflow":
+            if config.DL_FRAMEWORK == "tensorflow":
                 total_loss += loss.numpy()
                 total_acc += acc.numpy()
             else:
@@ -384,7 +386,7 @@ class Trainer:
         print(end='', flush=True)
 
         # calculate average metrics for the phase
-        for log_metric in LOG_METRICS:
+        for log_metric in config.LOG_METRICS:
             self.metric_dict[f'{log_metric}/{phase}'] = np.array(phase_metrics[log_metric]).mean()
         self.metric_dict['LearningRate'] = self.model.get_lr()
 
@@ -425,7 +427,7 @@ class Trainer:
         test_accuracies = []
         all_preds = []
         all_labels = []
-        phase_metrics = dict({x: [] for x in LOG_METRICS})
+        phase_metrics = dict({x: [] for x in config.LOG_METRICS})
         phase = "Test"
         for i, batch in tqdm(enumerate(self.test_loader), total=len(self.test_loader),
                              desc=f"Testing progress"):
@@ -440,7 +442,7 @@ class Trainer:
 
 
         # calculate average metrics for the phase
-        for log_metric in LOG_METRICS:
+        for log_metric in config.LOG_METRICS:
             self.metric_dict[f'{log_metric}/{phase}'] = np.array(phase_metrics[log_metric]).mean()
 
 
@@ -462,6 +464,17 @@ class Trainer:
 
 
     def write_classification_report(self,preds,labels):
+        """
+        Function to export classification report
+
+        Args:
+
+
+        :param preds: tensor
+        :type preds: tensor
+        :param labels: tensor
+        :return: None
+        """
         report = classification_report(labels, np.argmax(preds, axis=1),
                                        labels=list(trainer.dataset.target_dict.keys()),
                                        target_names=list(trainer.dataset.target_dict.values()))
@@ -493,9 +506,9 @@ class Trainer:
 
 if __name__ == '__main__':
     # Get Data
-    trainer = Trainer(modelname=MODELNAME,
-                      enableAugmentationDropout=True,
-                      augmentation_threshold=0.1)
+    trainer = Trainer(
+                      config=config,
+                      modelname=config.MODELNAME,)
     trainer.add_callback(dropout_callback)
     trainer.add_callback(augmentation_increase_callback)
     trainer.train()
