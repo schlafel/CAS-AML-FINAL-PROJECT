@@ -263,7 +263,7 @@ class Trainer:
                 train_accuracies.append(acc)
 
                 #calculate metrics and append to phase_metrics
-                phase_metrics = self.calculate_metrics(acc, labels, loss, phase_metrics, preds)
+                self.calculate_metrics(acc, labels, loss, phase_metrics, preds)
 
 
             print(end='', flush=True)
@@ -340,7 +340,7 @@ class Trainer:
                 phase_metrics[log_metric].append(acc)
             elif log_metric.lower() == "loss":
                 phase_metrics[log_metric].append(loss)
-        return phase_metrics
+
 
     def evaluate(self):
         """
@@ -388,7 +388,7 @@ class Trainer:
             valid_accuracies.append(acc)
 
             #calculate metrics and append to phase_metrics
-            phase_metrics = self.calculate_metrics(acc, labels, loss, phase_metrics, preds)
+            self.calculate_metrics(acc, labels, loss, phase_metrics, preds)
 
             pbar.set_postfix({'Loss': total_loss / (i + 1), 'Accuracy': total_acc / (i + 1)})
             print(end='', flush=True)
@@ -448,7 +448,7 @@ class Trainer:
             all_preds.append(preds)
             all_labels.append(batch[1])
             #calculate metrics and append to phase_metrics
-            phase_metrics = self.calculate_metrics(acc, labels, loss, phase_metrics, preds)
+            self.calculate_metrics(acc, labels, loss, phase_metrics, preds)
 
 
         # calculate average metrics for the phase

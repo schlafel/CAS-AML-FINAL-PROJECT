@@ -113,24 +113,28 @@ class BaseModel(nn.Module):
         #setup metrics
         self.accuracy = accuracy.Accuracy(
             task="multiclass",
-            num_classes=n_classes
+            num_classes=n_classes,
         )
         self.precision = Precision(
             task="multiclass",
-            num_classes=n_classes
+            num_classes=n_classes,
+
         )
 
         self.recall = Recall(
             task="multiclass",
-            num_classes=n_classes
+            num_classes=n_classes,
+
         )
         self.f1score = F1Score(
             task="multiclass",
-            num_classes=n_classes
+            num_classes=n_classes,
+
         )
         self.auroc = AUROC(
             task="multiclass",
-            num_classes=n_classes
+            num_classes=n_classes,
+
         )
 
         self.metrics = {"train": [], "val": [], "test": []}
@@ -336,7 +340,7 @@ class BaseModel(nn.Module):
 
             # del landmarks, labels
 
-        return loss.cpu().detach(), step_accuracy.cpu(), labels.cpu(), preds.cpu()
+        return loss.cpu().detach(), step_accuracy.cpu(), labels.cpu(), out.cpu()
 
     def optimize(self):
         """

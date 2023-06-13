@@ -38,11 +38,11 @@ def load_tf(dirname):
     dframes = {}
     mnames = ea.Tags()['scalars']
 
-
-
     for n in mnames:
         dframes[n] = pd.DataFrame(ea.Scalars(n), columns=["wall_time", "epoch", n.replace('val/', '')])
         dframes[n].drop("wall_time", axis=1, inplace=True)
+
+
     df_out = pd.concat([v for k, v in dframes.items()], axis=1)
 
     #get the hparams
@@ -53,6 +53,8 @@ def load_tf(dirname):
     #accumulate the hparams in dataframe as well
     for key,value in hparam_dict.items():
         df_out[key] = value
+    #drop duplicated epoch columns
+
     return df_out
 
 def plot_training_validation(data,
@@ -161,7 +163,7 @@ if __name__ == '__main__':
         os.path.join(ROOT_PATH,r"runs/pytorch/HybridModel/2023-06-09 23_26"),
     ]
 
-    ckpt_paths = [r'C:\Users\fs.GUNDP\Python\CAS-AML-FINAL-PROJECT\tmp\tb_logs\test0']
+    ckpt_paths = [r"C:\Users\fs.GUNDP\Python\CAS-AML-FINAL-PROJECT\runs\pytorch\YetAnotherTransformer\2023-06-13 09_36"]
     fig,ax = plot_trainingLossAccuracies(ckpt_paths)
 
     fig.savefig(os.path.join(ROOT_PATH,OUT_DIR,f"{save_name}.svg"))

@@ -272,7 +272,7 @@ class BaseModel(tf.keras.Model):
         if labels is not None:
             loss = self.criterion(labels, predictions)
 
-        preds = tf.argmax(predictions, axis=-1)
+        preds = tf.argmax(predictions, axis=-1)#not used...
         accuracy = self.calculate_accuracy(predictions, labels)
 
         return loss, accuracy, labels, predictions
