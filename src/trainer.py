@@ -134,8 +134,10 @@ class Trainer:
         self.model_class = self.model.__class__.__name__
         self.train_start_time = now.strftime("%Y-%m-%d %H_%M")
 
-        self.writer = SummaryWriter(os.path.join(ROOT_PATH, RUNS_DIR, DL_FRAMEWORK,
-                                                 self.model_class, self.train_start_time),
+        self.log_dir = os.path.join(ROOT_PATH, RUNS_DIR, DL_FRAMEWORK,
+                                                 self.model_class, self.train_start_time)
+
+        self.writer = SummaryWriter(self.log_dir,
                                     filename_suffix="experiment")
         self.metrics = LOG_METRICS
         self.checkpoint_path = os.path.join(ROOT_PATH, CHECKPOINT_DIR, DL_FRAMEWORK, self.model_class, self.train_start_time)
@@ -452,8 +454,20 @@ class Trainer:
         self.writer.close()
 
         print(f"Test/Accuracy: {self.metric_dict[f'Accuracy/{phase}']}")
+        preds = np.concatenate(all_preds)
+        targets = np.concatenate(all_labels)
 
-        return np.concatenate(all_preds), np.concatenate(all_labels)
+
+        return preds, targets
+
+
+    def write_classification_report(self,preds,labels):
+        report = classification_report(labels, np.argmax(preds, axis=1),
+                                       labels=list(trainer.dataset.target_dict.keys()),
+                                       target_names=list(trainer.dataset.target_dict.values()))
+        with open(os.path.join("TEST_classificationReport.txt"), "w") as infile:
+            infile.write(report)
+        print(report)
 
     def add_callback(self, callback):
         """
@@ -485,8 +499,5 @@ if __name__ == '__main__':
     trainer.add_callback(dropout_callback)
     trainer.add_callback(augmentation_increase_callback)
     trainer.train()
-    preds, labels = trainer.test()
-
-    report = classification_report(labels,np.argmax(preds,axis = 1),
-                                   labels=trainer.dataset.target_dict.values())
-
+    preds,labels = trainer.test()
+    trainer.write_classification_report(preds,labels)
