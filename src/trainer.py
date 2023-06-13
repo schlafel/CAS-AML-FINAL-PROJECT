@@ -61,8 +61,8 @@ class Trainer:
     epochs, performing validation and testing, implementing early stopping, and logging results. The module has been
     designed to be agnostic to the specific deep learning framework, enhancing its versatility across various projects.
     """
-    def __init__(self, config, modelname=config.MODELNAME, dataset=ASL_DATASET, patience=config.EARLY_STOP_PATIENCE,
-                 enableAugmentationDropout=True, augmentation_threshold=0.35,model_config = None):
+    def __init__(self, config, dataset=ASL_DATASET,
+                 model_config = None):
         """
         Initializes the Trainer class with the specified parameters.
 
@@ -77,11 +77,7 @@ class Trainer:
 
         Args:
             config (dict): The basic configuration (Train Configuration)
-            modelname (str): The name of the model to be used for training.
             dataset (Dataset): The dataset to be used.
-            patience (int): The number of epochs with no improvement after which training will be stopped.
-            enableAugmentationDropout (bool): If True, enable data augmentation dropout.
-            augmentation_threshold (float): The threshold for data augmentation.
             model_config (dict): preloaded model-config for hparam testing
 
         Functionality:
@@ -90,18 +86,10 @@ class Trainer:
 
         :param config: Configuration for Training.
         :type config: script
-        :param modelname: The name of the model for training.
-        :type modelname: str
         :param dataset: The dataset for training.
         :type dataset: Dataset
-        :param patience: The number of epochs with no improvement after which training will be stopped.
-        :type patience: int
-        :param enableAugmentationDropout: If True, enable data augmentation dropout.
-        :type enableAugmentationDropout: bool
-        :param augmentation_threshold: The threshold for data augmentation.
-        :type augmentation_threshold: float
         :param model_config: Loaded model configuration.
-        :type model_config: dict
+        :type model_config: any(dict,None)
 
         :rtype: None
 
@@ -112,30 +100,30 @@ class Trainer:
             Make sure the specified model name corresponds to an actual model in your project's models directory.
         """
         self.config = config
-        self.model_name = modelname
+        self.model_name = self.config.MODELNAME
         self.DL_FRAMEWORK = self.config.DL_FRAMEWORK
         module_name = f"models.{self.config.DL_FRAMEWORK}.models"
-        if isinstance(model_config,dict):
+        if model_config is not None:
             self.params = model_config
         else:
-            self.params = get_model_params(modelname)
+            self.params = get_model_params(self.config.MODELNAME)
 
         module = importlib.import_module(module_name)
-        Model = getattr(module, modelname)
+        Model = getattr(module, self.config.MODELNAME)
 
         # Get Model
         self.model = Model(**self.params)
-        print(f"Using model: {module_name}.{modelname}")
+        print(f"Using model: {module_name}.{self.config.MODELNAME}")
 
         # Get Data
-        asl_dataset = dataset(augment=True, augmentation_threshold=augmentation_threshold, enableDropout=enableAugmentationDropout)
+        asl_dataset = dataset(**self.params['data'])
         self.train_loader, self.valid_loader, self.test_loader = create_data_loaders(
             asl_dataset, batch_size=self.config.BATCH_SIZE, dl_framework=self.config.DL_FRAMEWORK, num_workers=4)
 
         batch = next(iter(self.train_loader))[0]
         self.model(batch)
 
-        self.patience = patience
+        self.patience = self.config.EARLY_STOP_PATIENCE
         self.best_metric = float('inf') if self.config.EARLY_STOP_MODE == "min" else float('-inf')
         self.patience_counter = 0
 
@@ -162,12 +150,12 @@ class Trainer:
             self.hyperparameters = {}
 
         #add also modelname as it is somehow not downloadable by tensorflow
-        self.hyperparameters['MODELNAME'] = modelname
+        self.hyperparameters['MODELNAME'] = self.config.MODELNAME
         self.hyperparameters['FRAMEWORK'] = self.config.DL_FRAMEWORK
         self.hyperparameters['EXPERIMENT'] = self.train_start_time
         self.hyperparameters['BATCH_SIZE'] = self.config.BATCH_SIZE
         self.hyperparameters['N_EPOCHS'] = self.config.EPOCHS
-        self.hyperparameters['AUGMENTATION_THRESHOLD'] = augmentation_threshold
+        self.hyperparameters['AUGMENTATION_THRESHOLD'] = self.params['data']['augmentation_threshold']
         self.hyperparameters['EARLYSTOP_METRIC'] = self.config.EARLY_STOP_METRIC
         self.hyperparameters['EARLYSTOP_PATIENCE'] = self.config.EARLY_STOP_PATIENCE
 
@@ -466,7 +454,7 @@ class Trainer:
                             epoch=self.epoch)
 
         print(flush=True)
-        # self.writer.close()
+        self.writer.close()
 
         print(f"Test/Accuracy: {self.metric_dict[f'Accuracy/{phase}']}")
 
@@ -496,10 +484,7 @@ class Trainer:
 
 if __name__ == '__main__':
     # Get Data
-    trainer = Trainer(config = config,
-                      modelname=config.MODELNAME,
-                      enableAugmentationDropout=False,
-                      augmentation_threshold=0.1)
+    trainer = Trainer(config = config,dataset=ASL_DATASET,model_config=None)
     # trainer.add_callback(dropout_callback)
     # trainer.add_callback(augmentation_increase_callback)
     trainer.train()

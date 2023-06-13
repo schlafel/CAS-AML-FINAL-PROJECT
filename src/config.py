@@ -175,11 +175,11 @@ LOG_METRICS = ['Accuracy','Loss','F1Score','Precision','Recall']
   Training/Validation/Testing will only be done on LIMIT_BATCHES and LIMIT_EPOCHS, if FAST_DEV_RUN is set to True
   
 """
-FAST_DEV_RUN = True
+FAST_DEV_RUN = False
 #: Number of batches to run (Only active if FAST_DEV_RUN is set to True)
 LIMIT_BATCHES = 3
 #: Number of Epochs to run (Only active if FAST_DEV_RUN is set to True)
-LIMIT_EPOCHS = 1
+LIMIT_EPOCHS = 5
 
 
 
