@@ -9,7 +9,7 @@ from config import DEVICE, N_CLASSES
 
 from tensorflow.keras.layers import MultiHeadAttention, LayerNormalization, Dense, Dropout, LayerNormalization, LSTM, Flatten
 from tensorflow.keras.models import Model
-import tensorflow_addons as tfa
+
 import os
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -42,16 +42,30 @@ class BaseModel(tf.keras.Model):
     .. warning::
         The 'call' function must be implemented in the subclass, else it will raise a NotImplementedError.
     """
-    def __init__(self, learning_rate):
+    DEFAULTS = dict(
+        criterion = dict(
+            name="CrossEntropyLoss",
+            logits = True
+        )
+    )
+    def __init__(self, **kwargs):
         super(BaseModel, self).__init__()
-        self.learning_rate = learning_rate
 
-        self.criterion = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False)
+        config_criterion = {**self.DEFAULTS,
+                            **(kwargs['criterion'] if 'criterion' in kwargs.keys() else {})}
+        self.loss_name = config_criterion['criterion']['name']
+
+        # self.learning_rate = learning_rate
+        if self.loss_name.upper() == "CROSSENTROPYLOSS":
+            self.criterion = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=config_criterion["criterion"]["logits"])
+        elif self.loss_name.upper() == "MeanSquaredError".upper():
+            self.criterion = tf.keras.losses.MeanSquaredError()
+
         self.accuracy = tf.keras.metrics.SparseCategoricalAccuracy()
         self.recall = tf.keras.metrics.Recall()
         self.precision = tf.keras.metrics.Precision()
-        self.f1score = tfa.metrics.F1Score(num_classes=N_CLASSES)
-        self.f1score = tf.keras.metrics.AUC()
+
+        self.auc = tf.keras.metrics.AUC()
 
 
 
@@ -87,7 +101,11 @@ class BaseModel(tf.keras.Model):
         :returns: The calculated accuracy.
         :rtype: float
         """
-        return self.f1score(y_true, tf.argmax(y_pred,axis = 1)).numpy()
+        precision = self.calculate_precision(y_pred, y_true)
+        recall = self.calculate_recall(y_pred, y_true)
+        f1_score = 2 * precision * recall / (precision + recall + 1e-8)
+        return f1_score
+
 
     def calculate_auc(self, y_pred, y_true):
         """
@@ -537,20 +555,22 @@ class LSTMClassifier(Model):
 
 
 class LSTMPredictor(BaseModel):
-    def __init__(self, **kwargs):
-        super().__init__(learning_rate=kwargs["hparams"]["learning_rate"])
 
-        self.learning_rate = kwargs["hparams"]["learning_rate"]
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
 
         # Instantiate the LSTM model
         self.model = LSTMClassifier(**kwargs["params"])
 
+
+        self.learning_rate = kwargs["hparams"]["learning_rate"]
         self.scheduler = tf.keras.optimizers.schedules.ExponentialDecay(
             initial_learning_rate=self.learning_rate,
             decay_steps=10000,
             decay_rate=kwargs["hparams"]["gamma"]
         )
-
         self.optimizer = tf.keras.optimizers.Adam(learning_rate=self.scheduler)
 
 

@@ -1,34 +1,28 @@
 models:
   TransformerPredictor:
-    d_model: 192
-    n_head: 8
-    dim_feedforward: 512
-    dropout: 0.001
-    layer_norm_eps: !!float 1e-6
-    norm_first: True
-    batch_first: True
-    num_layers: 3
-    num_classes: 250
-    learning_rate: 0.011
-    gamma: 0.9
-    augmentation_threshold: 0.35
-    tune:
-      n_head:
-        min: 4
-        max: 8
-        mode: choice
-      learning_rate:
-        min: 0.001
-        max: 0.01
-        mode: loguniform
-      gamma:
-        min: 0.9
-        max: 0.99
-        mode: lognormal
-      batch_size:
-        min: 64
-        max: 1024
-        mode: choice
+    params:
+      d_model: 192
+      n_head: 8
+      dim_feedforward: 512
+      dropout: 0.001
+      layer_norm_eps: !!float 1e-6
+      norm_first: True
+      batch_first: True
+      num_layers: 3
+      num_classes: 250
+      augmentation_threshold: 0.35
+    hparams:
+      learning_rate: 0.011
+      gamma: 0.9
+
+    optimizer:
+      name: Adam
+    criterion:
+      name: CrossEntropyLoss
+      logits: True
+
+
+
   LSTMPredictor:
     params:
       input_dim: 192
@@ -39,6 +33,11 @@ models:
     hparams:
       learning_rate: 0.001
       gamma: 0.9
+    optimizer:
+      name: Adam
+    criterion:
+        name: CrossEntropyLoss
+        logits: True
 
   HybridModel:
     transformer_params:
@@ -59,6 +58,12 @@ models:
     common_params:
       num_classes: 250
       learning_rate: 0.001
+    optimizer:
+      name: Adam
+    criterion:
+      name: CrossEntropyLoss
+      logits: True
+
   TransformerEnsemble:
     TransformerSequenceClassifier:
       d_model: 192
@@ -75,6 +80,12 @@ models:
       learning_rate: 0.011
       gamma: 0.9
       n_models: 5
+    optimizer:
+      name: Adam
+    criterion:
+      name: CrossEntropyLoss
+      logits: True
+
   HybridEnsembleModel:
     TransformerSequenceClassifier:
       d_model: 192
@@ -105,6 +116,11 @@ models:
       weights: null
       learning_rate: 0.001
       gamma: 0.95
+    optimizer:
+      name: Adam
+    criterion:
+        name: CrossEntropyLoss
+        logits: False
 
 
   YetAnotherTransformer:
@@ -122,6 +138,11 @@ models:
       num_classes: 250
       learning_rate: 0.001
       gamma: 0.9
+    optimizer:
+      name: Adam
+    criterion:
+      name: CrossEntropyLoss
+      logits: True
 
   YetAnotherEnsemble:
     YetAnotherTransformerClassifier:
@@ -138,4 +159,9 @@ models:
       learning_rate: 0.001
       gamma: 0.95
       n_models: 6
+    optimizer:
+      name: Adam
+    criterion:
+      name: CrossEntropyLoss
+      logits: True
 
