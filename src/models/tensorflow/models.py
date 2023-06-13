@@ -349,6 +349,7 @@ class TransformerEncoderLayer(tf.keras.layers.Layer):
         dim_feedforward (int): The dimensionality of the feedforward network model.
         dropout (float): The dropout value.
 
+
     :param d_model: The dimensionality of the input.
     :type d_model: int
     :param n_head: The number of heads in the multi-head attention.
@@ -357,6 +358,8 @@ class TransformerEncoderLayer(tf.keras.layers.Layer):
     :type dim_feedforward: int
     :param dropout: The dropout value.
     :type dropout: float
+    :param layer_norm: Layer-Norm Value
+    :type layer_norm: float
 
     :returns: None
     :rtype: None
@@ -425,7 +428,7 @@ class TransformerSequenceClassifier(Model):
     """
     DEFAULT_PARAMS = dict(
         d_model=192,
-        n_head=8,
+        nhead=8,
         dim_feedforward=512,
         dropout=0.1,
         num_layers=2,

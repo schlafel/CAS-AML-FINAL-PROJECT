@@ -74,10 +74,43 @@ class BaseModel(nn.Module):
         The 'forward' function must be implemented in the subclass, else it will raise a NotImplementedError.
 
     """
+    DEFAULTS_CRITERION = dict(
+        name="CrossEntropyLoss",
+        logits=True
+    )
 
-    def __init__(self, learning_rate, n_classes=N_CLASSES):
+    DEFAULTS_OPTIMIZER = dict(
+        name="Adam"
+    )
+
+    DEFAULTS_HPARAMS = dict(
+        learning_rate=0.001,
+        gamma = 0.9
+    )
+
+    def __init__(self, n_classes=N_CLASSES,**kwargs):
         super().__init__()
-        self.criterion = nn.CrossEntropyLoss()
+
+
+        config_criterion = {**self.DEFAULTS_CRITERION,
+                            **(kwargs['criterion'] if 'criterion' in kwargs.keys() else {})}
+        config_optimizer = {**self.DEFAULTS_OPTIMIZER,
+                            **(kwargs['optimizer'] if 'optimizer' in kwargs.keys() else {})}
+
+        config_hparams = {**self.DEFAULTS_HPARAMS,
+                            **(kwargs['hparams'] if 'hparams' in kwargs.keys() else {})}
+
+        self.BASE_CONFIG = dict(criterion=config_criterion,
+                                optimizer=config_optimizer,
+                                hparams = config_hparams)
+
+
+        if self.BASE_CONFIG['criterion']['name'].upper() == "CROSSENTROPYLOSS":
+            self.criterion = nn.CrossEntropyLoss()
+        elif self.BASE_CONFIG['criterion']['name'].upper() == "MeanSquaredError".upper():
+            self.criterion = nn.MSELoss()
+
+        #setup metrics
         self.accuracy = accuracy.Accuracy(
             task="multiclass",
             num_classes=n_classes
@@ -102,7 +135,9 @@ class BaseModel(nn.Module):
 
         self.metrics = {"train": [], "val": [], "test": []}
 
-        self.learning_rate = learning_rate
+        self.learning_rate = self.BASE_CONFIG["hparams"]['learning_rate']
+
+
         self.optimizer = None
         self.scheduler = None
 
@@ -392,8 +427,8 @@ class TransformerSequenceClassifier(nn.Module):
     forward(inputs)
         Performs a forward pass through the model.
     """
-    DEFAULTS = dict(
-        d_model=256,
+    DEFAULT_PARAMS = dict(
+        d_model=192,
         n_head=8,
         dim_feedforward=512,
         dropout=0.1,
@@ -402,37 +437,41 @@ class TransformerSequenceClassifier(nn.Module):
         batch_first=False,
         num_layers=2,
         num_classes=N_CLASSES,
-        learning_rate=0.001
+        learning_rate=0.001,
+        activation = "gelu"
     )
 
     def __init__(self, **kwargs):
         super().__init__()
 
         # Override defaults with passed-in values
-        self.settings = {**self.DEFAULTS, **kwargs}
+        settings_model = {**self.DEFAULT_PARAMS,
+                          **(kwargs['params'] if 'params' in kwargs.keys() else {})}
+
+        self.settings = dict(params = settings_model)
 
         # Transformer layers
         self.transformer = nn.TransformerEncoder(
             nn.TransformerEncoderLayer(
-                d_model=self.settings['d_model'],
-                nhead=self.settings['n_head'],
-                dim_feedforward=self.settings['dim_feedforward'],
-                dropout=self.settings['dropout'],
-                layer_norm_eps=self.settings['layer_norm_eps'],
-                norm_first=self.settings['norm_first'],
-                batch_first=self.settings['batch_first'],
-                activation='gelu'
+                d_model=self.settings['params']['d_model'],
+                nhead=self.settings['params']['n_head'],
+                dim_feedforward=self.settings['params']['dim_feedforward'],
+                dropout=self.settings['params']['dropout'],
+                layer_norm_eps=self.settings['params']['layer_norm_eps'],
+                norm_first=self.settings['params']['norm_first'],
+                batch_first=self.settings['params']['batch_first'],
+                activation=self.settings['params']['activation']
             ),
-            num_layers=self.settings['num_layers'],
-            norm=nn.LayerNorm(self.settings['d_model'])
+            num_layers=self.settings['params']['num_layers'],
+            norm=nn.LayerNorm(self.settings['params']['d_model'])
         ).to(DEVICE)
 
         # Output layer
-        self.output_layer = nn.Linear(self.settings['d_model'], self.settings['num_classes'])
+        self.output_layer = nn.Linear(self.settings['params']['d_model'], self.settings['params']['num_classes'])
 
     @property
     def batch_first(self):
-        return self.settings['batch_first']
+        return self.settings['params']['batch_first']
 
     def forward(self, inputs):
         """Forward pass through the model"""
@@ -484,15 +523,19 @@ class TransformerPredictor(BaseModel):
     """
 
     def __init__(self, **kwargs):
-        super().__init__(learning_rate=kwargs["learning_rate"], n_classes=kwargs["num_classes"])
+        super().__init__(n_classes=kwargs['params']["num_classes"],**kwargs)
 
-        self.learning_rate = kwargs["learning_rate"]
+        # self.learning_rate = kwargs["learning_rate"]
 
         # Instantiate the Transformer model
         self.model = TransformerSequenceClassifier(**kwargs)
 
+
+        #Define Optimizers
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
-        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=kwargs["gamma"])
+        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer,
+                                                                gamma=self.BASE_CONFIG["hparams"]['gamma'])
+
 
         self.to(DEVICE)
         ##self.save_hyperparameters() ## TODO

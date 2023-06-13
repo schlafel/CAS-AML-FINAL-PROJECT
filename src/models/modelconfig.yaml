@@ -13,7 +13,6 @@ models:
     hparams:
       learning_rate: 0.011
       gamma: 0.9
-
     optimizer:
       name: Adam
     criterion:
