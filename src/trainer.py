@@ -54,6 +54,7 @@ from callbacks import dropout_callback, augmentation_increase_callback
 import yaml
 from metrics import Metric
 
+from sklearn.metrics import classification_report
 class Trainer:
     """
     A trainer class which acts as a control hub for the model lifecycle, including initial setup, executing training
@@ -117,9 +118,9 @@ class Trainer:
         print(f"Using model: {module_name}.{modelname}")
 
         # Get Data
-        asl_dataset = dataset(augment=True, augmentation_threshold=augmentation_threshold, enableDropout=enableAugmentationDropout)
+        self.dataset = dataset(augment=True, augmentation_threshold=augmentation_threshold, enableDropout=enableAugmentationDropout)
         self.train_loader, self.valid_loader, self.test_loader = create_data_loaders(
-            asl_dataset, batch_size=BATCH_SIZE, dl_framework=DL_FRAMEWORK, num_workers=4)
+            self.dataset, batch_size=BATCH_SIZE, dl_framework=DL_FRAMEWORK, num_workers=4)
 
         batch = next(iter(self.train_loader))[0]
         self.model(batch)
@@ -452,7 +453,7 @@ class Trainer:
 
         print(f"Test/Accuracy: {self.metric_dict[f'Accuracy/{phase}']}")
 
-        return all_preds, all_labels
+        return np.concatenate(all_preds), np.concatenate(all_labels)
 
     def add_callback(self, callback):
         """
@@ -484,5 +485,8 @@ if __name__ == '__main__':
     trainer.add_callback(dropout_callback)
     trainer.add_callback(augmentation_increase_callback)
     trainer.train()
-    trainer.test()
+    preds, labels = trainer.test()
+
+    report = classification_report(labels,np.argmax(preds,axis = 1),
+                                   labels=trainer.dataset.target_dict.values())
 

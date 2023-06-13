@@ -117,6 +117,10 @@ class ASL_DATASET:
         self.target = self.df_train['target'].values
         self.size = self.df_train['size'].values
 
+        #create target_dict for conversion
+        df = self.df_train[['target','sign']].drop_duplicates().sort_values(by="target")
+        self.target_dict = dict(zip(df['target'],df["sign"]))
+
     # Get the length of the dataset
     def __len__(self):
         """
