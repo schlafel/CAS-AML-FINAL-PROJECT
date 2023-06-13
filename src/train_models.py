@@ -7,7 +7,7 @@ if __name__ == '__main__':
 
     for DL_FRAMEWORK in ['pytorch', 'tensorflow']:
         for MODELNAME in ['YetAnotherTransformer','TransformerPredictor',
-                          'LSTMPredictor','HybridModel','TransformerEnsemble']:
+                          'LSTMPredictor','TransformerEnsemble']:
             config.MODELNAME = MODELNAME
             config.DL_FRAMEWORK = DL_FRAMEWORK
 

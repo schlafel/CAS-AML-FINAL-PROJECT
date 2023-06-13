@@ -16,6 +16,8 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
 
+from sklearn.metrics import precision_score,recall_score,f1_score,roc_auc_score
+
 
 class BaseModel(tf.keras.Model):
     """
@@ -23,9 +25,9 @@ class BaseModel(tf.keras.Model):
 
     Functionality:
     #. The class initializes with a given learning rate.
-    #. It sets up the loss criterion, accuracy metric, and default states for optimizer and scheduler.
+    #. It sets up the loss criterion, accuracy_pt metric, and default states for optimizer and scheduler.
     #. It defines an abstract method 'call' which should be implemented in the subclass.
-    #. It also defines various utility functions like calculating accuracy, training, validation and testing steps, scheduler stepping, and model checkpointing.
+    #. It also defines various utility functions like calculating accuracy_pt, training, validation and testing steps, scheduler stepping, and model checkpointing.
 
     Args:
         learning_rate (float): The initial learning rate for optimizer.
@@ -86,10 +88,9 @@ class BaseModel(tf.keras.Model):
             self.criterion = tf.keras.losses.MeanSquaredError()
 
         self.accuracy = tf.keras.metrics.SparseCategoricalAccuracy()
-        self.recall = tf.keras.metrics.Recall()
-        self.precision = tf.keras.metrics.Precision()
-
-        self.auc = tf.keras.metrics.AUC()
+        # self.recall = tf.keras.metrics.Recall()
+        # self.precision = tf.keras.metrics.Precision()
+        # self.auc = tf.keras.metrics.AUC()
 
         self.scheduler = tf.keras.optimizers.schedules.ExponentialDecay(
             initial_learning_rate=self.learning_rate,
@@ -109,14 +110,14 @@ class BaseModel(tf.keras.Model):
 
     def calculate_accuracy(self, y_pred, y_true):
         """
-        Calculates the accuracy of the model's prediction.
+        Calculates the accuracy_pt of the model's prediction.
 
         :param y_pred: The predicted output from the model.
         :type y_pred: Tensor
         :param y_true: The ground truth or actual labels.
         :type y_true: Tensor
 
-        :returns: The calculated accuracy.
+        :returns: The calculated accuracy_pt.
         :rtype: float
         """
         return self.accuracy(y_true, y_pred)
@@ -130,13 +131,11 @@ class BaseModel(tf.keras.Model):
         :param y_true: The ground truth or actual labels.
         :type y_true: Tensor
 
-        :returns: The calculated accuracy.
+        :returns: The calculated accuracy_pt.
         :rtype: float
         """
-        precision = self.calculate_precision(y_pred, y_true)
-        recall = self.calculate_recall(y_pred, y_true)
-        f1_score = 2 * precision * recall / (precision + recall + 1e-8)
-        return f1_score
+
+        return f1_score(y_true,tf.argmax(y_pred,axis=1),average = "macro")
 
     def calculate_auc(self, y_pred, y_true):
         """
@@ -147,10 +146,10 @@ class BaseModel(tf.keras.Model):
         :param y_true: The ground truth or actual labels.
         :type y_true: Tensor
 
-        :returns: The calculated accuracy.
+        :returns: The calculated accuracy_pt.
         :rtype: float
         """
-        return self.auc(y_true, tf.argmax(y_pred, axis=1)).numpy()
+        return roc_auc_score(y_true, tf.argmax(y_pred, axis=1),average="macro")
 
     def calculate_recall(self, y_pred, y_true):
         """
@@ -161,10 +160,10 @@ class BaseModel(tf.keras.Model):
         :param y_true: The ground truth or actual labels.
         :type y_true: Tensor
 
-        :returns: The calculated accuracy.
+        :returns: The calculated recall.
         :rtype: float
         """
-        return self.recall(y_true, tf.argmax(y_pred, axis=1)).numpy()
+        return recall_score(y_true, tf.argmax(y_pred, axis=1),average="macro")
 
     def calculate_precision(self, y_pred, y_true):
         """
@@ -175,10 +174,10 @@ class BaseModel(tf.keras.Model):
         :param y_true: The ground truth or actual labels.
         :type y_true: Tensor
 
-        :returns: The calculated accuracy.
+        :returns: The calculated accuracy_pt.
         :rtype: float
         """
-        return self.precision(y_true, tf.argmax(y_pred, axis=1)).numpy()
+        return  precision_score(y_true,tf.argmax(y_pred,axis=1),average = "macro")
 
     def call(self, inputs, training=False):
         """
@@ -204,7 +203,7 @@ class BaseModel(tf.keras.Model):
         :param batch: A tuple containing input data and labels.
         :type batch: tuple
 
-        :returns: The calculated loss and accuracy, labels and predictions
+        :returns: The calculated loss and accuracy_pt, labels and predictions
         :rtype: tuple
         """
         landmarks, labels = batch
@@ -222,7 +221,7 @@ class BaseModel(tf.keras.Model):
         gradients = tape.gradient(loss, self.trainable_variables)
         self.optimizer.apply_gradients(zip(gradients, self.trainable_variables))
 
-        # Calculate accuracy
+        # Calculate accuracy_pt
         accuracy = self.calculate_accuracy(predictions, labels)
 
         # del landmarks, labels
@@ -237,7 +236,7 @@ class BaseModel(tf.keras.Model):
         :param batch: A tuple containing input data and labels.
         :type batch: tuple
 
-        :returns: The calculated loss and accuracy.
+        :returns: The calculated loss and accuracy_pt.
         :rtype: tuple
         """
         landmarks, labels = batch
@@ -260,7 +259,7 @@ class BaseModel(tf.keras.Model):
         :param batch: A tuple containing input data and labels.
         :type batch: tuple
 
-        :returns: The calculated loss, accuracy, and model predictions.
+        :returns: The calculated loss, accuracy_pt, and model predictions.
         :rtype: tuple
         """
 

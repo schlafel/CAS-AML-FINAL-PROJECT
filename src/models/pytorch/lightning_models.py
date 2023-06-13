@@ -56,7 +56,7 @@ class LightningBaseModel(pl.LightningModule):
         return {"loss": loss, "train_accuracy": step_accuracy}
 
     def on_train_epoch_end(self) -> None:
-        # get average training accuracy
+        # get average training accuracy_pt
         avg_loss = torch.stack([x['train_loss'] for x in self.train_step_outputs]).mean()
 
         train_acc = torch.stack([x['train_accuracy'] for x in self.train_step_outputs]).mean()

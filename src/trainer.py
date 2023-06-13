@@ -157,7 +157,7 @@ class Trainer:
 
         #Hyperparameter stuff
         if 'hparams' in self.params.keys():
-            self.hyperparameters = self.params['hparams']
+            self.hyperparameters = self.params['hparams'].copy()
         else: #infer them
             self.hyperparameters = {}
 
@@ -350,14 +350,14 @@ class Trainer:
         Evaluates the model on the validation set.
 
         This method sets the model to evaluation mode and loops over the validation dataset, computing the loss and
-        accuracy for each batch. It then averages these metrics and logs them. This process provides an unbiased
+        accuracy_pt for each batch. It then averages these metrics and logs them. This process provides an unbiased
         estimate of the model's performance on new data during training.
 
         Functionality:
             It manages the evaluation of the model on the validation set, handling batch-wise loss computation and
-            accuracy assessment.
+            accuracy_pt assessment.
 
-        :returns: Average validation loss and accuracy
+        :returns: Average validation loss and accuracy_pt
         :rtype: Tuple[float, float]
 
         .. warning::
@@ -419,11 +419,11 @@ class Trainer:
         Tests the model on the test set.
 
         This method loads the best saved model, sets it to evaluation mode, and then loops over the test dataset,
-        computing the loss, accuracy, and predictions for each batch. It then averages the loss and accuracy and logs
+        computing the loss, accuracy_pt, and predictions for each batch. It then averages the loss and accuracy_pt and logs
         them. It also collects all the model's predictions and their corresponding labels.
 
         Functionality:
-            It manages the testing of the model on the test set, handling batch-wise loss computation, accuracy
+            It manages the testing of the model on the test set, handling batch-wise loss computation, accuracy_pt
             assessment, and prediction generation.
 
         :returns: List of all predictions and their corresponding labels

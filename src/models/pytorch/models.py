@@ -51,9 +51,9 @@ class BaseModel(nn.Module):
 
     Functionality:
     #. The class initializes with a given learning rate and number of classes.
-    #. It sets up the loss criterion, accuracy metric, and default states for optimizer and scheduler.
+    #. It sets up the loss criterion, accuracy_pt metric, and default states for optimizer and scheduler.
     #. It defines an abstract method 'forward' which should be implemented in the subclass.
-    #. It also defines various utility functions like calculating accuracy, training, validation and testing steps, scheduler stepping, and model checkpointing.
+    #. It also defines various utility functions like calculating accuracy_pt, training, validation and testing steps, scheduler stepping, and model checkpointing.
 
     Args:
         learning_rate (float): The initial learning rate for optimizer.
@@ -118,22 +118,25 @@ class BaseModel(nn.Module):
         self.precision = Precision(
             task="multiclass",
             num_classes=n_classes,
-
+            average="macro"
         )
 
         self.recall = Recall(
             task="multiclass",
             num_classes=n_classes,
+            average="macro"
 
         )
         self.f1score = F1Score(
             task="multiclass",
             num_classes=n_classes,
+            average="macro"
 
         )
         self.auroc = AUROC(
             task="multiclass",
             num_classes=n_classes,
+            average="macro"
 
         )
 
@@ -145,16 +148,18 @@ class BaseModel(nn.Module):
         self.optimizer = None
         self.scheduler = None
 
+        self.to(DEVICE)
+
     def calculate_accuracy(self, y_hat, y):
         """
-        Calculates the accuracy of the model's prediction.
+        Calculates the accuracy_pt of the model's prediction.
 
         :param y_hat: The predicted output from the model.
         :type y_hat: Tensor
         :param y: The ground truth or actual labels.
         :type y: Tensor
 
-        :returns: The calculated accuracy.
+        :returns: The calculated accuracy_pt.
         :rtype: Tensor
 
         """
@@ -180,7 +185,7 @@ class BaseModel(nn.Module):
         # Damn Mac https://github.com/pytorch/pytorch/issues/92311
         preds = torch.argmax(y_hat.cpu(), dim=1)
         targets = y.view(-1).cpu()
-        rec = self.recall(preds, targets)
+        rec = self.recall.cpu()(preds, targets)
         return rec.cpu().numpy()
 
     def calculate_auc(self, y_hat, y):
@@ -199,26 +204,26 @@ class BaseModel(nn.Module):
         # Damn Mac https://github.com/pytorch/pytorch/issues/92311
         preds = torch.argmax(y_hat.cpu(), dim=1)
         targets = y.view(-1).cpu()
-        auc = self.auroc(preds, targets)
+        auc = self.auroc.cpu()(preds, targets)
         return auc.cpu().numpy()
 
     def calculate_precision(self, y_hat, y):
         """
-        Calculates the precision of the model's prediction.
+        Calculates the precision_pt of the model's prediction.
 
         :param y_hat: The predicted output from the model.
         :type y_hat: Tensor
         :param y: The ground truth or actual labels.
         :type y: Tensor
 
-        :returns: The calculated precision.
+        :returns: The calculated precision_pt.
         :rtype: Tensor
 
         """
         # Damn Mac https://github.com/pytorch/pytorch/issues/92311
         preds = torch.argmax(y_hat.cpu(), dim=1)
         targets = y.view(-1).cpu()
-        prec = self.precision(preds, targets)
+        prec = self.precision.cpu()(preds, targets)
         return prec.cpu().numpy()
 
     def calculate_f1score(self, y_hat, y):
@@ -236,8 +241,8 @@ class BaseModel(nn.Module):
         """
         # Damn Mac https://github.com/pytorch/pytorch/issues/92311
         preds = torch.argmax(y_hat.cpu(), dim=1)
-        targets = y.view(-1).cpu()
-        f1 = self.f1score(preds, targets)
+        targets = y.cpu().view(-1)
+        f1 =self.f1score.cpu()(preds, targets)
         return f1.cpu().numpy()
 
     def forward(self, x):
@@ -262,7 +267,7 @@ class BaseModel(nn.Module):
         :param batch: A tuple containing input data and labels.
         :type batch: tuple
 
-        :returns: The calculated loss and accuracy, labels and predictions
+        :returns: The calculated loss and accuracy_pt, labels and predictions
         :rtype: tuple
 
         """
@@ -290,7 +295,7 @@ class BaseModel(nn.Module):
         :param batch: A tuple containing input data and labels.
         :type batch: tuple
 
-        :returns: The calculated loss and accuracy, labels and predictions
+        :returns: The calculated loss and accuracy_pt, labels and predictions
         :rtype: tuple
 
         """
@@ -319,7 +324,7 @@ class BaseModel(nn.Module):
         :param batch: A tuple containing input data and labels.
         :type batch: tuple
 
-        :returns: The calculated loss, accuracy, labels, and model predictions.
+        :returns: The calculated loss, accuracy_pt, labels, and model predictions.
         :rtype: tuple
 
         """
