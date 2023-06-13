@@ -708,15 +708,16 @@ class HybridModel(BaseModel):
         common_params = kwargs['common_params']
         transformer_kwargs = kwargs['transformer_params']
         lstm_kwargs = kwargs['lstm_params']
+        hparams = kwargs['hparams']
 
-        super().__init__(learning_rate=common_params["learning_rate"], n_classes=common_params["num_classes"])
+        super().__init__(**kwargs)
 
         self.lstm = LSTMClassifier(**lstm_kwargs).to(DEVICE)
         self.transformer = TransformerSequenceClassifier(**transformer_kwargs).to(DEVICE)
         self.fc = nn.Linear(common_params["num_classes"] * 2, common_params["num_classes"]).to(DEVICE)
 
-        self.optimizer = torch.optim.Adam(self.parameters(), lr=common_params["learning_rate"])
-        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.9)
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=hparams["learning_rate"])
+        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=hparams['gamma'])
 
         self.to(DEVICE)
 
@@ -766,11 +767,12 @@ class TransformerEnsemble(BaseModel):
     def __init__(self, **kwargs):
         common_params = kwargs['common_params']
         transformer_params = kwargs['TransformerSequenceClassifier']
+        hparams = kwargs['hparams']
 
         n_models = common_params["n_models"]
-        super().__init__(learning_rate=common_params["learning_rate"], n_classes=common_params["num_classes"])
+        super().__init__(learning_rate=hparams["learning_rate"], n_classes=common_params["num_classes"])
 
-        self.learning_rate = common_params["learning_rate"]
+        self.learning_rate = hparams["learning_rate"]
 
         # Ensemble
         self.models = nn.ModuleList([TransformerSequenceClassifier(num_layers=2 + i,
@@ -780,7 +782,7 @@ class TransformerEnsemble(BaseModel):
         self.fc = nn.Linear(common_params["num_classes"] * n_models, common_params["num_classes"]).to(DEVICE)
 
         self.optimizer = torch.optim.Adam(self.models.parameters(), lr=self.learning_rate)
-        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=common_params["gamma"])
+        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=hparams["gamma"])
 
         self.to(DEVICE)
         ##self.save_hyperparameters() ## TODO
@@ -828,11 +830,12 @@ class HybridEnsembleModel(BaseModel):
         common_params = kwargs['common_params']
         transformer_params = kwargs['TransformerSequenceClassifier']
         lstm_kwargs = kwargs['lstm_params']
+        hparams = kwargs['hparams']
 
         n_models = common_params["n_models"]
-        super().__init__(learning_rate=common_params["learning_rate"], n_classes=common_params["num_classes"])
+        super().__init__(learning_rate=hparams["learning_rate"], n_classes=common_params["num_classes"])
 
-        self.learning_rate = common_params["learning_rate"]
+        self.learning_rate = hparams["learning_rate"]
 
         # Ensemble
         self.lstms = nn.ModuleList([LSTMClassifier(**lstm_kwargs).to(DEVICE) for i, _ in
@@ -844,8 +847,8 @@ class HybridEnsembleModel(BaseModel):
 
         self.fc = nn.Linear(common_params["num_classes"] * (n_models * 2), common_params["num_classes"]).to(DEVICE)
 
-        self.optimizer = torch.optim.Adam(self.parameters(), lr=common_params["learning_rate"])
-        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.95)
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=hparams["learning_rate"])
+        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=hparams['gamma'])
 
         self.to(DEVICE)
 
@@ -1210,16 +1213,17 @@ class YetAnotherTransformer(BaseModel):
     def __init__(self, **kwargs):
         common_params = kwargs['common_params']
         transformer_params = kwargs['YetAnotherTransformerClassifier']
+        hparams = kwargs['hparams']
 
-        super().__init__(learning_rate=common_params["learning_rate"], n_classes=common_params["num_classes"])
+        super().__init__(learning_rate=hparams["learning_rate"], n_classes=common_params["num_classes"])
 
-        self.learning_rate = common_params["learning_rate"]
+        self.learning_rate = hparams["learning_rate"]
 
         # Instantiate the Transformer model
         self.model = YetAnotherTransformerClassifier(**transformer_params)
 
-        self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.learning_rate, weight_decay=1e-4)
-        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=common_params["gamma"])
+        self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.learning_rate, weight_decay=hparams['weight_decay'])
+        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma = hparams['gamma'])
 
         self.to(DEVICE)
 
@@ -1249,11 +1253,12 @@ class YetAnotherEnsemble(BaseModel):
     def __init__(self, **kwargs):
         common_params = kwargs['common_params']
         transformer_params = kwargs['YetAnotherTransformerClassifier']
+        hparams = kwargs['hparams']
 
         n_models = common_params["n_models"]
-        super().__init__(learning_rate=common_params["learning_rate"], n_classes=common_params["num_classes"])
+        super().__init__(learning_rate=hparams["learning_rate"], n_classes=common_params["num_classes"])
 
-        self.learning_rate = common_params["learning_rate"]
+        self.learning_rate = hparams["learning_rate"]
 
         # Ensemble
         self.models = nn.ModuleList([YetAnotherTransformerClassifier(num_layers=2 + i,
@@ -1262,8 +1267,8 @@ class YetAnotherEnsemble(BaseModel):
 
         self.fc = nn.Linear(common_params["num_classes"] * n_models, common_params["num_classes"]).to(DEVICE)
 
-        self.optimizer = torch.optim.AdamW(self.models.parameters(), lr=self.learning_rate, weight_decay=1e-4)
-        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=common_params["gamma"])
+        self.optimizer = torch.optim.AdamW(self.models.parameters(), lr=self.learning_rate, weight_decay=hparams["weight_decay"])
+        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=hparams["gamma"])
 
         self.to(DEVICE)
 

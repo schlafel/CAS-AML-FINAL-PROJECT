@@ -46,14 +46,15 @@ models:
 
   HybridModel:
     transformer_params:
-      d_model: 192
-      n_head: 8
-      dim_feedforward: 512
-      dropout: 0.001
-      layer_norm_eps: !!float 1e-5
-      norm_first: true
-      batch_first: true
-      num_layers: 4
+      params:
+        d_model: 192
+        n_head: 8
+        dim_feedforward: 512
+        dropout: 0.001
+        layer_norm_eps: !!float 1e-5
+        norm_first: true
+        batch_first: true
+        num_layers: 4
     lstm_params:
       params:
         input_dim: 192
@@ -72,22 +73,25 @@ models:
       augment: true
       enableDropout: true
       augmentation_threshold: 0.35
+    hparams:
+      learning_rate: 0.001
+      gamma: 0.9
+
 
   TransformerEnsemble:
     TransformerSequenceClassifier:
-      d_model: 192
-      n_head: 8
-      dim_feedforward: 2048
-      dropout: 0.01
-      layer_norm_eps: !!float 1e-5
-      norm_first: true
-      batch_first: true
-      num_classes: 250
-      learning_rate: 0.0011
+      params:
+        d_model: 192
+        n_head: 8
+        dim_feedforward: 2048
+        dropout: 0.01
+        layer_norm_eps: !!float 1e-5
+        norm_first: true
+        batch_first: true
+        num_classes: 250
+        learning_rate: 0.0011
     common_params:
       num_classes: 250
-      learning_rate: 0.011
-      gamma: 0.9
       n_models: 5
     optimizer:
       name: Adam
@@ -98,18 +102,22 @@ models:
       augment: true
       enableDropout: true
       augmentation_threshold: 0.35
+    hparams:
+      learning_rate: 0.001
+      gamma: 0.9
 
   HybridEnsembleModel:
     TransformerSequenceClassifier:
-      d_model: 192
-      n_head: 8
-      dim_feedforward: 2048
-      dropout: 0.01
-      layer_norm_eps: !!float 1e-5
-      norm_first: true
-      batch_first: true
-      num_classes: 250
-      learning_rate: 0.00106
+      params:
+        d_model: 192
+        n_head: 8
+        dim_feedforward: 2048
+        dropout: 0.01
+        layer_norm_eps: !!float 1e-5
+        norm_first: true
+        batch_first: true
+        num_classes: 250
+        learning_rate: 0.00106
     lstm_params:
       params:
         input_dim: 192
@@ -118,12 +126,14 @@ models:
         dropout: 0.05
     common_params:
       num_classes: 250
-      learning_rate: 0.001
       n_models: 4
     data:
       augment: true
       enableDropout: true
       augmentation_threshold: 0.35
+    hparams:
+      learning_rate: 0.001
+      gamma: 0.95
 
   CVTransferLearningModel:
     params:
@@ -146,19 +156,17 @@ models:
 
   YetAnotherTransformer:
     YetAnotherTransformerClassifier:
-      learning_rate: 0.01
-      d_model: 192
-      embed_dim: 32
-      n_head: 8
-      expansion_factor: 4
-      drop_rate: 0.0001
-      attn_dropout: 0.0001
-      num_layers: 2
-      num_classes: 250
+      params:
+        d_model: 192
+        embed_dim: 32
+        n_head: 8
+        expansion_factor: 4
+        drop_rate: 0.0001
+        attn_dropout: 0.0001
+        num_layers: 2
+        num_classes: 250
     common_params:
       num_classes: 250
-      learning_rate: 0.001
-      gamma: 0.9
     optimizer:
       name: Adam
     criterion:
@@ -168,17 +176,22 @@ models:
       augment: true
       enableDropout: true
       augmentation_threshold: 0.35
+    hparams:
+      learning_rate: 0.01
+      gamma: 0.9
+      weight_decay: !!float 1e-4
+
 
   YetAnotherEnsemble:
     YetAnotherTransformerClassifier:
-      learning_rate: 0.01
-      d_model: 192
-      embed_dim: 64
-      n_head: 8
-      expansion_factor: 4
-      drop_rate: 0.0001
-      attn_dropout: 0.001
-      num_classes: 250
+      params:
+        d_model: 192
+        embed_dim: 64
+        n_head: 8
+        expansion_factor: 4
+        drop_rate: 0.0001
+        attn_dropout: 0.001
+        num_classes: 250
     common_params:
       num_classes: 250
       learning_rate: 0.001
@@ -193,5 +206,10 @@ models:
       augment: true
       enableDropout: true
       augmentation_threshold: 0.35
+    hparams:
+      learning_rate: 0.01
+      gamma: 0.9
+      weight_decay: !!float 1e-4
+
 
 
