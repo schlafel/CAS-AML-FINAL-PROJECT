@@ -336,7 +336,7 @@ class BaseModel(nn.Module):
 
             # del landmarks, labels
 
-        return loss.cpu().detach(), step_accuracy.cpu(), labels.cpu, preds.cpu()
+        return loss.cpu().detach(), step_accuracy.cpu(), labels.cpu(), preds.cpu()
 
     def optimize(self):
         """

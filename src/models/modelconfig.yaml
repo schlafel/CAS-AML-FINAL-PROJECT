@@ -20,7 +20,6 @@ models:
       logits: True
 
 
-
   LSTMPredictor:
     params:
       input_dim: 192
