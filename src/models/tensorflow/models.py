@@ -7,7 +7,8 @@ sys.path.insert(0, "./..")
 
 from config import DEVICE, N_CLASSES
 
-from tensorflow.keras.layers import MultiHeadAttention, LayerNormalization, Dense, Dropout, LayerNormalization, LSTM, Flatten
+from tensorflow.keras.layers import MultiHeadAttention, LayerNormalization, Dense, Dropout, LayerNormalization, LSTM, \
+    Flatten
 from tensorflow.keras.models import Model
 
 import os
@@ -42,22 +43,45 @@ class BaseModel(tf.keras.Model):
     .. warning::
         The 'call' function must be implemented in the subclass, else it will raise a NotImplementedError.
     """
-    DEFAULTS = dict(
-        criterion = dict(
-            name="CrossEntropyLoss",
-            logits = True
-        )
+    DEFAULTS_CRITERION = dict(
+        name="CrossEntropyLoss",
+        logits=True
     )
+
+    DEFAULTS_OPTIMIZER = dict(
+        name="Adam"
+    )
+
+    DEFAULTS_HPARAMS = dict(
+        learning_rate=0.001,
+        gamma = 0.9
+    )
+
+
+
     def __init__(self, **kwargs):
         super(BaseModel, self).__init__()
 
-        config_criterion = {**self.DEFAULTS,
+        config_criterion = {**self.DEFAULTS_CRITERION,
                             **(kwargs['criterion'] if 'criterion' in kwargs.keys() else {})}
-        self.loss_name = config_criterion['criterion']['name']
+        config_optimizer = {**self.DEFAULTS_OPTIMIZER,
+                            **(kwargs['optimizer'] if 'optimizer' in kwargs.keys() else {})}
+
+        config_hparams = {**self.DEFAULTS_HPARAMS,
+                            **(kwargs['hparams'] if 'hparams' in kwargs.keys() else {})}
+
+        self.BASE_CONFIG = dict(criterion=config_criterion,
+                                optimizer=config_optimizer,
+                                hparams = config_hparams)
+
+
+        self.loss_name = self.BASE_CONFIG['criterion']['name']
+        self.learning_rate = self.BASE_CONFIG['hparams']['learning_rate']
 
         # self.learning_rate = learning_rate
         if self.loss_name.upper() == "CROSSENTROPYLOSS":
-            self.criterion = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=config_criterion["criterion"]["logits"])
+            self.criterion = tf.keras.losses.SparseCategoricalCrossentropy(
+                from_logits=self.BASE_CONFIG['criterion']['logits'])
         elif self.loss_name.upper() == "MeanSquaredError".upper():
             self.criterion = tf.keras.losses.MeanSquaredError()
 
@@ -67,10 +91,17 @@ class BaseModel(tf.keras.Model):
 
         self.auc = tf.keras.metrics.AUC()
 
+        self.scheduler = tf.keras.optimizers.schedules.ExponentialDecay(
+            initial_learning_rate=self.learning_rate,
+            decay_steps=10000,
+            decay_rate=self.BASE_CONFIG['hparams']['gamma']
+        )
 
+        self.optimizer = tf.keras.optimizers.Adam(
+            learning_rate=self.scheduler)
 
-        self.optimizer = None
-        self.scheduler = None
+        # self.optimizer = None
+        # self.scheduler = None
 
         self.training = False
 
@@ -89,6 +120,7 @@ class BaseModel(tf.keras.Model):
         :rtype: float
         """
         return self.accuracy(y_true, y_pred)
+
     def calculate_f1score(self, y_pred, y_true):
         """
         Calculates the F1-Score of the model's prediction.
@@ -106,7 +138,6 @@ class BaseModel(tf.keras.Model):
         f1_score = 2 * precision * recall / (precision + recall + 1e-8)
         return f1_score
 
-
     def calculate_auc(self, y_pred, y_true):
         """
         Calculates the AUC of the model's prediction.
@@ -119,7 +150,7 @@ class BaseModel(tf.keras.Model):
         :returns: The calculated accuracy.
         :rtype: float
         """
-        return self.auc(y_true, tf.argmax(y_pred,axis = 1)).numpy()
+        return self.auc(y_true, tf.argmax(y_pred, axis=1)).numpy()
 
     def calculate_recall(self, y_pred, y_true):
         """
@@ -133,7 +164,7 @@ class BaseModel(tf.keras.Model):
         :returns: The calculated accuracy.
         :rtype: float
         """
-        return self.recall(y_true, tf.argmax(y_pred,axis = 1)).numpy()
+        return self.recall(y_true, tf.argmax(y_pred, axis=1)).numpy()
 
     def calculate_precision(self, y_pred, y_true):
         """
@@ -147,8 +178,7 @@ class BaseModel(tf.keras.Model):
         :returns: The calculated accuracy.
         :rtype: float
         """
-        return self.precision(y_true, tf.argmax(y_pred,axis = 1)).numpy()
-
+        return self.precision(y_true, tf.argmax(y_pred, axis=1)).numpy()
 
     def call(self, inputs, training=False):
         """
@@ -165,6 +195,7 @@ class BaseModel(tf.keras.Model):
             This function must be implemented in the subclass, else it raises a NotImplementedError.
         """
         raise NotImplementedError()
+
     @tf.function
     def training_step(self, batch):
         """
@@ -197,6 +228,7 @@ class BaseModel(tf.keras.Model):
         # del landmarks, labels
 
         return loss, accuracy, labels, predictions
+
     @tf.function
     def validation_step(self, batch):
         """
@@ -335,6 +367,7 @@ class TransformerEncoderLayer(tf.keras.layers.Layer):
     .. warning::
         Ensure that the input dimension 'd_model' is divisible by the number of attention heads 'n_head'.
     """
+
     def __init__(self, d_model, n_head, dim_feedforward, dropout):
         super(TransformerEncoderLayer, self).__init__()
 
@@ -450,7 +483,6 @@ class TransformerSequenceClassifier(Model):
 
 
 class TransformerPredictor(BaseModel):
-
     """
     ===================
     TransformerPredictor
@@ -478,6 +510,7 @@ class TransformerPredictor(BaseModel):
     .. warning::
         The learning rate and gamma for the decay schedule must be specified in the 'kwargs'.
     """
+
     def __init__(self, **kwargs):
         super().__init__(learning_rate=kwargs["learning_rate"])
 
@@ -485,14 +518,6 @@ class TransformerPredictor(BaseModel):
 
         # Instantiate the Transformer model
         self.model = TransformerSequenceClassifier(**kwargs)
-
-        self.scheduler = tf.keras.optimizers.schedules.ExponentialDecay(
-            initial_learning_rate=self.learning_rate,
-            decay_steps=10000,
-            decay_rate=kwargs["gamma"]
-        )
-
-        self.optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=self.scheduler)
 
         self.model.compile(optimizer=self.optimizer, loss=self.criterion, metrics=[self.accuracy])
         self.compile()
@@ -559,11 +584,8 @@ class LSTMPredictor(BaseModel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-
-
         # Instantiate the LSTM model
         self.model = LSTMClassifier(**kwargs["params"])
-
 
         self.learning_rate = kwargs["hparams"]["learning_rate"]
         self.scheduler = tf.keras.optimizers.schedules.ExponentialDecay(
@@ -572,7 +594,6 @@ class LSTMPredictor(BaseModel):
             decay_rate=kwargs["hparams"]["gamma"]
         )
         self.optimizer = tf.keras.optimizers.Adam(learning_rate=self.scheduler)
-
 
         self.compile(
             optimizer=self.optimizer,
@@ -617,11 +638,11 @@ class HybridModel(BaseModel):
 
         return output
 
+
 class CVTransferLearningModel(BaseModel):
-    DEFAULTS = dict({})
+    DEFAULTS_CRITERION = dict({})
 
     def __init__(self, **kwargs):
-
         # Override defaults with passed-in values
         self.settings = {**self.DEFAULTS, **kwargs}
         super().__init__(learning_rate=self.settings['hparams']['learning_rate'])
@@ -630,19 +651,14 @@ class CVTransferLearningModel(BaseModel):
         if "weights" not in self.settings['hparams'].keys():
             self.settings['hparams']['weights'] = None
 
-
-
         model = tf.keras.applications.resnet.ResNet152(
             include_top=True,
             weights=self.settings['hparams']['weights'],
             input_tensor=None,
-            input_shape=(64,48,3),
+            input_shape=(64, 48, 3),
             pooling=None,
             classes=self.settings['params']['num_classes'],
         )
-
-
-
 
         self.scheduler = tf.keras.optimizers.schedules.ExponentialDecay(
             initial_learning_rate=self.learning_rate,
@@ -654,16 +670,13 @@ class CVTransferLearningModel(BaseModel):
 
         self.model = model
 
-
-
     @tf.function
     def call(self, inputs, training=True):
-
         # Reshape the array to (-1, 64, 48, 3)
         reshaped_array = tf.reshape(inputs, (-1, 64, 48, 2))
 
         # Pad the array
-        padded_array = tf.concat([reshaped_array,tf.zeros((inputs.shape[0],64,48,1))],axis=-1)
+        padded_array = tf.concat([reshaped_array, tf.zeros((inputs.shape[0], 64, 48, 1))], axis=-1)
 
         output = self.model(padded_array)
 
