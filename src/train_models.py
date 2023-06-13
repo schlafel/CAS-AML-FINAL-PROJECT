@@ -6,16 +6,19 @@ from trainer  import Trainer,get_model_params
 if __name__ == '__main__':
 
     for DL_FRAMEWORK in ['pytorch', 'tensorflow']:
-        for MODELNAME in ['YetAnotherTransformer','TransformerPredictor',
-                          'LSTMPredictor','TransformerEnsemble']:
+        for MODELNAME in [
+            'CVTransferLearningModel',
+            'LSTMPredictor',
+            'TransformerPredictor',
+            'YetAnotherTransformer',
+            'HybridEnsembleModel',
+            'HybridModel',
+            'TransformerEnsemble']:
             config.MODELNAME = MODELNAME
             config.DL_FRAMEWORK = DL_FRAMEWORK
 
 
-            trainer = Trainer(config=config,
-                              modelname=config.MODELNAME,
-                              enableAugmentationDropout=False,
-                              augmentation_threshold=0.35)
+            trainer = Trainer(config=config)
             # trainer.add_callback(dropout_callback)
             # trainer.add_callback(augmentation_increase_callback)
             trainer.train()
