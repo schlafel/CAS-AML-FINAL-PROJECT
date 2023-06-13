@@ -18,7 +18,7 @@ params (dict): The parameters required for the model.
 model (model object): The model object built using the given model name and parameters.
 train_loader, valid_loader, test_loader (DataLoader objects): PyTorch dataloaders for training, validation, and testing datasets.
 patience (int): The number of epochs to wait before stopping training when the validation loss is no longer improving.
-best_val_metric (float): The best validation metric recorded.
+best_metric (float): The best validation metric recorded.
 patience_counter (int): A counter that keeps track of the number of epochs since the validation loss last improved.
 model_class (str): The class name of the model.
 train_start_time (str): The starting time of the training process.
@@ -136,7 +136,7 @@ class Trainer:
         self.model(batch)
 
         self.patience = patience
-        self.best_val_metric = float('inf') if self.config.EARLY_STOP_MODE == "min" else float('-inf')
+        self.best_metric = float('inf') if self.config.EARLY_STOP_MODE == "min" else float('-inf')
         self.patience_counter = 0
 
         now = datetime.now()
@@ -272,31 +272,34 @@ class Trainer:
             for log_metric in self.config.LOG_METRICS:
                 self.metric_dict[f'{log_metric}/{phase}'] = np.array(phase_metrics[log_metric]).mean()
             #
-            log_hparams_metrics(self.writer,
-                                hparam_dict=self.hyperparameters,
-                                metric_dict=self.metric_dict,
-                                epoch=self.epoch)
+            #logging is done in the validation....
+            # log_hparams_metrics(self.writer,
+            #                     hparam_dict=self.hyperparameters,
+            #                     metric_dict=self.metric_dict,
+            #                     epoch=self.epoch)
             print(end='', flush=True)
             #
             # avg_train_loss = np.mean(train_losses)
             # avg_train_acc = np.mean(train_accuracies)
 
-            self.epoch = epoch
 
+            self.epoch = epoch
             #Validation
             val_metrics = self.evaluate()
 
-            metric = val_metrics[f'{Metric["Accuracy"].value}/Validation']
+
+            #get the metric!
+            metric = val_metrics[f'{Metric[self.config.EARLY_STOP_METRIC.capitalize()].value}/Validation']
 
             # check if early_stop_criterion has improved
             if self.config.EARLY_STOP_MODE == "min":
-                early_stop_criterion = metric - self.config.EARLY_STOP_TOLERENCE < self.best_val_metric
+                early_stop_criterion = metric - self.config.EARLY_STOP_TOLERENCE < self.best_metric
             else:
-                early_stop_criterion = metric + self.config.EARLY_STOP_TOLERENCE > self.best_val_metric
+                early_stop_criterion = metric + self.config.EARLY_STOP_TOLERENCE > self.best_metric
 
             # Check for early stopping
             if early_stop_criterion:
-                self.best_val_metric = metric
+                self.best_metric = metric
                 self.patience_counter = 0
 
                 # Save the model checkpoint when Early-Stop-Metric loss improves
@@ -465,6 +468,8 @@ class Trainer:
         print(flush=True)
         # self.writer.close()
 
+        print(f"Test/Accuracy: {self.metric_dict[f'Accuracy/{phase}']}")
+
         return all_preds, all_labels
 
     def add_callback(self, callback):
@@ -493,10 +498,10 @@ if __name__ == '__main__':
     # Get Data
     trainer = Trainer(config = config,
                       modelname=config.MODELNAME,
-                      enableAugmentationDropout=True,
+                      enableAugmentationDropout=False,
                       augmentation_threshold=0.1)
-    trainer.add_callback(dropout_callback)
-    trainer.add_callback(augmentation_increase_callback)
+    # trainer.add_callback(dropout_callback)
+    # trainer.add_callback(augmentation_increase_callback)
     trainer.train()
     trainer.test()
 

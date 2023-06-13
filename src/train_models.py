@@ -5,8 +5,9 @@ from trainer  import Trainer,get_model_params
 
 if __name__ == '__main__':
 
-    for MODELNAME in ['YetAnotherTransformer','TransformerPredictor','LSTMPredictor','HybridModel','TransformerEnsemble']:
-        for DL_FRAMEWORK in ['pytorch','tensorflow']:
+    for DL_FRAMEWORK in ['pytorch', 'tensorflow']:
+        for MODELNAME in ['YetAnotherTransformer','TransformerPredictor',
+                          'LSTMPredictor','HybridModel','TransformerEnsemble']:
             config.MODELNAME = MODELNAME
             config.DL_FRAMEWORK = DL_FRAMEWORK
 

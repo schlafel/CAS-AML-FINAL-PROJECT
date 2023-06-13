@@ -79,7 +79,7 @@ BATCH_SIZE = 128                                            # Training batch siz
 #: Training Learning rate
 LEARNING_RATE = 0.001                                       # Training learning rate, may be overridden in model yaml
 #: Training Number of epochs
-EPOCHS = 50                                                 # Training number of epochs
+EPOCHS = 3                                                 # Training number of epochs
 #: Training Train set split size
 TRAIN_SIZE = 0.90                                           # Training set split size
 #: Training Validation set size
@@ -139,7 +139,7 @@ DYNAMIC_AUG_INC_INTERVAL = 5                                # Interval for augme
 #: Deep learning framework to use for training and inference. Can be either 'pytorch' or 'tensorflow'.
 DL_FRAMEWORK = 'pytorch'                                      # Deep learning framework to use for training and inference.
 #: Name of the model to be used for training.
-MODELNAME = 'YetAnotherTransformer'                 # Name of the model to be used for training.
+MODELNAME = 'TransformerPredictor'                 # Name of the model to be used for training.
 
 
 #

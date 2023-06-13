@@ -6,8 +6,8 @@ models:
       dim_feedforward: 512
       dropout: 0.001
       layer_norm_eps: !!float 1e-5
-      norm_first: True
-      batch_first: True
+      norm_first: true
+      batch_first: true
       num_layers: 4
       num_classes: 250
     hparams:
@@ -17,7 +17,7 @@ models:
       name: Adam
     criterion:
       name: CrossEntropyLoss
-      logits: True
+      logits: true
 
 
   LSTMPredictor:
@@ -34,7 +34,7 @@ models:
       name: Adam
     criterion:
         name: CrossEntropyLoss
-        logits: True
+        logits: true
 
   HybridModel:
     transformer_params:
@@ -43,8 +43,8 @@ models:
       dim_feedforward: 512
       dropout: 0.001
       layer_norm_eps: !!float 1e-5
-      norm_first: True
-      batch_first: True
+      norm_first: true
+      batch_first: true
       num_layers: 4
     lstm_params:
       params:
@@ -59,7 +59,7 @@ models:
       name: Adam
     criterion:
       name: CrossEntropyLoss
-      logits: True
+      logits: true
 
   TransformerEnsemble:
     TransformerSequenceClassifier:
@@ -68,8 +68,8 @@ models:
       dim_feedforward: 2048
       dropout: 0.01
       layer_norm_eps: !!float 1e-5
-      norm_first: True
-      batch_first: True
+      norm_first: true
+      batch_first: true
       num_classes: 250
       learning_rate: 0.0011
     common_params:
@@ -81,7 +81,7 @@ models:
       name: Adam
     criterion:
       name: CrossEntropyLoss
-      logits: True
+      logits: true
 
   HybridEnsembleModel:
     TransformerSequenceClassifier:
@@ -90,8 +90,8 @@ models:
       dim_feedforward: 2048
       dropout: 0.01
       layer_norm_eps: !!float 1e-5
-      norm_first: True
-      batch_first: True
+      norm_first: true
+      batch_first: true
       num_classes: 250
       learning_rate: 0.00106
     lstm_params:
@@ -117,7 +117,7 @@ models:
       name: Adam
     criterion:
         name: CrossEntropyLoss
-        logits: False
+        logits: false
 
 
   YetAnotherTransformer:
@@ -139,7 +139,7 @@ models:
       name: Adam
     criterion:
       name: CrossEntropyLoss
-      logits: True
+      logits: true
 
   YetAnotherEnsemble:
     YetAnotherTransformerClassifier:
@@ -160,5 +160,5 @@ models:
       name: Adam
     criterion:
       name: CrossEntropyLoss
-      logits: True
+      logits: true
 
