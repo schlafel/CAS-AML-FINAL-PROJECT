@@ -138,7 +138,7 @@ models:
     scheduler:
       name: ExponentialLR
       params:
-        gamma: 0.9
+        gamma: 0.95
 
 
   CVTransferLearningModel:
