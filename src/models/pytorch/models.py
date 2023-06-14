@@ -31,6 +31,7 @@ import sys
 sys.path.insert(0, "./..")
 
 from config import DEVICE, N_CLASSES
+import importlib
 
 import torch
 import torch.nn as nn
@@ -832,7 +833,16 @@ class CVTransferLearningModel(BaseModel):
     forward(x)
         Performs a forward pass through the model.
     """
-    DEFAULTS = dict({})
+    DEFAULTS = dict(
+        optimizer=dict({
+            'name': 'Adam',
+            'params': dict({'lr': 0.001, 'weight_decay': 0.01 })
+        }),
+        scheduler = dict({
+            'name' : 'ExponentialLR',
+            'params': dict({'gamma':0.95})
+        })
+    )
 
     def __init__(self, **kwargs):
 
@@ -873,9 +883,19 @@ class CVTransferLearningModel(BaseModel):
 
         setattr(model, last_layer_name, new_last_layer)
 
-        self.optimizer = torch.optim.Adam(model.parameters(), lr=self.learning_rate)
-        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer,
-                                                                gamma=kwargs['hparams']["gamma"])
+        #Get Optimizer dynamically
+        optimizer_module = importlib.import_module('torch.optim')
+        optimizer_class = getattr(optimizer_module, self.settings['optimizer']['name'])
+
+        self.optimizer = optimizer_class(self.model.parameters(), **self.settings['optimizer']['params'])
+
+
+        #Get LR-Scheduler dynamically
+        scheduler_class = getattr(optimizer_module, self.settings['scheduler']['name'])
+        self.scheduler = scheduler_class(self.optimizer,**self.settings['scheduler']['params'])
+
+        # torch.optim.lr_scheduler.ExponentialLR(self.optimizer,
+        #                                                         gamma=kwargs['hparams']["gamma"])
 
         self.model = model
 

@@ -33,6 +33,10 @@ models:
       min: 64
       max: 1024
       mode: choice
+  optim:
+    name: Adam
+    lr: 0.001
+    weight_decay: 0.01
 
   LSTMPredictor:
     params:
@@ -129,6 +133,16 @@ models:
       augmentation_threshold: 0.35
       enableDropout: true
       augment: true
+    optimizer:
+      name: Adam
+      params:
+        lr: 0.001
+        weight_decay: 0.01
+    scheduler:
+      name: ExponentialLR
+      params:
+        gamma: 0.95
+
 
 
   YetAnotherTransformer:

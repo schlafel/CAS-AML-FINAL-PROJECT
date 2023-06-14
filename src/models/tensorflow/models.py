@@ -11,10 +11,15 @@ from tensorflow.keras.layers import MultiHeadAttention, LayerNormalization, Dens
 from tensorflow.keras.models import Model
 import tensorflow_addons as tfa
 import os
+import importlib
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
 
+pt_tf_dict = dict(
+    ExponentialLR="ExponentialDecay",
+    lr = "learning_rate"
+)
 
 class BaseModel(tf.keras.Model):
     """
@@ -598,13 +603,25 @@ class HybridModel(BaseModel):
         return output
 
 class CVTransferLearningModel(BaseModel):
-    DEFAULTS = dict({})
+    DEFAULTS = dict(
+
+        optimizer=
+        dict({
+            'name': 'Adam',
+            'params': dict({'lr': 0.001, 'weight_decay': 0.01 })
+        }),
+        scheduler = dict({
+            'name' : 'ExponentialLR',
+            'params': dict({'gamma':0.95})
+        })
+    )
+
 
     def __init__(self, **kwargs):
 
         # Override defaults with passed-in values
         self.settings = {**self.DEFAULTS, **kwargs}
-        super().__init__(learning_rate=self.settings['hparams']['learning_rate'])
+        super().__init__(learning_rate=self.settings['optimizer']['params']['lr'])
 
         # get weights
         if "weights" not in self.settings['hparams'].keys():
@@ -621,16 +638,24 @@ class CVTransferLearningModel(BaseModel):
             classes=self.settings['params']['num_classes'],
         )
 
+        scheduler_module = importlib.import_module('tensorflow.keras.optimizers.schedules')
+        scheduler_class = getattr(scheduler_module, pt_tf_dict[self.settings['scheduler']['name']])
+        self.scheduler = scheduler_class(initial_learning_rate = self.settings['optimizer']['params']['lr'],
+                                         decay_steps = 10000,
+                                         decay_rate = self.settings['optimizer']['params']['gamma'])
 
 
+        # self.scheduler = tf.keras.optimizers.schedules.ExponentialDecay(
+        #     initial_learning_rate=self.learning_rate,
+        #     decay_steps=10000,
+        #     decay_rate=self.settings['hparams']['gamma']
+        # )
 
-        self.scheduler = tf.keras.optimizers.schedules.ExponentialDecay(
-            initial_learning_rate=self.learning_rate,
-            decay_steps=10000,
-            decay_rate=self.settings['hparams']['gamma']
-        )
+        optimizer_module = importlib.import_module('tensorflow.keras.optimizers')
+        optimizer_class = getattr(optimizer_module, self.settings['optimizer']['name'])
 
-        self.optimizer = tf.keras.optimizers.Adam(learning_rate=self.scheduler)
+
+        self.optimizer = optimizer_class(learning_rate=self.scheduler)
 
         self.model = model
 

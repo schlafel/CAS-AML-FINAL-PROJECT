@@ -20,6 +20,7 @@ Welcome to American Sign Language Recognition's documentation!
    dl_utils
    trainer
    visualizations
+   model_config
    pytorch_models
    tensorflow_models
 
