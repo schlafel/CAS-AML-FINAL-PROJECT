@@ -53,6 +53,7 @@ from datetime import datetime
 from callbacks import dropout_callback, augmentation_increase_callback
 import yaml
 from metrics import Metric
+import torch
 
 import  warnings
 from sklearn.metrics import classification_report
@@ -118,9 +119,7 @@ class Trainer:
         print(f"Using model: {module_name}.{self.model_name}")
 
         # Get Data
-        self.dataset = dataset(augment=True,
-                               augmentation_threshold=config.AUGMENTATION_THRESHOLD,
-                               enableDropout=config.ENABLE_AUGMENTATION_DROPOUT)
+        self.dataset = dataset(**self.params['data'])
         self.train_loader, self.valid_loader, self.test_loader = create_data_loaders(
             self.dataset, batch_size=config.BATCH_SIZE, dl_framework=config.DL_FRAMEWORK, num_workers=4)
 
@@ -230,12 +229,17 @@ class Trainer:
 
             total_loss = 0
             total_acc = 0
+            preds_list,targets_list = [],[]
+
 
             print(end='', flush=True)
             for i, batch in pbar:
                 if config.FAST_DEV_RUN & (i > config.LIMIT_BATCHES):
                     break
                 loss, acc, labels, preds = self.model.training_step(batch)
+
+                preds_list.append(preds)
+                targets_list.append(labels)
 
                 self.model.optimize()
 
@@ -248,18 +252,18 @@ class Trainer:
 
                 pbar.set_postfix({'Loss': total_loss / (i + 1), 'Accuracy': total_acc / (i + 1)})
 
+                #append all the predictions to a list....
                 train_losses.append(loss)
                 train_accuracies.append(acc)
 
                 #calculate metrics and append to phase_metrics
-                self.calculate_metrics(acc, labels, loss, phase_metrics, preds)
+                # self.calculate_metrics(acc, labels, loss, phase_metrics, preds)
 
 
             print(end='', flush=True)
 
-            # calculate average metrics for the phase
-            for log_metric in config.LOG_METRICS:
-                self.metric_dict[f'{log_metric}/{phase}'] = np.array(phase_metrics[log_metric]).mean()
+            self.metric_dict[f'{"Loss"}/{phase}'] = total_loss / (i + 1)
+            self.calc_metric(phase, preds_list, targets_list)
             #
             #logging is done in the validation....
             # log_hparams_metrics(self.writer,
@@ -317,6 +321,25 @@ class Trainer:
             for callback in self.callbacks:
                 callback(self)
 
+    def calc_metric(self, phase, preds_list, targets_list):
+        # calculate average metrics for the phase
+        if self.DL_FRAMEWORK == "pytorch":
+            allpreds = torch.concatenate(preds_list)
+            alltargets = torch.concatenate(targets_list)
+        else:
+            allpreds = np.concatenate(preds_list)
+            alltargets = np.concatenate(targets_list)
+        for log_metric in config.LOG_METRICS:
+            if log_metric == "F1Score":
+                self.metric_dict[f'{log_metric}/{phase}'] = self.model.calculate_f1score(allpreds, alltargets)
+            elif log_metric == "Accuracy":
+                self.metric_dict[f'{log_metric}/{phase}'] = self.model.calculate_accuracy(allpreds, alltargets)
+            elif log_metric == "Recall":
+                self.metric_dict[f'{log_metric}/{phase}'] = self.model.calculate_recall(allpreds, alltargets)
+            elif log_metric == "Precision":
+                self.metric_dict[f'{log_metric}/{phase}'] = self.model.calculate_precision(allpreds, alltargets)
+
+            # self.metric_dict[f'{log_metric}/{phase}'] = np.array(phase_metrics[log_metric]).mean()
 
     def calculate_metrics(self, acc, labels, loss, phase_metrics, preds):
         for log_metric in config.LOG_METRICS:
@@ -355,6 +378,7 @@ class Trainer:
 
         valid_losses = []
         valid_accuracies = []
+        preds_list, targets_list = [], []
         phase_metrics = dict({x: [] for x in config.LOG_METRICS})
 
         pbar = tqdm(enumerate(self.valid_loader), total=len(self.valid_loader), desc=f"Validation progress")
@@ -376,18 +400,25 @@ class Trainer:
 
             valid_losses.append(loss)
             valid_accuracies.append(acc)
+            preds_list.append(preds)
+            targets_list.append(labels)
 
-            #calculate metrics and append to phase_metrics
-            self.calculate_metrics(acc, labels, loss, phase_metrics, preds)
+            # #calculate metrics and append to phase_metrics
+            # self.calculate_metrics(acc, labels, loss, phase_metrics, preds)
 
             pbar.set_postfix({'Loss': total_loss / (i + 1), 'Accuracy': total_acc / (i + 1)})
             print(end='', flush=True)
 
         print(end='', flush=True)
 
+        #
+        #append loss
+        self.metric_dict[f'{"Loss"}/{phase}'] = total_loss
+        self.calc_metric(phase, preds_list, targets_list)
+
         # calculate average metrics for the phase
-        for log_metric in config.LOG_METRICS:
-            self.metric_dict[f'{log_metric}/{phase}'] = np.array(phase_metrics[log_metric]).mean()
+        # for log_metric in config.LOG_METRICS:
+        #     self.metric_dict[f'{log_metric}/{phase}'] = np.array(phase_metrics[log_metric]).mean()
         self.metric_dict['LearningRate'] = self.model.get_lr()
 
         # log the metrics to the dict
@@ -425,26 +456,36 @@ class Trainer:
 
         test_losses = []
         test_accuracies = []
-        all_preds = []
-        all_labels = []
+        all_preds,all_labels = [],[]
+        total_loss = 0
+        total_acc = 0
+
         phase_metrics = dict({x: [] for x in config.LOG_METRICS})
         phase = "Test"
         for i, batch in tqdm(enumerate(self.test_loader), total=len(self.test_loader),
                              desc=f"Testing progress"):
             loss, acc, labels, preds = self.model.test_step(batch)
 
+            if config.DL_FRAMEWORK == "tensorflow":
+                total_loss += loss.numpy()
+                total_acc += acc.numpy()
+            else:
+                total_loss += loss
+                total_acc += acc
+
             test_losses.append(loss)
             test_accuracies.append(acc)
             all_preds.append(preds)
             all_labels.append(batch[1])
             #calculate metrics and append to phase_metrics
-            self.calculate_metrics(acc, labels, loss, phase_metrics, preds)
+            # self.calculate_metrics(acc, labels, loss, phase_metrics, preds)
 
 
         # calculate average metrics for the phase
-        for log_metric in config.LOG_METRICS:
-            self.metric_dict[f'{log_metric}/{phase}'] = np.array(phase_metrics[log_metric]).mean()
-
+        # for log_metric in config.LOG_METRICS:
+        #     self.metric_dict[f'{log_metric}/{phase}'] = np.array(phase_metrics[log_metric]).mean()
+        self.metric_dict[f'{"Loss"}/{phase}'] = total_loss / (i + 1)
+        self.calc_metric(phase, all_preds, all_labels)
 
         # log the metrics to the dict
         log_hparams_metrics(self.writer,
@@ -453,13 +494,13 @@ class Trainer:
                             epoch=self.epoch)
 
         print(flush=True)
-        self.writer.close()
+
 
         print(f"Test/Accuracy: {self.metric_dict[f'Accuracy/{phase}']}")
         preds = np.concatenate(all_preds)
         targets = np.concatenate(all_labels)
 
-
+        self.writer.close()
         return preds, targets
 
 
@@ -475,12 +516,27 @@ class Trainer:
         :param labels: tensor
         :return: None
         """
-        report = classification_report(labels, np.argmax(preds, axis=1),
-                                       labels=list(trainer.dataset.target_dict.keys()),
-                                       target_names=list(trainer.dataset.target_dict.values()))
-        with open(os.path.join("TEST_classificationReport.txt"), "w") as infile:
+        report = self.get_classification_report(labels, preds)
+        with open(os.path.join(self.log_dir,"TEST_classificationReport.txt"), "w") as infile:
             infile.write(report)
-        print(report)
+
+
+
+    def get_classification_report(self, labels, preds,verbose = True):
+        """
+        Generates Classification report
+        :param labels: tensor with True values
+        :param preds:  tensor with predicted values
+        :param verbose: Wherer to print the report
+        :type: verbose: bool
+        :return: classification report
+        """
+        report = classification_report(labels, np.argmax(preds, axis=1),
+                              labels=list(self.dataset.target_dict.keys()),
+                              target_names=list(self.dataset.target_dict.values()))
+        if verbose:
+            print(report)
+        return report
 
     def add_callback(self, callback):
         """

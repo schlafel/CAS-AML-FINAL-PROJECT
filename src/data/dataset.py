@@ -41,7 +41,7 @@ class ASL_DATASET:
                  max_seq_length=INPUT_SIZE,
                  augment=False,
                  augmentation_threshold=0.1,
-                 enableDropout=True):
+                 enableDropout=True,**kwargs):
         """
         Initialize the ASL dataset.
 

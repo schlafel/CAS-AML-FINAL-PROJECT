@@ -12,23 +12,28 @@ models:
     learning_rate: 0.011
     gamma: 0.9
     augmentation_threshold: 0.35
-    tune:
-      n_head:
-        min: 4
-        max: 8
-        mode: choice
-      learning_rate:
-        min: 0.001
-        max: 0.01
-        mode: loguniform
-      gamma:
-        min: 0.9
-        max: 0.99
-        mode: lognormal
-      batch_size:
-        min: 64
-        max: 1024
-        mode: choice
+  data:
+    augmentation_threshold: 0.35
+    enableDropout: true
+    augment: true
+  tune:
+    n_head:
+      min: 4
+      max: 8
+      mode: choice
+    learning_rate:
+      min: 0.001
+      max: 0.01
+      mode: loguniform
+    gamma:
+      min: 0.9
+      max: 0.99
+      mode: lognormal
+    batch_size:
+      min: 64
+      max: 1024
+      mode: choice
+
   LSTMPredictor:
     params:
       input_dim: 192
@@ -38,6 +43,10 @@ models:
     hparams:
       learning_rate: 0.001
       gamma: 0.9
+    data:
+      augmentation_threshold: 0.35
+      enableDropout: true
+      augment: true
 
   HybridModel:
     transformer_params:
@@ -57,6 +66,11 @@ models:
     common_params:
       num_classes: 250
       learning_rate: 0.001
+    data:
+      augmentation_threshold: 0.35
+      enableDropout: true
+      augment: true
+
   TransformerEnsemble:
     TransformerSequenceClassifier:
       d_model: 192
@@ -73,6 +87,11 @@ models:
       learning_rate: 0.011
       gamma: 0.9
       n_models: 5
+    data:
+      augmentation_threshold: 0.35
+      enableDropout: true
+      augment: true
+
   HybridEnsembleModel:
     TransformerSequenceClassifier:
       d_model: 192
@@ -93,6 +112,10 @@ models:
       num_classes: 250
       learning_rate: 0.001
       n_models: 4
+    data:
+      augmentation_threshold: 0.35
+      enableDropout: true
+      augment: true
 
   CVTransferLearningModel:
     params:
@@ -102,6 +125,10 @@ models:
       weights: null
       learning_rate: 0.001
       gamma: 0.95
+    data:
+      augmentation_threshold: 0.35
+      enableDropout: true
+      augment: true
 
 
   YetAnotherTransformer:
@@ -119,6 +146,10 @@ models:
       num_classes: 250
       learning_rate: 0.001
       gamma: 0.9
+    data:
+      augmentation_threshold: 0.1
+      enableDropout: true
+      augment: true
 
   YetAnotherEnsemble:
     YetAnotherTransformerClassifier:
@@ -135,4 +166,8 @@ models:
       learning_rate: 0.001
       gamma: 0.95
       n_models: 6
+    data:
+      augmentation_threshold: 0.1
+      enableDropout: true
+      augment: true
 

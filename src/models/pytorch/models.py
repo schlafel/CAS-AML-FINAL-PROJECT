@@ -247,7 +247,7 @@ class BaseModel(nn.Module):
 
         # del landmarks, labels # @Asad: why did you delete the landmarks/labels
 
-        return loss.cpu().detach(), step_accuracy.cpu(), labels.cpu(), predictions.cpu()
+        return loss.cpu().detach(), step_accuracy.cpu(), labels.cpu(), predictions.cpu().detach()
 
     def validation_step(self, batch):
         """

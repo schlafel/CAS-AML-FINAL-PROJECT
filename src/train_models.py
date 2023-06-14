@@ -22,6 +22,7 @@ if __name__ == '__main__':
                 config.BATCH_SIZE = batch_size
                 config.MODELNAME = MODELNAME
                 config.DL_FRAMEWORK = DL_FRAMEWORK
+                config.AUGMENTATION_THRESHOLD = .1
 
                 #get the model_params already here....
                 model_params = get_model_params(config.MODELNAME)
@@ -33,7 +34,6 @@ if __name__ == '__main__':
                 trainer.add_callback(dropout_callback)
                 trainer.add_callback(augmentation_increase_callback)
                 trainer.train()
-                trainer.test()
                 preds, labels = trainer.test()
                 trainer.write_classification_report(preds, labels)
 

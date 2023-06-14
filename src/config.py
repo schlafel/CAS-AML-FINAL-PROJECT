@@ -79,17 +79,13 @@ BATCH_SIZE = 128                                            # Training batch siz
 #: Training Learning rate
 LEARNING_RATE = 0.001                                       # Training learning rate, may be overridden in model yaml
 #: Training Number of epochs
-EPOCHS = 3                                                 # Training number of epochs
+EPOCHS = 60                                                # Training number of epochs
 #: Training Train set split size
 TRAIN_SIZE = 0.90                                           # Training set split size
 #: Training Validation set size
 VALID_SIZE = 0.05                                           # Validation set size
 #: Testing Test set size
 TEST_SIZE = 0.05                                            # Test set size
-#: Enable Dropout of Frames in the data
-ENABLE_AUGMENTATION_DROPOUT = True
-#: Augmentation Threshold
-AUGMENTATION_THRESHOLD = 0.35
 
 #
 # =============================================================================
@@ -141,7 +137,7 @@ DYNAMIC_AUG_INC_INTERVAL = 5                                # Interval for augme
 #
 
 #: Deep learning framework to use for training and inference. Can be either 'pytorch' or 'tensorflow'.
-DL_FRAMEWORK='pytorch'                                      # Deep learning framework to use for training and inference.
+DL_FRAMEWORK='tensorflow'                                      # Deep learning framework to use for training and inference.
 #: Name of the model to be used for training.
 MODELNAME='YetAnotherEnsemble'                 # Name of the model to be used for training.
 
