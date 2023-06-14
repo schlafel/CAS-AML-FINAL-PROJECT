@@ -681,7 +681,8 @@ class HybridModel(BaseModel):
         self.optimizer = optimizer_class(self.parameters(), **self.settings['optimizer']['params'])
 
         #Get LR-Scheduler dynamically
-        scheduler_class = getattr(optimizer_module, self.settings['scheduler']['name'])
+        scheduler_module = importlib.import_module('torch.optim.lr_scheduler')
+        scheduler_class = getattr(scheduler_module, self.settings['scheduler']['name'])
         self.scheduler = scheduler_class(self.optimizer,**self.settings['scheduler']['params'])
 
 
@@ -833,7 +834,8 @@ class HybridEnsembleModel(BaseModel):
         self.optimizer = optimizer_class(self.parameters(), **self.settings['optimizer']['params'])
 
         #Get LR-Scheduler dynamically
-        scheduler_class = getattr(optimizer_module, self.settings['scheduler']['name'])
+        scheduler_module = importlib.import_module('torch.optim.lr_scheduler')
+        scheduler_class = getattr(scheduler_module, self.settings['scheduler']['name'])
         self.scheduler = scheduler_class(self.optimizer,**self.settings['scheduler']['params'])
 
 
@@ -941,7 +943,8 @@ class CVTransferLearningModel(BaseModel):
         self.optimizer = optimizer_class(self.model.parameters(), **self.settings['optimizer']['params'])
 
         #Get LR-Scheduler dynamically
-        scheduler_class = getattr(optimizer_module, self.settings['scheduler']['name'])
+        scheduler_module = importlib.import_module('torch.optim.lr_scheduler')
+        scheduler_class = getattr(scheduler_module, self.settings['scheduler']['name'])
         self.scheduler = scheduler_class(self.optimizer,**self.settings['scheduler']['params'])
 
         # torch.optim.lr_scheduler.ExponentialLR(self.optimizer,

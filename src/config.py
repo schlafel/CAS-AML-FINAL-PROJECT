@@ -113,7 +113,7 @@ DYNAMIC_DROP_OUT_INIT_RATE = 0.01                           # Initial dropout ra
 #: The value to increase dropouts by
 DYNAMIC_DROP_OUT_REDUCTION_RATE = 1.1                       # Dropout rate reduction factor
 #: The max value of dynamic dropouts
-DYNAMIC_DROP_OUT_MAX_THRESHOLD = 0.3                        # Maximum dropout threshold
+DYNAMIC_DROP_OUT_MAX_THRESHOLD = 0.35                        # Maximum dropout threshold
 #: The epoch interval value to gradually change dropout rate
 DYNAMIC_DROP_OUT_REDUCTION_INTERVAL = 2                     # Interval for dropout rate reduction
 
@@ -126,7 +126,7 @@ DYNAMIC_DROP_OUT_REDUCTION_INTERVAL = 2                     # Interval for dropo
 #: The rate at which the probability of data augmentation is increased.
 DYNAMIC_AUG_INC_RATE = 1.5                                  # Data augmentation increase rate
 #: The maximum limit to which the probability of data augmentation can be increased.
-DYNAMIC_AUG_MAX_THRESHOLD = 0.35                            # Maximum data augmentation threshold
+DYNAMIC_AUG_MAX_THRESHOLD = 0.4                            # Maximum data augmentation threshold
 #: The number of epochs to wait before increasing the probability of data augmentation.
 DYNAMIC_AUG_INC_INTERVAL = 5                                # Interval for augmentation rate increase
 

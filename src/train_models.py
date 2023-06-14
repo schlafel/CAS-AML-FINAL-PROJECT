@@ -10,7 +10,7 @@ if __name__ == '__main__':
             for MODELNAME in [
                 'HybridEnsembleModel',
                 'HybridModel',
-                'TransformerEnsemble'
+                'TransformerEnsemble',
                 'YetAnotherEnsemble',
                 'CVTransferLearningModel',
                 'LSTMPredictor',
