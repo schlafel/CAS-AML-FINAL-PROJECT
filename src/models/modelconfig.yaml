@@ -78,11 +78,11 @@ models:
       name: Adam
       params:
         lr: 0.001
-        weight_decay: 0.01
+        weight_decay: 0.0005
     scheduler:
       name: ExponentialLR
       params:
-        gamma: 0.9
+        gamma: 0.92
 
 
   TransformerEnsemble:
@@ -134,7 +134,7 @@ models:
       name: Adam
       params:
         lr: 0.001
-        weight_decay: 0.01
+        weight_decay: 0.001
     scheduler:
       name: ExponentialLR
       params:

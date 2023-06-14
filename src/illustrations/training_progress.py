@@ -117,19 +117,7 @@ def plot_trainingLossAccuracies(ckpt_paths):
     :type ckpt_paths: list
     :return: figure object (fig,(ax,ax1))
     """
-    df_list = []
-    for path in ckpt_paths:
-        df = load_tf(path)
-        df['Exp'] = os.path.basename(path)
-        df['model'] = os.path.basename(os.path.split(path)[0])
-        df["DL_FRAMEWORK"] = os.path.basename(os.path.split(os.path.split(path)[0])[0])
-        df['Experiment'] = df.DL_FRAMEWORK + "_" + df.model + "_" + df.Exp
-        # Drop duplicated columns
-        df = df.loc[:, ~df.columns.duplicated()]
-
-        df_list.append(df)
-
-    concat_df = pd.concat(df_list,ignore_index=True)
+    concat_df = read_experiments(ckpt_paths)
 
     melted_df_train_val = pd.melt(concat_df,
         id_vars=['epoch','Experiment',],
@@ -153,6 +141,21 @@ def plot_trainingLossAccuracies(ckpt_paths):
                                       hue = "Experiment")
     return fig,ax
 
+
+def read_experiments(ckpt_paths):
+    df_list = []
+    for path in ckpt_paths:
+        df = load_tf(path)
+        df['Exp'] = os.path.basename(path)
+        df['model'] = os.path.basename(os.path.split(path)[0])
+        df["DL_FRAMEWORK"] = os.path.basename(os.path.split(os.path.split(path)[0])[0])
+        df['Experiment'] = df.DL_FRAMEWORK + "_" + df.model + "_" + df.Exp
+        # Drop duplicated columns
+        df = df.loc[:, ~df.columns.duplicated()]
+
+        df_list.append(df)
+    concat_df = pd.concat(df_list, ignore_index=True)
+    return concat_df
 
 
 if __name__ == '__main__':
