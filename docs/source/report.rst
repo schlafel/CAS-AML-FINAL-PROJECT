@@ -1,6 +1,6 @@
 .. raw:: latex
 
-    % Switch back to one-column layout
+    % Switch back to two-column layout
     \twocolumn
 
 
@@ -77,6 +77,19 @@ Summarize the main findings and conclusions of the report.
 
 :cite:p:`vaswani2017attention`.
 
+
+References
+----------
+.. bibliography:: references.bib
+   :style: unsrt
+
+
+.. raw:: latex
+
+   \cleardoublepage
+   \begingroup
+   \renewcommand\chapter[1]{\endgroup}
+   \phantomsection
 
 
 

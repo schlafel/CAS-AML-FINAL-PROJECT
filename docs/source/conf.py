@@ -90,6 +90,7 @@ latex_elements = {
 # Additional stuff for the LaTeX preamble.
 #
 'preamble': r'''
+\addto\captionsenglish{\renewcommand{\bibname}{References}}
 %% %% %% %% %% %% %% %% %% %% CASAML %% %% %% %% %% %% %% %% %%
 %% %add number to subsubsection 2=subsection, 3=subsubsection
 %% % below subsubsection is not good idea.
@@ -269,4 +270,8 @@ bibtex_bibfiles = ['references.bib']
 # Other configuration settings...
 
 latex_index_module = 'sphinxcontrib.peculiarity'
+
+bibtex_bibliography_header = ".. rubric:: References"
+bibtex_footbibliography_header = bibtex_bibliography_header
+
 

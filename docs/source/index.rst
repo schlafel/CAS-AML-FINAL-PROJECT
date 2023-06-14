@@ -27,9 +27,6 @@ Welcome to American Sign Language Recognition's documentation!
 
 
 
-.. bibliography:: references.bib
-   :style: unsrt
-
 
 .. only:: html
 
