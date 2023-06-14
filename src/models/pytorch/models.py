@@ -647,19 +647,46 @@ class HybridModel(BaseModel):
     forward(x)
         Performs a forward pass through the model.
     """
+    DEFAULTS = dict(
+        optimizer=dict({
+            'name': 'Adam',
+            'params': dict({'lr': 0.001, 'weight_decay': 0.01 })
+        }),
+        scheduler = dict({
+            'name' : 'ExponentialLR',
+            'params': dict({'gamma':0.9})
+        })
+    )
+
+
+
     def __init__(self, **kwargs):
+        self.settings = {**self.DEFAULTS,**kwargs}
+
         common_params = kwargs['common_params']
         transformer_kwargs = kwargs['transformer_params']
         lstm_kwargs = kwargs['lstm_params']
 
-        super().__init__(learning_rate=common_params["learning_rate"], n_classes=common_params["num_classes"])
+        super().__init__(learning_rate=self.settings["optimizer"]["params"]['lr'],
+                         n_classes=common_params["num_classes"])
 
         self.lstm = LSTMClassifier(**lstm_kwargs).to(DEVICE)
         self.transformer = TransformerSequenceClassifier(**transformer_kwargs).to(DEVICE)
         self.fc = nn.Linear(common_params["num_classes"] * 2, common_params["num_classes"]).to(DEVICE)
 
-        self.optimizer = torch.optim.Adam(self.parameters(), lr=common_params["learning_rate"])
-        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.9)
+
+        #Get Optimizer dynamically
+        optimizer_module = importlib.import_module('torch.optim')
+        optimizer_class = getattr(optimizer_module, self.settings['optimizer']['name'])
+        self.optimizer = optimizer_class(self.parameters(), **self.settings['optimizer']['params'])
+
+        #Get LR-Scheduler dynamically
+        scheduler_class = getattr(optimizer_module, self.settings['scheduler']['name'])
+        self.scheduler = scheduler_class(self.optimizer,**self.settings['scheduler']['params'])
+
+
+        # self.optimizer = torch.optim.Adam(self.parameters(), lr=common_params["learning_rate"])
+        # self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.9)
 
         self.to(DEVICE)
 
@@ -765,14 +792,27 @@ class HybridEnsembleModel(BaseModel):
     forward(x)
         Performs a forward pass through the model.
     """
+    DEFAULTS = dict(
+        optimizer=dict({
+            'name': 'Adam',
+            'params': dict({'lr': 0.001, 'weight_decay': 0.01 })
+        }),
+        scheduler = dict({
+            'name' : 'ExponentialLR',
+            'params': dict({'gamma':0.95})
+        })
+    )
+
     def __init__(self, **kwargs):
+        self.settings = {**self.DEFAULTS,**kwargs}
+
         common_params = kwargs['common_params']
         transformer_params = kwargs['TransformerSequenceClassifier']
         lstm_kwargs = kwargs['lstm_params']
 
         n_models = common_params["n_models"]
-        super().__init__(learning_rate=common_params["learning_rate"], n_classes=common_params["num_classes"])
-
+        super().__init__(learning_rate=self.settings["optimizer"]["params"]['lr'],
+                         n_classes=common_params["num_classes"])
         self.learning_rate = common_params["learning_rate"]
 
         # Ensemble
@@ -785,8 +825,20 @@ class HybridEnsembleModel(BaseModel):
 
         self.fc = nn.Linear(common_params["num_classes"] * (n_models * 2), common_params["num_classes"]).to(DEVICE)
 
-        self.optimizer = torch.optim.Adam(self.parameters(), lr=common_params["learning_rate"])
-        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.95)
+
+
+        #Get Optimizer dynamically
+        optimizer_module = importlib.import_module('torch.optim')
+        optimizer_class = getattr(optimizer_module, self.settings['optimizer']['name'])
+        self.optimizer = optimizer_class(self.parameters(), **self.settings['optimizer']['params'])
+
+        #Get LR-Scheduler dynamically
+        scheduler_class = getattr(optimizer_module, self.settings['scheduler']['name'])
+        self.scheduler = scheduler_class(self.optimizer,**self.settings['scheduler']['params'])
+
+
+        # self.optimizer = torch.optim.Adam(self.parameters(), lr=common_params["learning_rate"])
+        # self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.95)
 
         self.to(DEVICE)
 
@@ -886,9 +938,7 @@ class CVTransferLearningModel(BaseModel):
         #Get Optimizer dynamically
         optimizer_module = importlib.import_module('torch.optim')
         optimizer_class = getattr(optimizer_module, self.settings['optimizer']['name'])
-
         self.optimizer = optimizer_class(self.model.parameters(), **self.settings['optimizer']['params'])
-
 
         #Get LR-Scheduler dynamically
         scheduler_class = getattr(optimizer_module, self.settings['scheduler']['name'])

@@ -74,6 +74,16 @@ models:
       augmentation_threshold: 0.35
       enableDropout: true
       augment: true
+    optimizer:
+      name: Adam
+      params:
+        lr: 0.001
+        weight_decay: 0.01
+    scheduler:
+      name: ExponentialLR
+      params:
+        gamma: 0.9
+
 
   TransformerEnsemble:
     TransformerSequenceClassifier:
@@ -120,6 +130,16 @@ models:
       augmentation_threshold: 0.35
       enableDropout: true
       augment: true
+    optimizer:
+      name: Adam
+      params:
+        lr: 0.001
+        weight_decay: 0.01
+    scheduler:
+      name: ExponentialLR
+      params:
+        gamma: 0.9
+
 
   CVTransferLearningModel:
     params:
