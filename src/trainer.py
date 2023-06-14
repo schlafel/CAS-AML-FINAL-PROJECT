@@ -55,6 +55,7 @@ import yaml
 from metrics import Metric
 import torch
 import inspect
+import callbacks
 
 import  warnings
 from sklearn.metrics import classification_report
@@ -173,9 +174,16 @@ class Trainer:
         self.hyperparameters['EARLYSTOP_METRIC'] = config.EARLY_STOP_METRIC
         self.hyperparameters['EARLYSTOP_PATIENCE'] = config.EARLY_STOP_PATIENCE
 
+        self.hyperparameters['EARLYSTOP_PATIENCE'] = config.EARLY_STOP_PATIENCE
+        #get all callbacks
+        script_methods = [method for method, _ in inspect.getmembers(callbacks, inspect.isfunction)]
+        for method in script_methods:
+            self.hyperparameters[method] = False
 
 
-        #Log the hyperparameters and training metrics
+
+
+            #Log the hyperparameters and training metrics
         self.metric_dict = get_metric_dict()
         log_hparams_metrics(self.writer,
                             hparam_dict=self.hyperparameters,

@@ -937,6 +937,8 @@ class CVTransferLearningModel(BaseModel):
 
         setattr(model, last_layer_name, new_last_layer)
 
+        self.model = model
+
         #Get Optimizer dynamically
         optimizer_module = importlib.import_module('torch.optim')
         optimizer_class = getattr(optimizer_module, self.settings['optimizer']['name'])
@@ -950,7 +952,7 @@ class CVTransferLearningModel(BaseModel):
         # torch.optim.lr_scheduler.ExponentialLR(self.optimizer,
         #                                                         gamma=kwargs['hparams']["gamma"])
 
-        self.model = model
+
 
         self.to(DEVICE)
 

@@ -8,11 +8,12 @@ if __name__ == '__main__':
     for DL_FRAMEWORK in ['pytorch', 'tensorflow']:
         for batch_size in [128, 256]:
             for MODELNAME in [
+                'CVTransferLearningModel',
                 'HybridEnsembleModel',
                 'HybridModel',
                 'TransformerEnsemble',
                 'YetAnotherEnsemble',
-                'CVTransferLearningModel',
+
                 'LSTMPredictor',
                 'TransformerPredictor',
     ]:
