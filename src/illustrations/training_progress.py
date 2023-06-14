@@ -165,7 +165,7 @@ if __name__ == '__main__':
     ]
 
     ckpt_paths = [
-        r"C:\Users\fs.GUNDP\Python\CAS-AML-FINAL-PROJECT\runs\pytorch\CVTransferLearningModel\2023-06-13 17_15",
+        os.path.join(ROOT_PATH,r"runs/pytorch/HybridEnsembleModel/2023-06-14 09_27",)
     ]
     fig,ax = plot_trainingLossAccuracies(ckpt_paths)
 

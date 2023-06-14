@@ -196,6 +196,7 @@ latex_elements = {
 ''',
 
 'maketitle': r'''
+% \renewcommand{\bibname}{\section*{\refname}}
 \pagenumbering{Roman} %% % to avoid page 1 conflict with actual page 1
 \begin{titlepage}
 {
@@ -256,7 +257,7 @@ HeaderFamily=\\rmfamily\\bfseries, \
 InnerLinkColor={rgb}{0,0,1}, \
 OuterLinkColor={rgb}{0,0,1}',
 #'tableofcontents':' ',
-    'tableofcontents': '\\tableofcontents\n\n',  # Exclude bibliography from TOC
+
 
 }
 

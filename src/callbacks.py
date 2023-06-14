@@ -113,9 +113,11 @@ def augmentation_increase_callback(trainer, aug_increase_rate=DYNAMIC_AUG_INC_RA
     step = trainer.epoch + 1
     loader = trainer.train_loader
     if step % DYNAMIC_AUG_INC_INTERVAL == 0:
-        dataset = get_dataset(loader)
+        dataset = get_dataset(loader,dl_framework=trainer.DL_FRAMEWORK)
         if not trainer.DL_FRAMEWORK == "tensorflow":#Hack to get TF-Working!
-            dataset.augmentation_threshold = min(dataset.augmentation_threshold * aug_increase_rate, max_limit)
+            new_threshold = min(dataset.augmentation_threshold * aug_increase_rate, max_limit)
+            dataset.augmentation_threshold = new_threshold
             print(
             f"Increasing random data augmentation probability by {aug_increase_rate} to {dataset.augmentation_threshold}")
+
 

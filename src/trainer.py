@@ -54,6 +54,7 @@ from callbacks import dropout_callback, augmentation_increase_callback
 import yaml
 from metrics import Metric
 import torch
+import inspect
 
 import  warnings
 from sklearn.metrics import classification_report
@@ -63,7 +64,7 @@ class Trainer:
     epochs, performing validation and testing, implementing early stopping, and logging results. The module has been
     designed to be agnostic to the specific deep learning framework, enhancing its versatility across various projects.
     """
-    def __init__(self, config, dataset=ASL_DATASET):
+    def __init__(self, config, dataset=ASL_DATASET, model_config = None):
         """
         Initializes the Trainer class with the specified parameters.
 
@@ -77,26 +78,23 @@ class Trainer:
         #. Finally, it prepares a directory for saving model checkpoints.
 
         Args:
-            modelname (str): The name of the model to be used for training.
+            config (module): the config with the hyperparameters for model training
             dataset (Dataset): The dataset to be used.
-            patience (int): The number of epochs with no improvement after which training will be stopped.
-            enableAugmentationDropout (bool): If True, enable data augmentation dropout.
-            augmentation_threshold (float): The threshold for data augmentation.
+            model_config (optional):
+
+
 
         Functionality:
             This method initializes various components, such as the model, dataset, data loaders,
             logging writer, and checkpoint path, required for the training process.
 
-        :param modelname: The name of the model for training.
-        :type modelname: str
+        :param: config: module
+        :type config: module
         :param dataset: The dataset for training.
-        :type dataset: Dataset
-        :param patience: The number of epochs with no improvement after which training will be stopped.
-        :type patience: int
-        :param enableAugmentationDropout: If True, enable data augmentation dropout.
-        :type enableAugmentationDropout: bool
-        :param augmentation_threshold: The threshold for data augmentation.
-        :type augmentation_threshold: float
+        :type dataset: Dataset or None
+        :param model_config: predifined model configuration
+        :type model_config: dict or None
+
 
         :rtype: None
 
@@ -109,10 +107,22 @@ class Trainer:
         self.model_name = config.MODELNAME
         self.DL_FRAMEWORK = config.DL_FRAMEWORK
         module_name = f"models.{config.DL_FRAMEWORK}.models"
-        self.params = get_model_params(self.model_name)
+
+        #Get Model Params....
+        if model_config is None:
+            self.params = get_model_params(self.model_name)
+        else:
+            self.params = model_config.copy()
 
         module = importlib.import_module(module_name)
         Model = getattr(module, self.model_name)
+
+        # Get the attributes from the config module
+        config_items = inspect.getmembers(config)
+
+        # Filter out private attributes and built-in attributes
+        self.config_dict = {name: value for name, value in config_items if
+                       not name.startswith('_') and not inspect.ismodule(value)}
 
         # Get Model
         self.model = Model(**self.params)
@@ -159,7 +169,7 @@ class Trainer:
         self.hyperparameters['EXPERIMENT'] = self.train_start_time
         self.hyperparameters['BATCH_SIZE'] = config.BATCH_SIZE
         self.hyperparameters['N_EPOCHS'] = config.EPOCHS
-        self.hyperparameters['AUGMENTATION_THRESHOLD'] = config.AUGMENTATION_THRESHOLD
+        self.hyperparameters = {**self.hyperparameters, **self.params['data']}
         self.hyperparameters['EARLYSTOP_METRIC'] = config.EARLY_STOP_METRIC
         self.hyperparameters['EARLYSTOP_PATIENCE'] = config.EARLY_STOP_PATIENCE
 
@@ -303,8 +313,12 @@ class Trainer:
                 checkpoint_param_path = os.path.join(self.checkpoint_path, f"{self.model_name}_best_model_params.yaml")
                 with open(checkpoint_param_path, 'w') as outfile:
                     yaml.dump(self.params, outfile, default_flow_style=False)
+
+                #save the parameters
+                with open(os.path.join(self.checkpoint_path,'config.yaml'), 'w') as file:
+                    yaml.dump(self.config_dict, file)
+
                 print(f"Best model and parameters saved at epoch {epoch + 1}")
-                copyfile('config.py',os.path.join(self.checkpoint_path,"config.py")) #copy the configurations file
 
 
             else:
@@ -413,7 +427,7 @@ class Trainer:
 
         #
         #append loss
-        self.metric_dict[f'{"Loss"}/{phase}'] = total_loss
+        self.metric_dict[f'{"Loss"}/{phase}'] = total_loss / (i + 1)
         self.calc_metric(phase, preds_list, targets_list)
 
         # calculate average metrics for the phase
@@ -557,6 +571,8 @@ class Trainer:
         .. warning::
             The callback function must be callable and should not modify the training process.
         """
+        #Add the setting to the hyperparameters
+        self.hyperparameters[callback.__name__] = True
         self.callbacks.append(callback)
 
 

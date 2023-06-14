@@ -6,18 +6,16 @@ from callbacks import dropout_callback, augmentation_increase_callback
 if __name__ == '__main__':
 
     for DL_FRAMEWORK in ['pytorch', 'tensorflow']:
-        for MODELNAME in [
-            'HybridEnsembleModel',
-            'HybridModel',
-            'TransformerEnsemble'
-            'YetAnotherEnsemble',
-            'CVTransferLearningModel',
-            'LSTMPredictor',
-            'TransformerPredictor',
-]:
-
-            for batch_size in [64,128,256]:
-
+        for batch_size in [128, 256]:
+            for MODELNAME in [
+                'HybridEnsembleModel',
+                'HybridModel',
+                'TransformerEnsemble'
+                'YetAnotherEnsemble',
+                'CVTransferLearningModel',
+                'LSTMPredictor',
+                'TransformerPredictor',
+    ]:
                 #overwrite the config file
                 config.BATCH_SIZE = batch_size
                 config.MODELNAME = MODELNAME
@@ -30,7 +28,8 @@ if __name__ == '__main__':
 
 
 
-                trainer = Trainer(config=config)
+                trainer = Trainer(config=config,
+                                  model_config = model_params)
                 trainer.add_callback(dropout_callback)
                 trainer.add_callback(augmentation_increase_callback)
                 trainer.train()

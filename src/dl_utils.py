@@ -295,7 +295,7 @@ def get_TF_Dataset(dataloader):
     return dataloader.tf_dataset
 
 
-def get_dataset(dataloader):
+def get_dataset(dataloader,dl_framework = DL_FRAMEWORK):
     """
     The `get_dataset` function is an interface to extract the underlying dataset from a dataloader, irrespective of
     the deep learning framework being used, i.e., TensorFlow or PyTorch. The versatility of this function makes it
@@ -316,7 +316,7 @@ def get_dataset(dataloader):
     :rtype: Dataset object
     :param dataloader: DataLoader in case of PyTorch and DatasetWithLen in case of TensorFlow.
     """
-    if DL_FRAMEWORK == 'tensorflow':
+    if dl_framework == 'tensorflow':
         return get_TF_Dataset(dataloader)
     else:
         return get_PT_Dataset(dataloader)
