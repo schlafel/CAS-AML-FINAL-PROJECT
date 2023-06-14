@@ -12,6 +12,18 @@
 #
 import os
 import sys
+import sphinx.builders.latex.transforms
+
+class DummyTransform(sphinx.builders.latex.transforms.BibliographyTransform):
+
+    def run(self, **kwargs):
+        pass
+
+sphinx.builders.latex.transforms.BibliographyTransform = DummyTransform
+# https://github.com/mcmtroffaes/sphinxcontrib-bibtex/issues/156
+
+
+
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../../src'))
@@ -37,7 +49,7 @@ release = '0.0.1'
 extensions = [
     'sphinx.ext.duration',
     'sphinx.ext.autodoc',
-'sphinxcontrib.bibtex',
+    'sphinxcontrib.bibtex',
     #'sphinx.ext.napoleon',
     'sphinx.ext.autosummary',
     'recommonmark'
@@ -90,6 +102,8 @@ latex_elements = {
 # Additional stuff for the LaTeX preamble.
 #
 'preamble': r'''
+\usepackage{abstract}
+\usepackage{here}
 \addto\captionsenglish{\renewcommand{\bibname}{References}}
 %% %% %% %% %% %% %% %% %% %% CASAML %% %% %% %% %% %% %% %% %%
 %% %add number to subsubsection 2=subsection, 3=subsubsection
@@ -196,7 +210,7 @@ latex_elements = {
 ''',
 
 'maketitle': r'''
-% \renewcommand{\bibname}{\section*{\refname}}
+
 \pagenumbering{Roman} %% % to avoid page 1 conflict with actual page 1
 \begin{titlepage}
 {
@@ -261,18 +275,18 @@ OuterLinkColor={rgb}{0,0,1}',
 
 }
 
+# latex_toplevel_sectioning = 'section'
 
 latex_logo = '_static/Logo_UniBe.pdf'
 # latex_logo = '_static/logo.png'
 
 
 bibtex_bibfiles = ['references.bib']
-
+bibtex_default_style = 'unsrt'
 # Other configuration settings...
 
 latex_index_module = 'sphinxcontrib.peculiarity'
 
-bibtex_bibliography_header = ".. rubric:: References"
-bibtex_footbibliography_header = bibtex_bibliography_header
-
+# bibtex_bibliography_header = ".. rubric:: References"
+# bibtex_footbibliography_header = bibtex_bibliography_header
 
