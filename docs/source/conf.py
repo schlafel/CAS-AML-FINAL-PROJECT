@@ -97,21 +97,18 @@ latex_elements = {
 # The font size ('10pt', '11pt' or '12pt').
 #
 'pointsize': '10pt',
-'classoptions':',twocolumn,',
-    'extraclassoptions': 'openany,oneside',
+'classoptions':',twocolumn,openany,oneside',
+
 # Additional stuff for the LaTeX preamble.
 #
 'preamble': r'''
-\usepackage{abstract}
-\usepackage{here}
-\addto\captionsenglish{\renewcommand{\bibname}{References}}
 %% %% %% %% %% %% %% %% %% %% CASAML %% %% %% %% %% %% %% %% %%
 %% %add number to subsubsection 2=subsection, 3=subsubsection
 %% % below subsubsection is not good idea.
 \setcounter{secnumdepth}{3}
 %
 %% %% Table of content upto 2=subsection, 3=subsubsection
-\setcounter{tocdepth}{2}
+\setcounter{tocdepth}{3}
 \usepackage{amsmath,amsfonts,amssymb,amsthm}
 \usepackage{graphicx}
 \usepackage{here}
@@ -270,12 +267,12 @@ TitleColor={rgb}{0,0,0}, \
 HeaderFamily=\\rmfamily\\bfseries, \
 InnerLinkColor={rgb}{0,0,1}, \
 OuterLinkColor={rgb}{0,0,1}',
-#'tableofcontents':' ',
+'tableofcontents':' ',
 
 
 }
 
-# latex_toplevel_sectioning = 'section'
+# latex_toplevel_sectioning = 'chapter'
 
 latex_logo = '_static/Logo_UniBe.pdf'
 # latex_logo = '_static/logo.png'
