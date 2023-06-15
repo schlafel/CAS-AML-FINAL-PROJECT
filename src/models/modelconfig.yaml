@@ -22,7 +22,7 @@ models:
       name: Adam
       params:
         lr: 0.001
-        weight_decay: 0.0005
+        weight_decay: 0.0007
     scheduler:
       name: ExponentialLR
       params:
