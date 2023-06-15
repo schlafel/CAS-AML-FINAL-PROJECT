@@ -38,16 +38,18 @@ if __name__ == '__main__':
 
     print(df_test.loc[:,df_test.columns.str.contains("Test")])
 
-    df_export = df_test.loc[df_test['Accuracy/Test'] == df_test.groupby(by="MODELNAME")["Accuracy/Test"].transform(max)]
+    df_export = df_test.loc[(df_test['Accuracy/Test'] == df_test.groupby(by="MODELNAME")["Accuracy/Test"].transform(max)).values]
     rename_dict = dict({
         'Accuracy/Test': "Acc",
         'Loss/Test': "Loss",
         'Precision/Test': "Prec.",
         'F1Score/Test': "F1",
+        'Recall/Test': "Recall",
     })
     df_export = df_export.rename(columns=rename_dict)
 
-    df_export = df_export[["MODELNAME"] + list(rename_dict.values())]
-    df_export.select_dtypes(include=[float]).apply(lambda x: round(x, 2)).to_csv(os.path.join(ROOT_PATH,OUT_DIR,"Summary.csv"),index_label = "MODEL_NAME")
-    print(df_export.reset_index(drop=True))
+    df_export = df_export[["MODELNAME"] + list(rename_dict.values())].set_index("MODELNAME",drop=True).drop_duplicates()
+    df_export.select_dtypes(include=[float]).apply(lambda x: round(x, 2)).to_csv(os.path.join(ROOT_PATH,OUT_DIR,"Summary.csv"),index_label = "MODELNAME")
+    df_export.select_dtypes(include=[float]).apply(lambda x: round(x, 2)).to_csv(os.path.join(ROOT_PATH,OUT_DIR,"Summary.tsv"),index_label = "MODELNAME",sep="\t")
+    print(df_export)
     print("done")
