@@ -11,11 +11,11 @@ if __name__ == '__main__':
                 #'CVTransferLearningModel',
                 #'HybridEnsembleModel',
                 #'HybridModel',
-                #'TransformerEnsemble',
+                'TransformerEnsemble',
                 #'YetAnotherEnsemble',
-                #'LSTMPredictor',
+                'LSTMPredictor',
                 #'YetAnotherTransformer',
-                'TransformerPredictor',
+                # 'TransformerPredictor',
     ]:
                 #overwrite the config file
                 config.BATCH_SIZE = batch_size
@@ -31,7 +31,8 @@ if __name__ == '__main__':
 
                 trainer = Trainer(config=config,
                                   model_config = model_params)
-                trainer.add_callback(dropout_callback)
+                if MODELNAME != "LSTMPredictor":
+                    trainer.add_callback(dropout_callback)
                 trainer.add_callback(augmentation_increase_callback)
                 trainer.train()
                 preds, labels = trainer.test()
