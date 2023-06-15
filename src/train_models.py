@@ -13,7 +13,8 @@ if __name__ == '__main__':
                 #'HybridModel',
                 #'TransformerEnsemble',
                 #'YetAnotherEnsemble',
-                #'LSTMPredictor',
+                'YetAnotherTransformer',
+                'LSTMPredictor',
                 'TransformerPredictor',
     ]:
                 #overwrite the config file
