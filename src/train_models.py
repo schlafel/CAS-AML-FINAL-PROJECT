@@ -5,7 +5,7 @@ from callbacks import dropout_callback, augmentation_increase_callback
 
 if __name__ == '__main__':
 
-    for DL_FRAMEWORK in ['pytorch', 'tensorflow']:
+    for DL_FRAMEWORK in ['pytorch', ]:
         for batch_size in [128,]:
             for MODELNAME in [
                 #'CVTransferLearningModel',

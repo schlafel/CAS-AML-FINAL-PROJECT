@@ -36,6 +36,18 @@ if __name__ == '__main__':
     df_test.sort_values(by=['Accuracy/Test'],inplace=True)
     df_test.to_excel(os.path.join(ROOT_PATH, OUT_DIR, "Results.xlsx"))
 
-    print(df_test.loc[:,df_test.columns.str.contains("Test")
-          ])
+    print(df_test.loc[:,df_test.columns.str.contains("Test")])
+
+    df_export = df_test.loc[df_test['Accuracy/Test'] == df_test.groupby(by="MODELNAME")["Accuracy/Test"].transform(max)]
+    rename_dict = dict({
+        'Accuracy/Test': "Acc",
+        'Loss/Test': "Loss",
+        'Precision/Test': "Prec.",
+        'F1Score/Test': "F1",
+    })
+    df_export = df_export.rename(columns=rename_dict)
+
+    df_export = df_export[["MODELNAME"] + list(rename_dict.values())]
+    df_export.select_dtypes(include=[float]).apply(lambda x: round(x, 2)).to_csv(os.path.join(ROOT_PATH,OUT_DIR,"Summary.csv"))
+    print(df_export.reset_index(drop=True))
     print("done")
