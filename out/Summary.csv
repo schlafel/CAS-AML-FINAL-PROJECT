@@ -1,6 +1,6 @@
 MODELNAME,Acc,Loss,Prec.,F1,Recall
-LSTMPredictor,0.01,5.5,0.0,0.0,0.0
-TransformerEnsemble,0.64,2.11,0.65,0.63,0.63
+LSTMPredictor,0.5,2.05,0.48,0.46,0.47
+TransformerEnsemble,0.66,1.47,0.66,0.65,0.65
 HybridEnsembleModel,0.75,1.32,0.75,0.74,0.74
 YetAnotherEnsemble,0.78,1.38,0.78,0.77,0.77
 CVTransferLearningModel,0.78,0.88,0.79,0.77,0.77
