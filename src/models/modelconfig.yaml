@@ -12,17 +12,16 @@ models:
       num_classes: 250
       learning_rate: 0.011
       gamma: 0.9
-      augmentation_threshold: 0.35
+      augmentation_threshold: 0.1
     data:
-      augmentation_threshold: 0.35
+      augmentation_threshold: 0.1
       enableDropout: true
       augment: true
-
     optimizer:
       name: Adam
       params:
         lr: 0.001
-        weight_decay: 0.0007
+        weight_decay: 0.001
     scheduler:
       name: ExponentialLR
       params:
@@ -39,7 +38,7 @@ models:
       learning_rate: 0.001
       gamma: 0.9
     data:
-      augmentation_threshold: 0.35
+      augmentation_threshold: 0.1
       enableDropout: true
       augment: true
     optimizer:
@@ -151,7 +150,7 @@ models:
       learning_rate: 0.001
       gamma: 0.95
     data:
-      augmentation_threshold: 0.35
+      augmentation_threshold: 0.1
       enableDropout: true
       augment: true
     optimizer:

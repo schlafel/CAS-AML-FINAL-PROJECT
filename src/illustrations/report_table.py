@@ -48,6 +48,6 @@ if __name__ == '__main__':
     df_export = df_export.rename(columns=rename_dict)
 
     df_export = df_export[["MODELNAME"] + list(rename_dict.values())]
-    df_export.select_dtypes(include=[float]).apply(lambda x: round(x, 2)).to_csv(os.path.join(ROOT_PATH,OUT_DIR,"Summary.csv"))
+    df_export.select_dtypes(include=[float]).apply(lambda x: round(x, 2)).to_csv(os.path.join(ROOT_PATH,OUT_DIR,"Summary.csv"),index_label = "MODEL_NAME")
     print(df_export.reset_index(drop=True))
     print("done")

@@ -7,12 +7,8 @@ Welcome to American Sign Language Recognition's documentation!
 ==============================================================
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 3
 
-   introduction
-   scope_of_project
-   report_dataset
-   report
    augmentations
    callbacks
    config

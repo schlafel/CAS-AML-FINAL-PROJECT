@@ -14,13 +14,13 @@ import os
 import sys
 import sphinx.builders.latex.transforms
 
-class DummyTransform(sphinx.builders.latex.transforms.BibliographyTransform):
-
-    def run(self, **kwargs):
-        pass
-
-sphinx.builders.latex.transforms.BibliographyTransform = DummyTransform
-# https://github.com/mcmtroffaes/sphinxcontrib-bibtex/issues/156
+# class DummyTransform(sphinx.builders.latex.transforms.BibliographyTransform):
+#
+#     def run(self, **kwargs):
+#         pass
+#
+# sphinx.builders.latex.transforms.BibliographyTransform = DummyTransform
+# # https://github.com/mcmtroffaes/sphinxcontrib-bibtex/issues/156
 
 
 
@@ -49,7 +49,7 @@ release = '0.0.1'
 extensions = [
     'sphinx.ext.duration',
     'sphinx.ext.autodoc',
-    'sphinxcontrib.bibtex',
+    # 'sphinxcontrib.bibtex',
     #'sphinx.ext.napoleon',
     'sphinx.ext.autosummary',
     'recommonmark'
@@ -97,7 +97,7 @@ latex_elements = {
 # The font size ('10pt', '11pt' or '12pt').
 #
 'pointsize': '10pt',
-'classoptions':',twocolumn,openany,oneside',
+'classoptions':',onecolumn,openany,oneside',
 
 # Additional stuff for the LaTeX preamble.
 #
@@ -224,7 +224,7 @@ latex_elements = {
 
 
  {\huge \bfseries \thesistitle\par}\vspace{0.4cm} % Thesis title
-  {\Large CAS Final Project}\\[0.8cm]
+  {\Large Project documentation}\\[0.8cm]
 
 \begin{tabular}{c@{\hspace{1.5cm}}c}
     {\LARGE \bfseries Felix Schlatter} &   {\LARGE \bfseries Asad Bin Imtiaz} \\
@@ -237,7 +237,7 @@ latex_elements = {
 
 
 
-  {\Large for the degree of}\\[0.5cm]
+  {\Large  Presented by}\\[0.5cm]
   {\Large \degree \par}
 
    \vfill
@@ -253,9 +253,9 @@ latex_elements = {
 \clearpage
 \pagenumbering{roman}
 \tableofcontents
-\listoffigures
-\listoftables
-\clearpage
+%\listoffigures
+%\listoftables
+%\clearpage
 \pagenumbering{arabic}
 ''',
 # Latex figure align
@@ -278,8 +278,8 @@ latex_logo = '_static/Logo_UniBe.pdf'
 # latex_logo = '_static/logo.png'
 
 
-bibtex_bibfiles = ['references.bib']
-bibtex_default_style = 'unsrt'
+# bibtex_bibfiles = ['references.bib']
+# bibtex_default_style = 'unsrt'
 # Other configuration settings...
 
 latex_index_module = 'sphinxcontrib.peculiarity'

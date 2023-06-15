@@ -165,6 +165,13 @@ As shown in Equation :eq:`eqn1`, the loss function is defined as ...
 
 
 .. csv-table::
+   :file: ../out/Summary.csv
+   :header-rows: 1
+   :widths: 45, 11, 11, 11, 11, 11
+
+
+
+.. csv-table::
    :header: MODELNAME, Acc., Loss, F1, Prec., Rec.
    :widths: 45, 11, 11, 11, 11, 11
 
