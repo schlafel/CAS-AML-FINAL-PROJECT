@@ -224,7 +224,7 @@ latex_elements = {
 
 
  {\huge \bfseries \thesistitle\par}\vspace{0.4cm} % Thesis title
-  {\Large Project documentation}\\[0.8cm]
+  {\Large Project documentation presented by}\\[0.8cm]
 
 \begin{tabular}{c@{\hspace{1.5cm}}c}
     {\LARGE \bfseries Felix Schlatter} &   {\LARGE \bfseries Asad Bin Imtiaz} \\
@@ -237,8 +237,8 @@ latex_elements = {
 
 
 
-  {\Large  Presented by}\\[0.5cm]
-  {\Large \degree \par}
+  %{\Large  Presented by}\\[0.5cm]
+  % {\Large \degree \par}
 
    \vfill
 
