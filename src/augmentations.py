@@ -127,5 +127,5 @@ def standardize(frames):
     """
     frames_mean = frames.mean(axis = 1, keepdims=True)
     frames_std = frames.std(axis = 1, keepdims=True)
-    return (frames - frames_mean) / frames_std
+    return (frames - frames_mean) / (frames_std+np.finfo(float).eps)
 
