@@ -765,14 +765,30 @@ class TransformerEnsemble(BaseModel):
     forward(x)
         Performs a forward pass through the model.
     """
+    DEFAULTS = dict(
+        optimizer=dict({
+            'name': 'Adam',
+            'params': dict({'lr': 0.001, 'weight_decay': 0.0 })
+        }),
+        scheduler = dict({
+            'name' : 'ExponentialLR',
+            'params': dict({'gamma':0.9})
+        })
+    )
+
+
+
+
     def __init__(self, **kwargs):
+        self.settings = {**self.DEFAULTS,**kwargs}
         common_params = kwargs['common_params']
         transformer_params = kwargs['TransformerSequenceClassifier']
+
 
         n_models = common_params["n_models"]
         super().__init__(learning_rate=common_params["learning_rate"], n_classes=common_params["num_classes"])
 
-        self.learning_rate = common_params["learning_rate"]
+        self.learning_rate = self.settings['optimizer']['params']['lr']
 
         # Ensemble
         self.models = nn.ModuleList([TransformerSequenceClassifier(num_layers=2 + i,
@@ -781,8 +797,15 @@ class TransformerEnsemble(BaseModel):
 
         self.fc = nn.Linear(common_params["num_classes"] * n_models, common_params["num_classes"]).to(DEVICE)
 
-        self.optimizer = torch.optim.Adam(self.models.parameters(), lr=self.learning_rate)
-        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=common_params["gamma"])
+        #Get Optimizer dynamically
+        optimizer_module = importlib.import_module('torch.optim')
+        optimizer_class = getattr(optimizer_module, self.settings['optimizer']['name'])
+        self.optimizer = optimizer_class(self.models.parameters(), **self.settings['optimizer']['params'])
+
+        #Get LR-Scheduler dynamically
+        scheduler_module = importlib.import_module('torch.optim.lr_scheduler')
+        scheduler_class = getattr(scheduler_module, self.settings['scheduler']['name'])
+        self.scheduler = scheduler_class(self.optimizer,**self.settings['scheduler']['params'])
 
         self.to(DEVICE)
         ##self.save_hyperparameters() ## TODO
