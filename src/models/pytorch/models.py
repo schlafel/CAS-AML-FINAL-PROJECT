@@ -112,6 +112,8 @@ class BaseModel(nn.Module):
         self.optimizer = None
         self.scheduler = None
 
+        self.to(DEVICE)
+
     def calculate_accuracy(self, y_hat, y):
         """
         Calculates the accuracy of the model's prediction.
@@ -408,7 +410,9 @@ class TransformerSequenceClassifier(nn.Module):
         batch_first=False,
         num_layers=2,
         num_classes=N_CLASSES,
-        learning_rate=0.001
+        learning_rate=0.001,
+        activation="gelu",
+
     )
 
     def __init__(self, **kwargs):
@@ -427,7 +431,7 @@ class TransformerSequenceClassifier(nn.Module):
                 layer_norm_eps=self.settings['layer_norm_eps'],
                 norm_first=self.settings['norm_first'],
                 batch_first=self.settings['batch_first'],
-                activation='gelu'
+                activation=self.settings['activation']
             ),
             num_layers=self.settings['num_layers'],
             norm=nn.LayerNorm(self.settings['d_model'])
@@ -628,7 +632,7 @@ class LSTMPredictor(BaseModel):
         self.learning_rate = self.settings["optimizer"]["params"]['lr']
 
         # Instantiate the LSTM model
-        self.model = LSTMClassifier(**kwargs).to(DEVICE)
+        self.model = LSTMClassifier(**kwargs['params']).to(DEVICE)
 
         #Get Optimizer dynamically
         optimizer_module = importlib.import_module('torch.optim')

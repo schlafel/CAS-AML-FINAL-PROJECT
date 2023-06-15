@@ -139,7 +139,7 @@ DYNAMIC_AUG_INC_INTERVAL = 5                                # Interval for augme
 #: Deep learning framework to use for training and inference. Can be either 'pytorch' or 'tensorflow'.
 DL_FRAMEWORK='pytorch'                                      # Deep learning framework to use for training and inference.
 #: Name of the model to be used for training.
-MODELNAME='CVTransferLearningModel'                 # Name of the model to be used for training.
+MODELNAME='LSTMPredictor'                 # Name of the model to be used for training.
 
 
 #

@@ -34,9 +34,7 @@ models:
       hidden_dim: 100
       layer_dim: 5
       output_dim: 250
-    hparams:
-      learning_rate: 0.001
-      gamma: 0.9
+      dropout: 0.5
     data:
       augmentation_threshold: 0.1
       enableDropout: true
@@ -45,11 +43,11 @@ models:
       name: Adam
       params:
         lr: 0.001
-        weight_decay: 0.0005
+        weight_decay: 0.0
     scheduler:
       name: ExponentialLR
       params:
-        gamma: 0.92
+        gamma: 0.9
 
 
   HybridModel:
