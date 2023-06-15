@@ -489,15 +489,22 @@ class TransformerPredictor(BaseModel):
         Performs a forward pass through the model.
     """
     def __init__(self, **kwargs):
-        super().__init__(learning_rate=kwargs["learning_rate"], n_classes=kwargs["num_classes"])
+        self.settings =kwargs
+        super().__init__(learning_rate=kwargs['optimizer']['params']["lr"], n_classes=kwargs['params']["num_classes"])
 
-        self.learning_rate = kwargs["learning_rate"]
+        self.learning_rate = kwargs['optimizer']['params']["lr"]
 
         # Instantiate the Transformer model
-        self.model = TransformerSequenceClassifier(**kwargs)
+        self.model = TransformerSequenceClassifier(**kwargs['params'])
 
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
-        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=kwargs["gamma"])
+
+
+
+        #Get LR-Scheduler dynamically
+        scheduler_module = importlib.import_module('torch.optim.lr_scheduler')
+        scheduler_class = getattr(scheduler_module, self.settings['scheduler']['name'])
+        self.scheduler = scheduler_class(self.optimizer,**self.settings['scheduler']['params'])
 
         self.to(DEVICE)
         ##self.save_hyperparameters() ## TODO
@@ -601,16 +608,37 @@ class LSTMPredictor(BaseModel):
     forward(x)
         Performs a forward pass through the model.
     """
-    def __init__(self, **kwargs):
-        super().__init__(learning_rate=kwargs["learning_rate"], n_classes=kwargs["output_dim"])
+    DEFAULTS = dict(
+        optimizer=dict({
+            'name': 'Adam',
+            'params': dict({'lr': 0.001, 'weight_decay': 0.01 })
+        }),
+        scheduler = dict({
+            'name' : 'ExponentialLR',
+            'params': dict({'gamma':0.9})
+        })
+    )
 
-        self.learning_rate = kwargs["learning_rate"]
+    def __init__(self, **kwargs):
+        self.settings = {**self.DEFAULTS, **kwargs}
+        #super().__init__(learning_rate=kwargs["learning_rate"], n_classes=kwargs["output_dim"])
+        super().__init__(learning_rate=self.settings["optimizer"]["params"]['lr'],
+                         n_classes=self.settings['params']["output_dim"])
+
+        self.learning_rate = self.settings["optimizer"]["params"]['lr']
 
         # Instantiate the LSTM model
         self.model = LSTMClassifier(**kwargs).to(DEVICE)
 
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
-        self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=kwargs["gamma"])
+        #Get Optimizer dynamically
+        optimizer_module = importlib.import_module('torch.optim')
+        optimizer_class = getattr(optimizer_module, self.settings['optimizer']['name'])
+        self.optimizer = optimizer_class(self.model.parameters(), **self.settings['optimizer']['params'])
+
+        #Get LR-Scheduler dynamically
+        scheduler_module = importlib.import_module('torch.optim.lr_scheduler')
+        scheduler_class = getattr(scheduler_module, self.settings['scheduler']['name'])
+        self.scheduler = scheduler_class(self.optimizer,**self.settings['scheduler']['params'])
 
         self.to(DEVICE)
 

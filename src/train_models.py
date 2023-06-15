@@ -8,12 +8,12 @@ if __name__ == '__main__':
     for DL_FRAMEWORK in ['pytorch', 'tensorflow']:
         for batch_size in [128,]:
             for MODELNAME in [
-                'CVTransferLearningModel',
-                'HybridEnsembleModel',
-                'HybridModel',
-                'TransformerEnsemble',
-                'YetAnotherEnsemble',
-                'LSTMPredictor',
+                #'CVTransferLearningModel',
+                #'HybridEnsembleModel',
+                #'HybridModel',
+                #'TransformerEnsemble',
+                #'YetAnotherEnsemble',
+                #'LSTMPredictor',
                 'TransformerPredictor',
     ]:
                 #overwrite the config file
