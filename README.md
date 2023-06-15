@@ -38,6 +38,8 @@ Make sure to edit the `src/config.py` file first!
 `python src/trainer.py`
 
 
+The complete functional documentation on the code can be found under [this link](https://github.com/schlafel/CAS-AML-FINAL-PROJECT/raw/working/docs/build/latex/americansignlanguagerecognition.pdf). 
+
 
 To evaluate the trained model on the test set, run the following command:
 
