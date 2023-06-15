@@ -33,15 +33,18 @@ pip install -r requirements.txt`
 ## Usage
 To preprocess the data and train the model, run the following command:
 
-`python src/train.py --config config/train_config.yaml`
+Make sure to edit the `src/config.py` file first! 
+
+`python src/trainer.py`
+
+
 
 To evaluate the trained model on the test set, run the following command:
 
 `python src/evaluate.py --config config/eval_config.yaml`
 
 ## Results
-Remember: This is all bullshit here as just a placeholder.
-The trained model achieves an accuracy of !99%! on the test set, demonstrating its effectiveness in classifying sign language gestures from landmark data.
+The results are summarized in the 
 
 ## Future Work
 Remember: This is all bullshit here as just a placeholder.
