@@ -125,7 +125,7 @@ def standardize(frames):
     Returns:
         numpy.ndarray: An array of standardized landmarks.
     """
-    frames_mean = frames.mean(axis = 1, keepdim=True)
-    frames_std = frames.std(axis = 1, keepdim=True)
+    frames_mean = frames.mean(axis = 1, keepdims=True)
+    frames_std = frames.std(axis = 1, keepdims=True)
     return (frames - frames_mean) / frames_std
 

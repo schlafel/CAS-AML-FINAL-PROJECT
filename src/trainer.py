@@ -127,7 +127,7 @@ class Trainer:
 
         # Get Model
         self.model = Model(**self.params)
-        print(f"Using model: {module_name}.{self.model_name} on device f{config.DEVICE}")
+        print(f"Using model: {module_name}.{self.model_name} on device {config.DEVICE}")
 
         # Get Data
         self.dataset = dataset(**self.params['data'])
