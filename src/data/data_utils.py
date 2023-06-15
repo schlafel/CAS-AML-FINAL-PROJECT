@@ -845,7 +845,7 @@ def create_data_loaders(asl_dataset, train_size=TRAIN_SIZE, valid_size=VALID_SIZ
                                           random_state=random_state, stratify=train_df['target'])
 
     # Create dataset instances for each split
-    train_dataset = ASL_DATASET(metadata_df=train_df)
+    train_dataset = ASL_DATASET(metadata_df=train_df,**asl_dataset.__dict__)
     valid_dataset = ASL_DATASET(metadata_df=valid_df)
     test_dataset  = ASL_DATASET(metadata_df=test_df)
 
