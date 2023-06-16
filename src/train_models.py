@@ -6,16 +6,16 @@ from callbacks import dropout_callback, augmentation_increase_callback
 if __name__ == '__main__':
 
     for DL_FRAMEWORK in ['pytorch', ]:
-        for batch_size in [128,]:
+        for batch_size in [128,256]:
             for MODELNAME in [
                 #'CVTransferLearningModel',
                 #'HybridEnsembleModel',
                 #'HybridModel',
-                'TransformerEnsemble',
+                # 'TransformerEnsemble',
                 #'YetAnotherEnsemble',
-                'LSTMPredictor',
+                # 'LSTMPredictor',
                 #'YetAnotherTransformer',
-                # 'TransformerPredictor',
+                'TransformerPredictor',
     ]:
                 #overwrite the config file
                 config.BATCH_SIZE = batch_size
@@ -26,14 +26,13 @@ if __name__ == '__main__':
                 #get the model_params already here....
                 model_params = get_model_params(config.MODELNAME)
 
-
-
-
                 trainer = Trainer(config=config,
                                   model_config = model_params)
-                if MODELNAME != "LSTMPredictor":
-                    trainer.add_callback(dropout_callback)
-                trainer.add_callback(augmentation_increase_callback)
+
+                # if MODELNAME != "LSTMPredictor":
+                #     trainer.add_callback(dropout_callback)
+
+                # trainer.add_callback(augmentation_increase_callback)
                 trainer.train()
                 preds, labels = trainer.test()
                 trainer.write_classification_report(preds, labels)
