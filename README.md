@@ -3,6 +3,18 @@
 
 This project aims to classify isolated American Sign Language (ASL) signs using deep learning techniques implemented in PyTorch. The dataset used for this project is provided by Google's "Isolated Sign Language Recognition" competition on Kaggle.
 
+## Table of contents
+- [Isolated Sign Language Recognition](#isolated-sign-language-recognition)                
+      - [CAS Advance Machine Learning - Uni Bern](#cas-advance-machine-learning---uni-bern)
+  * [About the Dataset](#about-the-dataset)                                                
+  * [Project Structure](#project-structure)                                                
+  * [Installation](#installation)                                                          
+  * [Usage](#usage)                                                                        
+  * [Results/Report](#resultsreport)                                                       
+  * [Future Work](#future-work)                                                            
+  * [Contributors](#contributors)                                                          
+  * [License](#license)      
+
 ## About the Dataset
 The dataset consists of videos of sign language gestures made by individuals. The videos were processed using MediaPipe's holistic model to extract landmark data for the face, left and right hands, and body pose. Each sequence of landmarks is labeled with the corresponding sign.
 the dataset can be downloaded from [Kaggle](https://www.kaggle.com/competitions/asl-signs/data)
@@ -83,7 +95,7 @@ To evaluate the trained model on the test set, run the following command:
 
 `python src/evaluate.py --config config/eval_config.yaml`
 
-## Results
+## Results/Report
 The results are summarized in the [project report](). 
 
 ## Future Work
