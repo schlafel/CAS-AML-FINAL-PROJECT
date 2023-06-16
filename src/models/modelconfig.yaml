@@ -10,11 +10,8 @@ models:
       batch_first: True
       num_layers: 3
       num_classes: 250
-      learning_rate: 0.011
-      gamma: 0.9
-      augmentation_threshold: 0.1
     data:
-      augmentation_threshold: 0.1
+      augmentation_threshold: 0.6
       enableDropout: true
       augment: true
     optimizer:
