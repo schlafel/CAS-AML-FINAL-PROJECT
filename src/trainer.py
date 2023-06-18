@@ -35,7 +35,6 @@ add_callback(callback): Adds a callback function to the list of functions to be 
 
 """
 import sys,os
-from shutil import copyfile
 sys.path.insert(0, '../src')
 
 import config as config

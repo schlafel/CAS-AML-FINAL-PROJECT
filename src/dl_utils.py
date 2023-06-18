@@ -15,7 +15,7 @@ from config import *
 
 import tensorflow as tf
 from torch.utils.data import DataLoader
-from torch.utils.tensorboard import SummaryWriter,summary
+from torch.utils.tensorboard import SummaryWriter, summary
 import math
 import yaml
 

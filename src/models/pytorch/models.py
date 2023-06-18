@@ -452,7 +452,7 @@ class TransformerSequenceClassifier(nn.Module):
 
         # Flatten the last two dimensions
         batch_size, seq_length, height, width = inputs.shape
-        inputs = inputs.view(batch_size, seq_length, height * width).to(DEVICE)
+        inputs = inputs.reshape(batch_size, seq_length, height * width).to(DEVICE)
 
         # Pass the input sequence through the Transformer layers
         transformed = self.transformer(inputs.to(torch.float32))
@@ -571,7 +571,7 @@ class LSTMClassifier(nn.Module):
 
         # Initialize hidden state with zeros
         batch_size, seq_length, height, width = x.shape
-        x = x.view(batch_size, seq_length, height * width).to(DEVICE)
+        x = x.reshape(batch_size, seq_length, height * width).to(DEVICE)
 
         h0 = torch.zeros(self.settings['layer_dim'], x.size(0), self.settings['hidden_dim']).to(DEVICE)
 
@@ -1225,7 +1225,7 @@ class YetAnotherTransformerClassifier(nn.Module):
 
         # Flatten the last two dimensions
         batch_size, seq_length, height, width = inputs.shape
-        inputs = inputs.view(batch_size, seq_length, height * width).to(DEVICE)
+        inputs = inputs.reshape(batch_size, seq_length, height * width).to(DEVICE)
 
         # Pass the input sequence through the Transformer layers
         for transformer_block in self.transformer:

@@ -1,20 +1,17 @@
-import os.path
-import pandas as pd
+import sys
+
+sys.path.insert(0, '../src')
 
 import cv2
 import mediapipe as mp
-from config import *
-import data.data_utils
-import models.pytorch.models
-import torch
-import numpy as np
+from data.data_utils import preprocess_data_to_same_size
+from models.pytorch.models import *
 import pandas as pd
-import json
-from mediapipe.framework.formats import landmark_pb2
+import yaml
 from collections import deque
+from data.dataset import label_dict_inference
+from config import *
 
-label_dict = json.load(open(os.path.join(ROOT_PATH,'data/raw/sign_to_prediction_index_map.json'),'r'))
-label_dict_inv = dict(zip(label_dict.values(),label_dict.keys()))
 
 def convert_mp_to_df(results):
     face_landmarks = []
@@ -82,22 +79,19 @@ def show_camera_feed(model, LAST_FRAMES=32):
 
         df = convert_mp_to_df(results=results)
         df_deque.append(df)
-        arr_inp = np.reshape(pd.concat(df_deque,axis = 0,ignore_index=True).values,(len(df_deque),543,3))
-        arr_prep = data_utils.preprocess_data_to_same_size(arr_inp)
-        perc_missing = np.sum(arr_prep[0][:,HAND_INDICES,0:2] == 0) / ((len(df_deque)+1)*192)
+        arr_inp = np.reshape(pd.concat(df_deque, axis=0, ignore_index=True).values, (len(df_deque), 543, 3))
+        arr_prep = preprocess_data_to_same_size(arr_inp)
+        perc_missing = np.sum(arr_prep[0][:, HAND_INDICES, 0:2] == 0) / ((len(df_deque) + 1) * 192)
 
         if perc_missing < 0.3:
-            X_in = torch.from_numpy(arr_prep[0][None,:,:,0:2]).to(DEVICE)
+            X_in = torch.from_numpy(arr_prep[0][None, :, :, 0:2].astype(np.float32)).to(DEVICE)
             pred = model(X_in)
             top_values, top_indices = torch.topk(pred, k=5)
-            top_labels = [label_dict_inv[x] for x in top_indices.cpu().numpy()[0]]
+            top_labels = [label_dict_inference[x] for x in top_indices.cpu().numpy()[0]]
 
-
-            cv2.putText(frame, ', '.join(top_labels), (3,30),
-                           cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
+            cv2.putText(frame, ', '.join(top_labels), (3, 30),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
         # update deque
-
-        print(len(df_deque))
 
         # Render the pose landmarks on the frame
         mp_drawing.draw_landmarks(frame,
@@ -117,7 +111,7 @@ def show_camera_feed(model, LAST_FRAMES=32):
             mp_drawing.DrawingSpec(color=(80, 110, 10), thickness=1, circle_radius=1),
             mp_drawing.DrawingSpec(color=(80, 256, 121), thickness=1, circle_radius=1)
         )
-            # Render the hand landmarks on the frame
+        # Render the hand landmarks on the frame
         mp_drawing.draw_landmarks(frame, results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS,
                                   landmark_drawing_spec=mp_drawing.DrawingSpec(color=(0, 255, 0),
                                                                                thickness=2,
@@ -148,10 +142,16 @@ mp_drawing = mp.solutions.drawing_utils
 holistic = mp_holistic.Holistic()
 
 if __name__ == '__main__':
-    ckpt_path = r"lightning_logs/FIRST_TRANSFORMER_MODEL_2/version_9/checkpoints/FIRST_TRANSFORMER_MODEL_2-epoch=25-val_accuracy=0.78.ckpt"
-    full_ckpt_path = os.path.join(os.path.dirname(__file__), "./..", ckpt_path)
-    model = models.TransformerPredictor()
-    model = model.load_from_checkpoint(full_ckpt_path)
+    DL_FRAMEWORK='pytorch'
+    ckpt_name = r"TransformerPredictor/2023-06-16 00_18/TransformerPredictor_best_model"
+    ckpt_path = os.path.join(ROOT_PATH, CHECKPOINT_DIR, DL_FRAMEWORK, ckpt_name + '.ckpt')
+    yaml_path = os.path.join(ROOT_PATH, CHECKPOINT_DIR, DL_FRAMEWORK, ckpt_name + '_params.yaml')
+
+    with open(yaml_path) as f:
+        config = yaml.safe_load(f)
+
+    model = TransformerPredictor(**config)
+    model.load_checkpoint(ckpt_path)
     model.to(DEVICE)
     model.eval()
 

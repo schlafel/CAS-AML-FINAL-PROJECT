@@ -1,7 +1,6 @@
-
 import sys
+
 sys.path.insert(0, '../src')
-from config import *
 import numpy as np
 
 
@@ -40,6 +39,7 @@ def mirror_landmarks(frames):
     inverted_frames[:, :, 0] = -inverted_frames[:, :, 0] + 1
     return inverted_frames
 
+
 def frame_dropout(frames, dropout_rate=0.05):
     """
     Randomly drop frames from the input landmark data.
@@ -59,6 +59,7 @@ def frame_dropout(frames, dropout_rate=0.05):
     dropped_landmarks = np.array([frames[i] for i in keep_indices])
     return dropped_landmarks
 
+
 def random_scaling(frames, scale_range=(0.9, 1.1)):
     """
     Apply random scaling to landmark coordinates.
@@ -75,6 +76,7 @@ def random_scaling(frames, scale_range=(0.9, 1.1)):
     scale_factor = np.random.uniform(scale_range[0], scale_range[1])
     return frames * scale_factor
 
+
 def random_rotation(frames, max_angle=10):
     """
     Apply random rotation to landmark coordinates. (on X and Y only)
@@ -89,7 +91,6 @@ def random_rotation(frames, max_angle=10):
     if not isinstance(frames, np.ndarray):
         frames = frames.numpy()
 
-
     angle = np.radians(np.random.uniform(-max_angle, max_angle))
     cos_a, sin_a = np.cos(angle), np.sin(angle)
     rotation_matrix = np.array([[cos_a, -sin_a], [sin_a, cos_a]])
@@ -98,7 +99,7 @@ def random_rotation(frames, max_angle=10):
 
     return frames
 
-#TODO 
+
 def normalize(frames, mn, std):
     """
     Normalize the frames with a given mean and standard deviation.
@@ -114,7 +115,6 @@ def normalize(frames, mn, std):
     return (frames - mn) / std
 
 
-#TODO
 def standardize(frames):
     """
     Standardize the frames so that they have mean 0 and standard deviation 1.
@@ -125,7 +125,6 @@ def standardize(frames):
     Returns:
         numpy.ndarray: An array of standardized landmarks.
     """
-    frames_mean = frames.mean(axis = 1, keepdims=True)
-    frames_std = frames.std(axis = 1, keepdims=True)
-    return (frames - frames_mean) / (frames_std+np.finfo(float).eps)
-
+    frames_mean = frames.mean(axis=1, keepdims=True)
+    frames_std = frames.std(axis=1, keepdims=True)
+    return (frames - frames_mean) / (frames_std + np.finfo(float).eps)
