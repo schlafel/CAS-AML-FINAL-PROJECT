@@ -65,7 +65,7 @@ class Trainer:
     epochs, performing validation and testing, implementing early stopping, and logging results. The module has been
     designed to be agnostic to the specific deep learning framework, enhancing its versatility across various projects.
     """
-    def __init__(self, config, dataset=ASL_DATASET, model_config = None):
+    def __init__(self, config, dataset=ASL_DATASET, model_config = None, Model_Name = None):
         """
         Initializes the Trainer class with the specified parameters.
 
@@ -105,7 +105,7 @@ class Trainer:
         .. warning::
             Make sure the specified model name corresponds to an actual model in your project's models directory.
         """
-        self.model_name = config.MODELNAME
+        self.model_name = Model_Name if Model_Name is not None else config.MODELNAME
         self.DL_FRAMEWORK = config.DL_FRAMEWORK
         module_name = f"models.{config.DL_FRAMEWORK}.models"
 
@@ -157,7 +157,6 @@ class Trainer:
         self.epoch = 0
         self.callbacks = []
 
-
         #Hyperparameter stuff
         if 'hparams' in self.params.keys():
             self.hyperparameters = self.params['hparams'].copy()
@@ -175,15 +174,13 @@ class Trainer:
         self.hyperparameters['EARLYSTOP_PATIENCE'] = config.EARLY_STOP_PATIENCE
 
         self.hyperparameters['EARLYSTOP_PATIENCE'] = config.EARLY_STOP_PATIENCE
+
         #get all callbacks
         script_methods = [method for method, _ in inspect.getmembers(callbacks, inspect.isfunction)]
         for method in script_methods:
             self.hyperparameters[method] = False
 
-
-
-
-            #Log the hyperparameters and training metrics
+        #Log the hyperparameters and training metrics
         self.metric_dict = get_metric_dict()
         log_hparams_metrics(self.writer,
                             hparam_dict=self.hyperparameters,
@@ -586,10 +583,13 @@ class Trainer:
 
 if __name__ == '__main__':
     # Get Data
-    trainer = Trainer(
-                      config=config,)
-    trainer.add_callback(dropout_callback)
-    trainer.add_callback(augmentation_increase_callback)
-    trainer.train()
-    preds,labels = trainer.test()
-    trainer.write_classification_report(preds,labels)
+
+    #for model_name in ['LSTMPredictor', 'HybridModel', 'TransformerEnsemble', 'HybridEnsembleModel', 'CVTransferLearningModel', 'YetAnotherTransformer', 'YetAnotherEnsemble']:
+    for model_name in ['YetAnotherEnsemble']:
+        trainer = Trainer(config=config, Model_Name=model_name)
+
+        trainer.add_callback(dropout_callback)
+        trainer.add_callback(augmentation_increase_callback)
+        trainer.train()
+        preds, labels = trainer.test()
+        trainer.write_classification_report(preds, labels)

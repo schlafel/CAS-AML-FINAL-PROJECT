@@ -12,7 +12,6 @@ models:
       num_classes: 250
       learning_rate: 0.011
       gamma: 0.9
-      augmentation_threshold: 0.1
     data:
       augmentation_threshold: 0.1
       enableDropout: true
@@ -205,7 +204,7 @@ models:
       num_classes: 250
     common_params:
       num_classes: 250
-      learning_rate: 0.001
+      learning_rate: 0.0011
       gamma: 0.95
       n_models: 6
     data:
