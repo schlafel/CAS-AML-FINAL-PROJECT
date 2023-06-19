@@ -11,59 +11,12 @@ import yaml
 from collections import deque
 from data.dataset import label_dict_inference
 from config import *
+from video_utils import convert_mp_to_df, draw_landmarks_on_frame
 
 
-def convert_mp_to_df(results):
-    face_landmarks = []
-    if results.face_landmarks:
-        for idx, landmark in enumerate(results.face_landmarks.landmark):
-            face_landmarks.append(dict({'x': landmark.x,
-                                        'y': landmark.y,
-                                        'z': landmark.z}))
-        df_face = pd.DataFrame(face_landmarks)
-    else:
-        df_face = pd.DataFrame(np.zeros((468, 3)) * np.nan, columns=['x', 'y', 'z'])
+def show_camera_feed(model, last_frames=INPUT_SIZE):
 
-    pose_landmarks = []
-    if results.pose_landmarks:
-        for idx, landmark in enumerate(results.pose_landmarks.landmark):
-            pose_landmarks.append(dict({'x': landmark.x,
-                                        'y': landmark.y,
-                                        'z': landmark.z}))
-
-        df_pose = pd.DataFrame(pose_landmarks)
-    else:
-        df_pose = pd.DataFrame(np.zeros((33, 3)) * np.nan, columns=['x', 'y', 'z'])
-
-    rh_landmarks = []
-    if results.right_hand_landmarks:
-        for idx, landmark in enumerate(results.right_hand_landmarks.landmark):
-            rh_landmarks.append(dict({'x': landmark.x,
-                                      'y': landmark.y,
-                                      'z': landmark.z}))
-        df_right_hand = pd.DataFrame(rh_landmarks)
-    else:
-        df_right_hand = pd.DataFrame(np.zeros((21, 3)) * np.nan, columns=['x', 'y', 'z'])
-
-    lh_landmarks = []
-    if results.left_hand_landmarks:
-        for idx, landmark in enumerate(results.left_hand_landmarks.landmark):
-            lh_landmarks.append(dict({'x': landmark.x,
-                                      'y': landmark.y,
-                                      'z': landmark.z}))
-        df_left_hand = pd.DataFrame(lh_landmarks)
-    else:
-        df_left_hand = pd.DataFrame(np.zeros((21, 3)) * np.nan, columns=['x', 'y', 'z'])
-
-    df_x = pd.concat([df_face, df_left_hand, df_pose, df_right_hand], axis=0, ignore_index=True)
-    assert df_x.shape[0] == 543
-
-    # Order is Face, Left_Hand, POSE, RIGHT_HAND
-    return df_x
-
-
-def show_camera_feed(model, LAST_FRAMES=32):
-    df_deque = deque(maxlen=LAST_FRAMES)
+    df_deque = deque(maxlen=last_frames)
     # Create a VideoCapture object to access the camera
     cap = cv2.VideoCapture(0)  # 0 represents the default camera index, change it if you have multiple cameras
     _i = 0
@@ -77,11 +30,11 @@ def show_camera_feed(model, LAST_FRAMES=32):
         # pass frame to mediapipe
         results = holistic.process(frame_rgb)
 
-        df = convert_mp_to_df(results=results)
+        df = convert_mp_to_df(results)
         df_deque.append(df)
-        arr_inp = np.reshape(pd.concat(df_deque, axis=0, ignore_index=True).values, (len(df_deque), 543, 3))
+        arr_inp = np.reshape(pd.concat(df_deque, axis=0, ignore_index=True).values, (len(df_deque), ROWS_PER_FRAME, 3))
         arr_prep = preprocess_data_to_same_size(arr_inp)
-        perc_missing = np.sum(arr_prep[0][:, HAND_INDICES, 0:2] == 0) / ((len(df_deque) + 1) * 192)
+        perc_missing = np.sum(arr_prep[0][:, HAND_INDICES, 0:2] == 0) / ((len(df_deque) + 1) * (N_LANDMARKS * 2))
 
         if perc_missing < 0.3:
             X_in = torch.from_numpy(arr_prep[0][None, :, :, 0:2].astype(np.float32)).to(DEVICE)
@@ -93,34 +46,8 @@ def show_camera_feed(model, LAST_FRAMES=32):
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
         # update deque
 
-        # Render the pose landmarks on the frame
-        mp_drawing.draw_landmarks(frame,
-                                  results.pose_landmarks,
-                                  mp_holistic.POSE_CONNECTIONS)
-
-        # Render the face landmarks on the frame
-        # Extract the nose landmarks
-        # nose_landmarks = results.face_landmarks.landmark[mp_holistic.FACEMESH_CONTOURS['nose']]
-
-        # Render the nose landmarks on the frame
-
-        mp_drawing.draw_landmarks(
-            frame,
-            results.face_landmarks,
-            mp_holistic.FACEMESH_CONTOURS,
-            mp_drawing.DrawingSpec(color=(80, 110, 10), thickness=1, circle_radius=1),
-            mp_drawing.DrawingSpec(color=(80, 256, 121), thickness=1, circle_radius=1)
-        )
-        # Render the hand landmarks on the frame
-        mp_drawing.draw_landmarks(frame, results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS,
-                                  landmark_drawing_spec=mp_drawing.DrawingSpec(color=(0, 255, 0),
-                                                                               thickness=2,
-                                                                               circle_radius=4),
-                                  connection_drawing_spec=mp_drawing.DrawingSpec(color=(0, 0, 255), thickness=2)
-                                  )
-        mp_drawing.draw_landmarks(frame,
-                                  results.right_hand_landmarks,
-                                  mp_holistic.HAND_CONNECTIONS)
+        # Render the landmarks on the frame
+        frame = draw_landmarks_on_frame(frame, results)
 
         # Display the frame
         cv2.imshow('ASL Parser', frame)

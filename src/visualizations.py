@@ -13,7 +13,7 @@ random.seed(SEED)
 
 from data.dataset import label_dict_inference
 
-def visualize_target_samples(landmarks_list, target_sign=None):
+def visualize_target_samples(landmarks_list, target_sign=None, invert=True):
     
     size = INPUT_SIZE
     offset = 20
@@ -45,26 +45,29 @@ def visualize_target_samples(landmarks_list, target_sign=None):
             face_connections = frozenset((new_face_landmark_map[x], new_face_landmark_map[y]) for (x, y) in face_connections if x in USEFUL_FACE_LANDMARKS and y in USEFUL_FACE_LANDMARKS)
 
             pose_first_idx=USEFUL_POSE_LANDMARKS[0]-POSE_FEATURE_START
-            new_pose_landmark_map = new_pose_landmark_map = {i+pose_first_idx: x for i, x in enumerate(USEFUL_POSE_LANDMARKS-USEFUL_POSE_LANDMARKS[0])}
+            new_pose_landmark_map = {i+pose_first_idx: x for i, x in enumerate(USEFUL_POSE_LANDMARKS-USEFUL_POSE_LANDMARKS[0])}
             pose_connections = frozenset((new_pose_landmark_map[x], new_pose_landmark_map[y]) for (x, y) in pose_connections if x in new_pose_landmark_map.keys() and y in new_pose_landmark_map.keys())
 
-            face_x = [-float(x) + sample_idx * 2 for x in face_landmarks[frame][:, 0]]
-            face_y = [-float(y) for y in face_landmarks[frame][:, 1]]
-            pose_x = [-float(x) + sample_idx*2 for x in pose_landmarks[frame][:, 0]]
-            pose_y = [-float(y)  for y in pose_landmarks[frame][:, 1]]
-            lh_x   = [-float(x) + sample_idx*2 for x in left_hand_landmarks[frame][:, 0]]
-            lh_y   = [-float(y)  for y in left_hand_landmarks[frame][:, 1]]
-            rh_x   = [-float(x) + sample_idx*2 for x in right_hand_landmarks[frame][:, 0]]
-            rh_y   = [-float(y)  for y in right_hand_landmarks[frame][:, 1]]
+            multiplier = -1 if invert else 1
+            face_x = [multiplier * float(x) + sample_idx * 2 for x in face_landmarks[frame][:, 0]]
+            face_y = [multiplier * float(y) for y in face_landmarks[frame][:, 1]]
+            pose_x = [multiplier * float(x) + sample_idx*2 for x in pose_landmarks[frame][:, 0]]
+            pose_y = [multiplier * float(y)  for y in pose_landmarks[frame][:, 1]]
+            lh_x = [multiplier * float(x) + sample_idx*2 for x in left_hand_landmarks[frame][:, 0]]
+            lh_y = [multiplier * float(y)  for y in left_hand_landmarks[frame][:, 1]]
+            rh_x = [multiplier * float(x) + sample_idx*2 for x in right_hand_landmarks[frame][:, 0]]
+            rh_y = [multiplier * float(y)  for y in right_hand_landmarks[frame][:, 1]]
 
             ax.scatter(pose_x, pose_y)
             ax.scatter(face_x, face_y,s=5)
        
             for i in pose_connections:
-                ax.plot([pose_x[i[0]], pose_x[i[1]]],[pose_y[i[0]], pose_y[i[1]]],color='k', lw=0.8)
+                if pose_x[i[0]] !=0. and pose_x[i[1]] != 0. and pose_y[i[0]] != 0. and pose_y[i[1]] != 0.:
+                    ax.plot([pose_x[i[0]], pose_x[i[1]]],[pose_y[i[0]], pose_y[i[1]]],color='k', lw=0.8)
 
             for i in face_connections:
-                ax.plot([face_x[i[0]], face_x[i[1]]],[face_y[i[0]], face_y[i[1]]],color='k', lw=0.5)
+                if face_x[i[0]] != 0. and face_x[i[1]] != 0. and face_y[i[0]] != 0. and face_y[i[1]] != 0.:
+                    ax.plot([face_x[i[0]], face_x[i[1]]],[face_y[i[0]], face_y[i[1]]],color='k', lw=0.5)
 
             if round(float(left_hand_landmarks[frame][0, 0]),2)!=0.00 and round(float(left_hand_landmarks[frame][0, 1]),2)!=0.00:
                 plt.scatter(lh_x, lh_y,s=10)
@@ -76,8 +79,11 @@ def visualize_target_samples(landmarks_list, target_sign=None):
                 for i in hand_connections:
                     ax.plot([rh_x[i[0]], rh_x[i[1]]],[rh_y[i[0]], rh_y[i[1]]],color='k', lw=0.5)
                         
-        ax.set_ylim(-1.5,0.0)
-        ax.set_xlim(-1.5, (len(landmarks_list)-1)*2 + 0.5)
+        ax.set_ylim(multiplier * 1.5,0.0)
+        if invert:
+            ax.set_xlim(-1.5, (len(landmarks_list)-1)*2 + 0.5)
+        else:
+            ax.set_xlim(0, (len(landmarks_list) - 1) * 1.5 + 1.5)
         
         if target_sign:
             ax.set_title(label_dict_inference[target_sign])
