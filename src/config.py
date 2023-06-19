@@ -150,6 +150,8 @@ MODELNAME='LSTMPredictor'                 # Name of the model to be used for tra
 
 #: CSV file name that contains the training dataset.
 TRAIN_CSV_FILE = 'train.csv'                                # CSV file that contains the training dataset
+#: CSV file name that contains the additional training dataset from videos.
+TRAIN_CSV_ADDON_FILE = 'train_add.csv'                      # CSV file that contains the training dataset
 #: JSON file that maps sign to prediction index.
 MAP_JSON_FILE = 'sign_to_prediction_index_map.json'         # JSON file that maps sign to prediction index
 #: Directory where training landmark files are stored.
