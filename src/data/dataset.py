@@ -40,6 +40,7 @@ class ASL_DATASET:
     def __init__(self, metadata_df=None, transform=None,
                  max_seq_length=INPUT_SIZE,
                  augment=False,
+                 standardize=True,
                  augmentation_threshold=0.1,
                  load_additional_data=False,
                  enableDropout=True,**kwargs):
@@ -79,6 +80,7 @@ class ASL_DATASET:
 
         self.transform = transform
         self.augment = augment
+        self.standardize = standardize
         self.augmentation_threshold = augmentation_threshold
         self.enableDropout = enableDropout
 
@@ -202,8 +204,8 @@ class ASL_DATASET:
 
         padding = np.zeros((pad_len, landmarks.shape[1], landmarks.shape[2]))
         landmarks = np.vstack([landmarks, padding]).astype('float32')
-
-        landmarks = standardize(landmarks)
+        if self.standardize:
+            landmarks = standardize(landmarks)
 
         sample = (landmarks, target)
 
