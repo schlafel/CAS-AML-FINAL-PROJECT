@@ -91,7 +91,150 @@ def visualize_target_samples(landmarks_list, target_sign=None, invert=True):
     animation = FuncAnimation(fig, update, frames=size, interval=50)
     print(f'\n Frame : {size}: ', end='')
 
-    return animation    
+    return animation
+
+def visualize_augmentations(dataset, target_sign,  augmentation, n_augments=4):
+    """
+    Visualize `n_augments` instances of a given target sign from the dataset and applies the augmentation provided.
+
+    This function generates a visual representation of the landmarks for each sample
+    belonging to the specified `target_sign` and applies the defined augmentation.
+
+    Args:
+        dataset (ASL_Dataset): The ASL dataset to load data from.
+        target_sign (int): The target sign to visualize.
+        augmentation: callable function to represent augmentation
+        n_augments (int, optional): The number of samples to visualize. Defaults to 4.
+
+    Returns:
+        matplotlib.animation.FuncAnimation: A matplotlib animation object displaying the landmarks for each frame.
+
+    :param dataset: The ASL dataset to load data from.
+    :type dataset: ASL_Dataset
+    :param target_sign: The target sign to visualize.
+    :type target_sign: int
+    :param augmentation: callable function with an augmentation
+    :type: callable
+    :param n_augments: The number of samples to visualize, defaults to 6.
+    :type n_augments: int, optional
+
+    :return: A matplotlib animation object displaying the landmarks for each frame.
+    :rtype: matplotlib.animation.FuncAnimation
+    """
+
+    print('Generating ', end='')
+    n_samples = 1
+    target_indices = []
+    for i, (_, target) in enumerate(dataset):
+        if target == target_sign:
+            target_indices.append(i)
+            print('.', end='')
+            if len(target_indices) >= n_samples:
+                break
+
+    # Randomly choose n_samples samples from the target_indices
+    selected_indices = random.sample(target_indices, min(n_samples, len(target_indices)))
+
+    # Retrieve the samples from the dataset
+    samples = [dataset[i] for i in selected_indices]
+
+    # size = 0
+    _, target = samples[0]
+
+    # for i, sample in enumerate(samples):
+    #    if sample['size'] > size:
+    #        size = int(sample['size'])
+
+    landmarks_list = [sample[0] for sample in samples]
+    # now generate the augmentations
+    # do 4
+
+    landmarks_list_aug = []
+    for sample_no in range(n_augments):
+        if sample_no == 0:
+            landmarks_list_aug.append(landmarks_list[0].copy())
+        else:
+            landmarks_list_aug.append(augmentation(landmarks_list[0]).copy())
+    # return landmarks_list,landmarks_list_aug
+
+    size = INPUT_SIZE
+    offset = 20
+
+    fig, ax = plt.subplots(1, figsize=(8 * len(landmarks_list_aug) / 2, 10))
+
+    def update(frame):
+
+        ax.cla()
+        print('.', end='')
+
+        for sample_idx, frames in enumerate(landmarks_list_aug):
+
+            landmark_lists = frames[:size]
+
+            landmark_offset = 192 * sample_idx
+
+            # `landmark_lists` is a list containing sequence of mediapipe landmarks for face, left_hand, pose, and right_hand
+            face_landmarks = landmark_lists[:, FACE_INDICES, :]
+            left_hand_landmarks = landmark_lists[:, LEFT_HAND_INDICES, :]
+            pose_landmarks = landmark_lists[:, POSE_INDICES, :]
+            right_hand_landmarks = landmark_lists[:, RIGHT_HAND_INDICES, :]
+
+            face_connections = mp.solutions.face_mesh_connections.FACEMESH_CONTOURS
+            pose_connections = mp.solutions.pose.POSE_CONNECTIONS
+            hand_connections = mp.solutions.hands.HAND_CONNECTIONS
+
+            new_face_landmark_map = {x: i for i, x in enumerate(USEFUL_FACE_LANDMARKS)}
+            face_connections = frozenset(
+                (new_face_landmark_map[x], new_face_landmark_map[y]) for (x, y) in face_connections if
+                x in USEFUL_FACE_LANDMARKS and y in USEFUL_FACE_LANDMARKS)
+
+            pose_first_idx = USEFUL_POSE_LANDMARKS[0] - POSE_FEATURE_START
+            new_pose_landmark_map = new_pose_landmark_map = {i + pose_first_idx: x for i, x in enumerate(
+                USEFUL_POSE_LANDMARKS - USEFUL_POSE_LANDMARKS[0])}
+            pose_connections = frozenset(
+                (new_pose_landmark_map[x], new_pose_landmark_map[y]) for (x, y) in pose_connections if
+                x in new_pose_landmark_map.keys() and y in new_pose_landmark_map.keys())
+
+            face_x = [-float(x) + sample_idx * 2 for x in face_landmarks[frame][:, 0]]
+            face_y = [-float(y) for y in face_landmarks[frame][:, 1]]
+            pose_x = [-float(x) + sample_idx * 2 for x in pose_landmarks[frame][:, 0]]
+            pose_y = [-float(y) for y in pose_landmarks[frame][:, 1]]
+            lh_x = [-float(x) + sample_idx * 2 for x in left_hand_landmarks[frame][:, 0]]
+            lh_y = [-float(y) for y in left_hand_landmarks[frame][:, 1]]
+            rh_x = [-float(x) + sample_idx * 2 for x in right_hand_landmarks[frame][:, 0]]
+            rh_y = [-float(y) for y in right_hand_landmarks[frame][:, 1]]
+
+            ax.scatter(pose_x, pose_y)
+            ax.scatter(face_x, face_y, s=5)
+
+            for i in pose_connections:
+                ax.plot([pose_x[i[0]], pose_x[i[1]]], [pose_y[i[0]], pose_y[i[1]]], color='k', lw=0.8)
+
+            for i in face_connections:
+                ax.plot([face_x[i[0]], face_x[i[1]]], [face_y[i[0]], face_y[i[1]]], color='k', lw=0.5)
+
+            if round(float(left_hand_landmarks[frame][0, 0]), 2) != 0.00 and round(
+                    float(left_hand_landmarks[frame][0, 1]), 2) != 0.00:
+                plt.scatter(lh_x, lh_y, s=10)
+                for i in hand_connections:
+                    ax.plot([lh_x[i[0]], lh_x[i[1]]], [lh_y[i[0]], lh_y[i[1]]], color='k', lw=0.5)
+
+            if round(float(right_hand_landmarks[frame][0, 0]), 2) != 0.00 and round(
+                    float(right_hand_landmarks[frame][0, 1]), 2) != 0.00:
+                plt.scatter(rh_x, rh_y, s=10)
+                for i in hand_connections:
+                    ax.plot([rh_x[i[0]], rh_x[i[1]]], [rh_y[i[0]], rh_y[i[1]]], color='k', lw=0.5)
+
+        ax.set_ylim(-1.5, 0.0)
+        ax.set_xlim(-1.5, (len(landmarks_list_aug) - 1) * 2 + 0.5)
+
+        if target_sign:
+            ax.set_title(label_dict_inference[target_sign])
+
+    animation = FuncAnimation(fig, update, frames=size, interval=50)
+    print(f'\n Frame : {size}: ', end='')
+
+    return animation
 
 def visualize_target_sign(dataset, target_sign, n_samples=6):
     """
