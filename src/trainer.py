@@ -584,7 +584,7 @@ if __name__ == '__main__':
     # Get Data
 
     #for model_name in ['LSTMPredictor', 'HybridModel', 'TransformerEnsemble', 'HybridEnsembleModel', 'CVTransferLearningModel', 'YetAnotherTransformer', 'YetAnotherEnsemble']:
-    for model_name in ['YetAnotherEnsemble']:
+    for model_name in ['TransformerPredictor']:
         trainer = Trainer(config=config, Model_Name=model_name)
 
         trainer.add_callback(dropout_callback)

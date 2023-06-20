@@ -18,6 +18,7 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter, summary
 import math
 import yaml
+import importlib
 
 
 def get_model_params(model_name):
@@ -320,3 +321,28 @@ def get_dataset(dataloader,dl_framework = DL_FRAMEWORK):
         return get_TF_Dataset(dataloader)
     else:
         return get_PT_Dataset(dataloader)
+
+
+def load_model_from_checkpoint(ckpt_name):
+    ckpt_path = os.path.join(ROOT_PATH, CHECKPOINT_DIR, DL_FRAMEWORK, ckpt_name)
+    ckpt_file = ckpt_path + '.ckpt'
+    yaml_file = ckpt_path + '_params.yaml'
+
+    with open(yaml_file) as f:
+        config = yaml.safe_load(f)
+
+    model_name = ckpt_name.split('/')[0]
+    module_name = f"models.{DL_FRAMEWORK}.models"
+
+    module = importlib.import_module(module_name)
+    Model = getattr(module, model_name)
+
+    model = Model(**config)
+
+    model.load_checkpoint(ckpt_file)
+    model.to(DEVICE)
+
+    print(f"Using {DL_FRAMEWORK.capitalize()} model: {module_name}.{model_name} on device {DEVICE}")
+
+    return model
+

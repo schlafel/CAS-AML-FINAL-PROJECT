@@ -41,6 +41,7 @@ class ASL_DATASET:
                  max_seq_length=INPUT_SIZE,
                  augment=False,
                  augmentation_threshold=0.1,
+                 load_additional_data=False,
                  enableDropout=True,**kwargs):
         """
         Initialize the ASL dataset.
@@ -86,10 +87,10 @@ class ASL_DATASET:
 
         self.df_train = metadata_df
 
-        self.load_data()
+        self.load_data(load_additional_data)
 
     # Load the data method
-    def load_data(self):
+    def load_data(self, load_additional_data=False):
         """
         Load the data for the ASL dataset.
 
@@ -106,6 +107,10 @@ class ASL_DATASET:
         if self.df_train is None:
             # Load Processed data
             self.df_train = pd.read_csv(os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, TRAIN_CSV_FILE))
+            if load_additional_data:
+                print(f'Loading additional data')
+                self.df_train = pd.concat([
+                    self.df_train, pd.read_csv(os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, TRAIN_CSV_ADDON_FILE))])
 
         # Generate Absolute path to locate landmark files
         self.file_paths = np.array(

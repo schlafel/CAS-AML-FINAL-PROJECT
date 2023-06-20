@@ -599,7 +599,7 @@ def calculate_avg_landmark_positions(dataset):
     return avg_landmarks_pos
 
 
-def remove_unusable_data():
+def remove_unusable_data(metadata_file=TRAIN_CSV_FILE, skip_check=False):
     """
     This function checks the existing training data for unusable instances, like missing files or data that is smaller than the set
     minimum sequence length. If unusable data is found, it is removed from the system, both in terms of files and entries in the training
@@ -619,20 +619,18 @@ def remove_unusable_data():
     """
     marker_file_path = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, CLEANED_FILE)
 
-    if os.path.exists(os.path.join(marker_file_path)):
+    if os.path.exists(os.path.join(marker_file_path)) and not skip_check:
         print('Cleansed data found. Skipping...')
         return
 
     # Load the training data
-    df_train = pd.read_csv(os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, TRAIN_CSV_FILE))
+    df_train = pd.read_csv(os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, metadata_file))
 
     # List of row indices to drop
     rows_to_drop = []
 
     # Iterate over each row in the DataFrame
     for index, row in tqdm(df_train.iterrows(), total=len(df_train)):
-
-
 
         # Load the file and get the length of its landmarks data
         file_path = os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, row['path'])
@@ -653,7 +651,8 @@ def remove_unusable_data():
 
             # Delete the processed file
             if os.path.exists(file_path):
-                # print(f"removing {file_path}: landmarks_len {landmarks_len} {landmarks_len < MIN_LEN_THRESHOLD} {landmarks_len > MAX_LEN_THRESHOLD} lh_missings {lh_missings} rh_missings {rh_missings}")
+                # print(f"removing {file_path}: landmarks_len {landmarks_len} {landmarks_len < MIN_LEN_THRESHOLD}
+                #       {landmarks_len > MAX_LEN_THRESHOLD} lh_missings {lh_missings} rh_missings {rh_missings}")
                 os.remove(file_path)
 
             # Mark the row for deletion
@@ -663,11 +662,12 @@ def remove_unusable_data():
     df_train.drop(rows_to_drop, inplace=True)
 
     # Save the updated DataFrame to the CSV file
-    df_train.to_csv(os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, TRAIN_CSV_FILE), index=False)
+    df_train.to_csv(os.path.join(ROOT_PATH, PROCESSED_DATA_DIR, metadata_file), index=False)
 
     # Create the marker file
-    with open(marker_file_path, 'w') as f:
-        f.write('')
+    if not skip_check:
+        with open(marker_file_path, 'w') as f:
+            f.write('')
 
 
 def remove_outlier_or_missing_data(landmark_len_dict):
@@ -860,5 +860,6 @@ def create_data_loaders(asl_dataset, train_size=TRAIN_SIZE, valid_size=VALID_SIZ
 
 if __name__ == '__main__':
 
-    preprocess_raw_data(sample=100000)
-    remove_unusable_data()
+    #preprocess_raw_data(sample=100000)
+    #remove_unusable_data()
+    remove_unusable_data(metadata_file=TRAIN_CSV_ADDON_FILE, skip_check=True)

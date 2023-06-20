@@ -13,9 +13,10 @@ models:
       learning_rate: 0.011
       gamma: 0.9
     data:
-      augmentation_threshold: 0.1
+      augmentation_threshold: 0.05
       enableDropout: true
       augment: true
+      load_additional_data: True
     optimizer:
       name: Adam
       params:
@@ -194,7 +195,7 @@ models:
 
   YetAnotherEnsemble:
     YetAnotherTransformerClassifier:
-      learning_rate: 0.01
+      learning_rate: 0.0011
       d_model: 192
       embed_dim: 64
       n_head: 8
@@ -208,7 +209,8 @@ models:
       gamma: 0.95
       n_models: 6
     data:
-      augmentation_threshold: 0.1
+      augmentation_threshold: 0.01
       enableDropout: true
       augment: true
+      load_additional_data: True
 
