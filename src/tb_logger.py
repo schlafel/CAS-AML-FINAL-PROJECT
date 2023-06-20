@@ -1,3 +1,11 @@
+"""
+This script demonstrates writing hyperparameters and metrics to TensorBoard for visualization.
+
+It creates a TensorBoard writer for each run, then trains a hypothetical model with pre-defined hyperparameters over
+10 epochs. At each epoch, the script writes the hyperparameters, training and validation accuracy and loss to
+TensorBoard. Finally, it writes the testing accuracy and loss to TensorBoard and closes the writer. The process is
+repeated for 5 runs.
+"""
 from torch.utils.tensorboard import SummaryWriter,summary
 import numpy as np
 

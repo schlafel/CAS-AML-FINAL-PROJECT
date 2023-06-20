@@ -2,6 +2,11 @@
 ===============
 Video Utilities
 ===============
+This script provides a set of utility functions for video processing. It includes functions to convert Mediapipe results to a pandas DataFrame, capture frames from a video, draw landmarks on a frame, and convert frames to landmarks.
+
+Imports:
+- Required libraries (pandas, numpy, cv2, mediapipe)
+- Constants from config file (FACE_FEATURES, POSE_FEATURES, HAND_FEATURES, ROWS_PER_FRAME)
 """
 import sys
 sys.path.insert(0, '../src')
@@ -13,7 +18,15 @@ import cv2
 import mediapipe as mp
 
 def convert_mp_to_df(arr_results):
+    """
+    Convert MediaPipe results to a DataFrame.
 
+    Args:
+    arr_results (mp.Solutions): MediaPipe results object containing landmarks for face, pose, right and left hand.
+
+    Returns:
+    df_x (pd.DataFrame): DataFrame containing all landmarks.
+    """
     face_landmarks = []
     if arr_results.face_landmarks:
         for idx, landmark in enumerate(arr_results.face_landmarks.landmark):
@@ -63,6 +76,16 @@ def convert_mp_to_df(arr_results):
 
 
 def capture_frames(video_path, target_sequence=None):
+    """
+    Capture frames from a video file.
+
+    Args:
+    video_path (str): The path to the video file.
+    target_sequence (int): The target number of frames to capture. Defaults to None.
+
+    Returns:
+    frames (np.array): Array of captured frames.
+    """
     cap = cv2.VideoCapture(video_path)
 
     # Get the total number of frames
@@ -96,6 +119,16 @@ def capture_frames(video_path, target_sequence=None):
 
 
 def draw_landmarks_on_frame(frame, results):
+    """
+    Draw landmarks on a frame.
+
+    Args:
+    frame (np.array): The frame to draw landmarks on.
+    results (mp.Solutions): MediaPipe results object containing landmarks.
+
+    Returns:
+    frame (np.array): The frame with landmarks drawn.
+    """
     mp_drawing = mp.solutions.drawing_utils
     mp_holistic = mp.solutions.holistic
 
@@ -124,6 +157,15 @@ def draw_landmarks_on_frame(frame, results):
 
 
 def convert_frames_to_landmarks(video_numpy_frames):
+    """
+    Convert frames to landmarks.
+
+    Args:
+    video_numpy_frames (np.array): Array of frames to convert.
+
+    Returns:
+    landmarks (np.array): Array of landmarks corresponding to each frame.
+    """
     mp_holistic = mp.solutions.holistic
     holistic = mp_holistic.Holistic()
     landmarks = []

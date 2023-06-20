@@ -468,9 +468,9 @@ class TransformerSequenceClassifier(nn.Module):
 
 class TransformerPredictor(BaseModel):
     """
-    ===================
+    ====================
     TransformerPredictor
-    ===================
+    ====================
 
     A TransformerPredictor model that extends the Pytorch BaseModel.
 

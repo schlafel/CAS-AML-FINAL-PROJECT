@@ -2,6 +2,12 @@
 ===========================
 Generic Metric class
 ===========================
+
+This module defines a generic Metric enumeration class.
+This class enumerates different metrics that can be used in evaluating the performance of a machine learning model.
+These metrics include Loss, Accuracy, F1Score, Recall, Precision, and AUC (Area under the curve of the ROC).
+It can be used in the context of machine learning model evaluation where one needs to switch between different metrics
+based on the problem at hand.
 """
 from enum import Enum
 

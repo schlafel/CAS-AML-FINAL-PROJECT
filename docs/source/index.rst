@@ -15,13 +15,17 @@ Welcome to American Sign Language Recognition's documentation!
    data_utils
    hparam_search
    predict_on_camera
+   predict_on_video
    dataset
    dl_utils
    trainer
-   visualizations
-   model_config
+   lightning_models
    pytorch_models
    tensorflow_models
+   visualizations
+   video_utils
+   metrics
+   model_config
 
 
 

@@ -4,9 +4,9 @@
     \twocolumn
 
 
-==============
+====================================================
 American Sign Language Recognition with DeepLearning
-==============
+====================================================
 
 
 .. raw:: latex
@@ -64,13 +64,6 @@ Thereby we entailed detailed documentation to ensure that other researchers and 
 Dataset
 =======
 
-hahahaha
------------
-
-
-
-teset
-^^^^^
 
 The dataset used for this project was provided by Google and hosted by Kaggle and was part of the 2023 challenge Isolated Sign Language Recognition [1][3]. 
 This rich and comprehensive dataset has been a joint contribution from Google, the Georgia Institute of Technology, the National Technical Institute for the Deaf at Rochester Institute of Technology, and Deaf Professional Arts Network.
@@ -165,7 +158,7 @@ As shown in Equation :eq:`eqn1`, the loss function is defined as ...
 
 
 .. csv-table::
-   :file: ../out/Summary.csv
+   :file: ../../out/Summary.csv
    :header-rows: 1
    :widths: 45, 11, 11, 11, 11, 11
 

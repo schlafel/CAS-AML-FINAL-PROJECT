@@ -232,8 +232,15 @@ def log_metrics(writer, log_dict):
 
 def get_metric_dict():
     """
-    Instantiatnes an empty dict with the metrics to be logged in tensorboard
-    :return: dict with an empty metric dict to feed in log_hparams_metrics
+    This function is responsible for creating an empty dictionary, structured to log the specified metrics for different
+    phases (Train, Validation, Test) in Tensorboard. The function initializes an empty list for each metric and phase
+    combination, and these lists are then mapped to their corresponding keys (metric/phase) in the dictionary.
+
+    Functionality:
+        Creates and returns a dictionary with None as initial values for the metric and phase keys.
+
+    :rtype: dict
+    :return: Dictionary with keys for each metric and phase, all initialized to None.
     """
     metric_name = []
     metric_val = []
@@ -278,17 +285,24 @@ def log_hparams_metrics(writer,hparam_dict,metric_dict,epoch = 0):
 
 def get_PT_Dataset(dataloader):
     """
-    Retrieve the underlying dataset from a PyTorch data loader.
+    This function retrieves the underlying dataset from a PyTorch DataLoader object.
 
-    :param dataloader: DataLoader object.
-    :return: Dataset object.
+    Functionality:
+        Extracts the dataset from a PyTorch DataLoader object.
+
+    :rtype: Dataset
+    :param dataloader: PyTorch DataLoader object.
+    :return: The underlying PyTorch Dataset object.
     """
     return dataloader.dataset
 
 
 def get_TF_Dataset(dataloader):
     """
-    Retrieve the underlying dataset from a TensorFlow data loader.
+    This function retrieves the underlying dataset from a TensorFlow DataLoader object.
+
+    Functionality:
+        Extracts the dataset from a TensorFlow DataLoader object.
 
     :param dataloader: DatasetWithLen object.
     :return: Dataset object.
@@ -324,6 +338,27 @@ def get_dataset(dataloader,dl_framework = DL_FRAMEWORK):
 
 
 def load_model_from_checkpoint(ckpt_name):
+    """
+    This function loads a deep learning model from a previously saved checkpoint. It is useful when you want to resume
+    training from a certain point or when you want to use a pre-trained model. This function takes the name of the
+    checkpoint as input and returns the model in the device specified by the DEVICE global variable.
+
+    The function first constructs the paths to the checkpoint and YAML files containing model parameters. It then reads
+    the YAML file and extracts the model parameters. Using importlib, the function dynamically imports the correct model
+    class based on the model name extracted from the checkpoint name and the deep learning framework specified in the
+    DL_FRAMEWORK global variable. The model is instantiated with the extracted parameters, loaded from the checkpoint,
+    and moved to the appropriate device.
+
+    Args:
+        ckpt_name: The name of the checkpoint from which the model should be loaded.
+
+    Functionality:
+        Loads a model from a checkpoint file and moves it to a specified device.
+
+    :rtype: Model
+    :param ckpt_name: The name of the checkpoint from which the model should be loaded.
+    :return: The model loaded from the checkpoint, moved to the specified device.
+    """
     ckpt_path = os.path.join(ROOT_PATH, CHECKPOINT_DIR, DL_FRAMEWORK, ckpt_name)
     ckpt_file = ckpt_path + '.ckpt'
     yaml_file = ckpt_path + '_params.yaml'

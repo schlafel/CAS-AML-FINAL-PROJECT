@@ -49,7 +49,8 @@ release = '0.0.1'
 extensions = [
     'sphinx.ext.duration',
     'sphinx.ext.autodoc',
-    # 'sphinxcontrib.bibtex',
+    'sphinxcontrib.bibtex',
+    'sphinx.ext.imgmath',
     #'sphinx.ext.napoleon',
     'sphinx.ext.autosummary',
     'recommonmark'
@@ -75,6 +76,12 @@ autodoc_mock_imports = ['torch',
 # a list of builtin themes.
 #
 html_theme = 'alabaster'
+
+html_sidebars = {
+    '**': [
+        'globaltoc.html','searchbox.html','relations.html'
+    ]
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -278,8 +285,8 @@ latex_logo = '_static/Logo_UniBe.pdf'
 # latex_logo = '_static/logo.png'
 
 
-# bibtex_bibfiles = ['references.bib']
-# bibtex_default_style = 'unsrt'
+bibtex_bibfiles = ['references.bib']
+bibtex_default_style = 'unsrt'
 # Other configuration settings...
 
 latex_index_module = 'sphinxcontrib.peculiarity'

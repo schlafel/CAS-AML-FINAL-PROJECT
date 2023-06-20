@@ -1,3 +1,29 @@
+"""
+This module contains functions for data augmentation and normalization of hand landmarks extracted from sign language videos.
+
+.. list-table:: Summary of Augmentations
+   :widths: 30 70
+   :header-rows: 1
+
+   * - Functions
+     - Description
+   * - shift_landmarks(frames, max_shift=0.01)
+     - Shifts the landmark coordinates randomly by a small amount.
+   * - mirror_landmarks(frames)
+     - Inverts (mirrors) the landmark coordinates along the x-axis.
+   * - frame_dropout(frames, dropout_rate=0.05)
+     - Randomly drops frames from the input landmark data based on a specified dropout rate.
+   * - random_scaling(frames, scale_range=(0.9, 1.1))
+     - Applies random scaling to the landmark coordinates within a specified scale range.
+   * - random_rotation(frames, max_angle=10)
+     - Applies a random rotation to the landmark coordinates, with the rotation angle within a specified range.
+   * - normalize(frames, mn, std)
+     - Normalizes the frames using a given mean and standard deviation.
+   * - standardize(frames)
+     - Standardizes the frames so that they have a mean of 0 and a standard deviation of 1.
+
+"""
+
 import sys
 
 sys.path.insert(0, '../src')

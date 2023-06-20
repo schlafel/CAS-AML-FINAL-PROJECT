@@ -1,5 +1,10 @@
 #!/usr/bin/env python
-"""Examples using MLfowLoggerCallback and setup_mlflow.
+"""
+This script provides examples for using the MLfowLoggerCallback and setup_mlflow.
+
+It contains functions and classes for defining hyperparameters, training machine learning models, and performing
+hyperparameter tuning with the aid of MLflow for logging and Ray for distributed computing. The scripts uses ASL
+(American Sign Language) dataset for training the models.
 """
 
 import sys
@@ -38,12 +43,30 @@ from ray.tune.schedulers import ASHAScheduler
 
 
 class Trainer_HparamSearch(Trainer):
+    """
+    Trainer_HparamSearch inherits from the Trainer class. It is specifically designed to accommodate hyperparameter
+    search during model training.
+
+    Args:
+        modelname: Name of the model being trained.
+        dataset: Dataset used for training.
+        patience: Number of epochs to wait before stopping the training if no improvement is observed.
+
+    Functionality:
+        Provides a method for model training, taking into account hyperparameter search and early stopping.
+    """
     def __init__(self,  modelname=MODELNAME, dataset=ASL_DATASET, patience=EARLY_STOP_PATIENCE):
         super.__init__( modelname, dataset, patience)
 
 
 
     def train(self, n_epochs=EPOCHS):
+        """
+        Train the model for a specific number of epochs. Also implements early stopping based on the patience parameter.
+
+        :rtype: None
+        :param n_epochs: Number of epochs for training the model.
+        """
         for epoch in range(n_epochs):
             print(f"Epoch {epoch + 1}/{n_epochs}", flush=True)
             time.sleep(0.5)  # time to flush std out
@@ -124,6 +147,12 @@ class Trainer_HparamSearch(Trainer):
 
 
 def train(config):
+    """
+    Function to train a model, with configurable parameters.
+
+    :rtype: None
+    :param config: Dictionary containing key-value pairs of model configuration parameters.
+    """
     # mlflow.autolog()
     # with mlflow.start_run():
 
@@ -218,6 +247,13 @@ def train(config):
 def tune_with_callback(
         mlflow_tracking_uri,
         finish_fast=False):
+    """
+    Perform hyperparameter tuning using Ray Tune, with MLflow logging integration.
+
+    :rtype: None
+    :param mlflow_tracking_uri: URI for MLflow tracking.
+    :param finish_fast: If True, Ray Tune will complete trials as soon as possible.
+    """
     search_space = {
         "learning_rate": tune.loguniform(0.0001, 0.001),
         "dropout": tune.uniform(0.1, 0.4),

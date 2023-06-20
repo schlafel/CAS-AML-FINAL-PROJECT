@@ -2,6 +2,10 @@
 =================
 Video Predictions
 =================
+This script defines methods to predict signs from a given video.
+
+Imports:
+- Required libraries and modules.
 """
 import os, sys, cv2, random
 
@@ -14,9 +18,19 @@ from data.data_utils import preprocess_data_to_same_size
 from dl_utils import load_model_from_checkpoint
 from models.pytorch.models import *
 from data.dataset import label_dict_inference
+from augmentations import standardize
 
 
 def get_video_landmarks(video_path):
+    """
+    Extracts and pre-processes landmarks from a video.
+
+    :param video_path: str
+        Path to the video file.
+
+    :return: numpy.ndarray
+        Preprocessed video landmarks.
+    """
     frames = capture_frames(video_path, INPUT_SIZE)
 
     landmarks = convert_frames_to_landmarks(frames)
@@ -27,6 +41,21 @@ def get_video_landmarks(video_path):
 
 
 def get_top_n_predictions(model_checkpoint, landmarks, n):
+    """
+    Predicts the top-n signs for given landmarks using the specified model.
+
+    :param model_checkpoint: str
+        Path to the model checkpoint.
+
+    :param landmarks: numpy.ndarray
+        Preprocessed video landmarks.
+
+    :param n: int
+        Number of top predictions to return.
+
+    :return: list
+        List of top-n predicted signs.
+    """
     model = load_model_from_checkpoint(model_checkpoint)
     model.eval()
 
@@ -41,8 +70,27 @@ def get_top_n_predictions(model_checkpoint, landmarks, n):
     return [label_dict_inference[i] for i in top_n_indices]
 
 
-def play_video_with_predictions(video_path, model_checkpoint, num_top_predictions, show_mesh=True):
+def play_video_with_predictions(video_path, model_checkpoint, num_top_predictions, sign="",  show_mesh=True):
+    """
+    Plays the video with predicted signs overlay.
+
+    :param video_path: str
+        Path to the video file.
+
+    :param model_checkpoint: str
+        Path to the model checkpoint.
+
+    :param num_top_predictions: int
+        Number of top predictions to overlay on the video.
+
+    :param sign: str, optional
+        Name of the sign to display. Default is an empty string.
+
+    :param show_mesh: bool, optional
+        If True, the landmark mesh is drawn on the video. Default is True.
+    """
     landmarks = get_video_landmarks(video_path)
+    landmarks = standardize(landmarks)
     top_n_labels = get_top_n_predictions(model_checkpoint, landmarks, num_top_predictions)
 
     frames = capture_frames(video_path)
@@ -54,7 +102,7 @@ def play_video_with_predictions(video_path, model_checkpoint, num_top_prediction
     loop_counter = 0
 
     while True:
-        if quit_loop or loop_counter > 5:
+        if quit_loop or loop_counter > 10:
             break
 
         for i, frame in enumerate(frames):
@@ -64,8 +112,8 @@ def play_video_with_predictions(video_path, model_checkpoint, num_top_prediction
 
                 frame = draw_landmarks_on_frame(frame, results)
 
-            cv2.putText(frame, ', '.join(top_n_labels), (3, 30),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1, cv2.LINE_AA)
+            cv2.putText(frame, ', '.join(top_n_labels) + f' >> [{sign}]', (3, 30),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1, cv2.LINE_AA)
 
             # Display the frame
             cv2.imshow('Video Predictor', frame)
@@ -103,9 +151,12 @@ def get_random_video(root_dir='../data/raw/MSASL/Videos/'):
 
 
 if __name__ == '__main__':
+
+    ckpt_name = r'TransformerPredictor/2023-06-16 00_18/TransformerPredictor_best_model'
     ckpt_name = r'TransformerPredictor/2023-06-20 07_24/TransformerPredictor_best_model'
 
-    video_path = get_random_video()  # "../data/raw/MSASL/Videos/airplane/airplane_ZHZ0whKc_144_trimmed.mp4"
+    video_path = get_random_video() #"../data/raw/MSASL/Videos/apple/apple_3wq_Jcw0_24_trimmed.mp4"
+    sign = os.path.basename(os.path.dirname(video_path))
 
     print(video_path)
-    play_video_with_predictions(video_path, ckpt_name, 5)
+    play_video_with_predictions(video_path, ckpt_name, 5, sign, show_mesh=True)
