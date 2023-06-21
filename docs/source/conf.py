@@ -68,7 +68,8 @@ exclude_patterns = []
 autodoc_mock_imports = ['torch',
                         'tensorflow',
                         'mediapipe',
-                        'torchvision']
+                        'torchvision',
+                        'tensorflow_addons']
 
 # -- Options for HTML output -------------------------------------------------
 
